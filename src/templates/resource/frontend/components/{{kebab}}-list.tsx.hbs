@@ -41,7 +41,7 @@ export function {{Name}}List({ {{names}}, isLoading }: {{Name}}ListProps) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {{{names}}.map(({{name}}) => (
+      { {{names}}.map(({{name}}) => (
         <{{Name}}Card key={ {{name}}.id} {{name}}={ {{name}}} />
       ))}
     </div>

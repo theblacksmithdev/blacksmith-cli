@@ -19,15 +19,15 @@ interface {{Name}}CardProps {
 export function {{Name}}Card({ {{name}} }: {{Name}}CardProps) {
   return (
     <Link
-      to={`/{{kebabs}}/${{{name}}}.id}`}
+      to={`/{{kebabs}}/${ {{name}}.id}`}
       className="block p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
     >
       <h3 className="text-lg font-semibold text-gray-900">
-        {{{name}}.title}
+        { {{name}}.title}
       </h3>
-      {{{name}}.description && (
+      { {{name}}.description && (
         <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-          {{{name}}.description}
+          { {{name}}.description}
         </p>
       )}
       <p className="mt-3 text-xs text-gray-400">
