@@ -1,0 +1,19 @@
+"""
+Development settings for {{projectName}}.
+"""
+
+DEBUG = True
+
+ALLOWED_HOSTS = ['*']
+
+# SQLite for development
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db.sqlite3',
+    }
+}
+
+# CORS - allow all origins in development
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True

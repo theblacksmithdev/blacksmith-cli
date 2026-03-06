@@ -1,0 +1,35 @@
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
+from rest_framework import status
+from .models import {{Name}}
+
+User = get_user_model()
+
+
+class {{Name}}Tests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            password='TestPass123!',
+            first_name='Test',
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_{{snake}}(self):
+        response = self.client.post('/api/{{snakes}}/', {
+            'title': 'Test {{Name}}',
+            'description': 'A test {{name}}.',
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['title'], 'Test {{Name}}')
+
+    def test_list_{{snakes}}(self):
+        {{Name}}.objects.create(
+            title='Test {{Name}}',
+            created_by=self.user,
+        )
+        response = self.client.get('/api/{{snakes}}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)

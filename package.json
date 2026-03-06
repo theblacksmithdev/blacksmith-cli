@@ -1,0 +1,45 @@
+{
+  "name": "forge-cli",
+  "version": "0.1.0",
+  "description": "Fullstack Django + React framework — one command, one codebase, one mental model",
+  "type": "module",
+  "bin": {
+    "forge": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node dist/index.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "keywords": [
+    "django",
+    "react",
+    "fullstack",
+    "openapi",
+    "scaffold",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "change-case": "^5.4.4",
+    "commander": "^13.1.0",
+    "concurrently": "^9.1.2",
+    "execa": "^9.5.2",
+    "handlebars": "^4.7.8",
+    "ora": "^8.2.0",
+    "pluralize": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/pluralize": "^0.0.33",
+    "tsup": "^8.4.0",
+    "typescript": "~5.9.3"
+  }
+}

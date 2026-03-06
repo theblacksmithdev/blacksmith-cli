@@ -1,0 +1,21 @@
+from rest_framework import serializers
+from .models import {{Name}}
+
+
+class {{Name}}Serializer(serializers.ModelSerializer):
+    """Serializer for {{Name}}."""
+
+    created_by_email = serializers.EmailField(source='created_by.email', read_only=True)
+
+    class Meta:
+        model = {{Name}}
+        fields = [
+            'id',
+            'title',
+            'description',
+            'created_by',
+            'created_by_email',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_by', 'created_by_email', 'created_at', 'updated_at']
