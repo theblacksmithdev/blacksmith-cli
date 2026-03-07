@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
@@ -19,6 +20,10 @@ class {{Name}}ViewSet(viewsets.ModelViewSet):
 
     serializer_class = {{Name}}Serializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'description']
+    ordering_fields = ['created_at', 'updated_at', 'title']
+    ordering = ['-created_at']
 
     def get_queryset(self):
         return {{Name}}.objects.filter(created_by=self.request.user)

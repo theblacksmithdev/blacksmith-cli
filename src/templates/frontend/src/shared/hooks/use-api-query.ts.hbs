@@ -31,10 +31,11 @@ export type UseApiQueryResult<TData> = UseQueryResult<TData> & {
 export function useApiQuery<
   TQueryFnData = unknown,
   TData = TQueryFnData,
+  TQueryKey extends readonly unknown[] = readonly unknown[],
 >(
-  options: UseQueryOptions<TQueryFnData, Error, TData>,
+  options: UseQueryOptions<TQueryFnData, Error, TData, TQueryKey>,
 ): UseApiQueryResult<TData> {
-  const result = useQuery<TQueryFnData, Error, TData>({
+  const result = useQuery<TQueryFnData, Error, TData, TQueryKey>({
     retry: (failureCount, error) => {
       const status = getStatusFromError(error)
       if (NON_RETRYABLE_STATUSES.has(status)) return false
