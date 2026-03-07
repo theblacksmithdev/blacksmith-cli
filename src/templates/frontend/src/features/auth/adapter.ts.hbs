@@ -10,7 +10,7 @@
 import type { AuthAdapter, AuthUser, AuthResult, AuthError, SocialProvider } from '@blacksmith-ui/auth'
 import { setTokens, getAccessToken, clearTokens } from '@/api/client'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:{{backendPort}}'
 
 // Internal state
 let currentUser: AuthUser | null = null

@@ -86,6 +86,8 @@ export async function init(name: string | undefined, options: InitOptions) {
 
   const context = {
     projectName: name,
+    backendPort,
+    frontendPort,
   }
 
   // 1. Create project directory and config
