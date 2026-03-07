@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const blacksmithHooksSkill: Skill = {
   id: 'blacksmith-hooks',
-  filename: 'blacksmith-hooks.md',
+  name: '@blacksmith-ui/hooks',
+  description: '75 production-ready React hooks for state, DOM, timers, async, browser APIs, and layout.',
 
   render(_ctx: SkillContext): string {
     return `## @blacksmith-ui/hooks — React Hooks Library

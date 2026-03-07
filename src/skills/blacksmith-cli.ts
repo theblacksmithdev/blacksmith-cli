@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const blacksmithCliSkill: Skill = {
   id: 'blacksmith-cli',
-  filename: 'blacksmith-cli.md',
+  name: 'Blacksmith CLI',
+  description: 'CLI commands, configuration, and workflows for project scaffolding and management.',
 
   render(_ctx: SkillContext): string {
     return `## Blacksmith CLI

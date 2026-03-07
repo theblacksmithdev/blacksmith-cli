@@ -2,6 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const aiGuidelinesSkill: Skill = {
   id: 'ai-guidelines',
+  name: 'AI Development Guidelines',
+  description: 'Guidelines for developing the project using AI, including when to use code generation, code style, environment setup, and a checklist before finishing tasks.',
 
   render(_ctx: SkillContext): string {
     return `## AI Development Guidelines

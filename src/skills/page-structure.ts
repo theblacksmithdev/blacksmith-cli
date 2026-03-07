@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const pageStructureSkill: Skill = {
   id: 'page-structure',
-  filename: 'page-structure.md',
+  name: 'Page & Route Structure',
+  description: 'Page folders, feature modules, routing conventions, and route composition patterns.',
 
   render(_ctx: SkillContext): string {
     return `## Page & Route Structure

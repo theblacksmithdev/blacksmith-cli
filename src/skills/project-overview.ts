@@ -2,6 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const projectOverviewSkill: Skill = {
   id: 'project-overview',
+  name: 'Project Overview',
+  description: 'Overview of the project structure, commands, and development workflow.',
 
   render(ctx: SkillContext): string {
     return `# ${ctx.projectName}

@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const djangoSkill: Skill = {
   id: 'django',
-  filename: 'django.md',
+  name: 'Django Backend Conventions',
+  description: 'Models, serializers, views, URLs, settings, migrations, and testing patterns for the Django backend.',
 
   render(_ctx: SkillContext): string {
     return `## Django Backend Conventions

@@ -56,7 +56,7 @@ export async function setupSkills(options: SetupOptions) {
   log.blank()
   log.success('AI skills generated:')
   log.step('  CLAUDE.md                  → project overview + guidelines')
-  log.step('  .claude/skills/*.md        → detailed skill files')
+  log.step('  .claude/skills/*/SKILL.md  → detailed skill files')
 }
 
 export function listSkills() {
@@ -71,8 +71,8 @@ export function listSkills() {
   const hasClaude = fs.existsSync(`${root}/CLAUDE.md`)
   const hasSkillsDir = fs.existsSync(`${root}/.claude/skills`)
 
-  const inlineSkills = allSkills.filter((s) => !s.filename)
-  const fileSkills = allSkills.filter((s) => s.filename)
+  const inlineSkills = allSkills.filter((s) => !s.name)
+  const fileSkills = allSkills.filter((s) => s.name)
 
   log.info('Inline skills (in CLAUDE.md):')
   for (const skill of inlineSkills) {
@@ -82,9 +82,9 @@ export function listSkills() {
   log.blank()
   log.info('File-based skills (in .claude/skills/):')
   for (const skill of fileSkills) {
-    const exists = hasSkillsDir && fs.existsSync(`${root}/.claude/skills/${skill.filename}`)
+    const exists = hasSkillsDir && fs.existsSync(`${root}/.claude/skills/${skill.id}/SKILL.md`)
     const status = exists ? '✓' : '✗'
-    log.step(`  ${status} ${skill.filename}`)
+    log.step(`  ${status} ${skill.id}/SKILL.md — ${skill.name}`)
   }
 
   log.blank()

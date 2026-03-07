@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const blacksmithUiFormsSkill: Skill = {
   id: 'blacksmith-ui-forms',
-  filename: 'blacksmith-ui-forms.md',
+  name: '@blacksmith-ui/forms',
+  description: 'Form components using React Hook Form + Zod for validation and submission.',
 
   render(_ctx: SkillContext): string {
     return `## @blacksmith-ui/forms — Form Components (React Hook Form + Zod)

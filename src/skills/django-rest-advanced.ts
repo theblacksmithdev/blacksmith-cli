@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const djangoRestAdvancedSkill: Skill = {
   id: 'django-rest-advanced',
-  filename: 'django-rest-advanced.md',
+  name: 'Advanced Django REST Framework',
+  description: 'Senior-level DRF patterns: service layer, query optimization, custom permissions, filters, caching, and testing.',
 
   render(_ctx: SkillContext): string {
     return `## Advanced Django REST Framework — Senior-Level Patterns

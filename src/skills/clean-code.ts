@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const cleanCodeSkill: Skill = {
   id: 'clean-code',
-  filename: 'clean-code.md',
+  name: 'Clean Code Principles',
+  description: 'Naming, functions, components, file organization, conditionals, error handling, and DRY guidelines.',
 
   render(_ctx: SkillContext): string {
     return `## Clean Code Principles

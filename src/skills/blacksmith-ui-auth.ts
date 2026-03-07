@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const blacksmithUiAuthSkill: Skill = {
   id: 'blacksmith-ui-auth',
-  filename: 'blacksmith-ui-auth.md',
+  name: '@blacksmith-ui/auth',
+  description: 'Authentication UI components and hooks for login, registration, and password reset.',
 
   render(_ctx: SkillContext): string {
     return `## @blacksmith-ui/auth — Authentication UI

@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const reactQuerySkill: Skill = {
   id: 'react-query',
-  filename: 'react-query.md',
+  name: 'TanStack React Query',
+  description: 'API data fetching conventions using useApiQuery and useApiMutation wrappers.',
 
   render(_ctx: SkillContext): string {
     return `## TanStack React Query — API Data Fetching

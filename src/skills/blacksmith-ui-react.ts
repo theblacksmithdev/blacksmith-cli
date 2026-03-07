@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const blacksmithUiReactSkill: Skill = {
   id: 'blacksmith-ui-react',
-  filename: 'blacksmith-ui-react.md',
+  name: '@blacksmith-ui/react',
+  description: 'Core UI component library — layout, actions, data entry, data display, feedback, and navigation components.',
 
   render(_ctx: SkillContext): string {
     return `## @blacksmith-ui/react — Core UI Components

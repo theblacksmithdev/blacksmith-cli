@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const reactSkill: Skill = {
   id: 'react',
-  filename: 'react.md',
+  name: 'React Frontend Conventions',
+  description: 'Tech stack, project structure, state management, component patterns, styling, and testing for the React frontend.',
 
   render(_ctx: SkillContext): string {
     return `## React Frontend Conventions

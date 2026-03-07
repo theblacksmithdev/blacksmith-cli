@@ -2,7 +2,8 @@ import type { Skill, SkillContext } from './types.js'
 
 export const apiDocumentationSkill: Skill = {
   id: 'api-documentation',
-  filename: 'api-documentation.md',
+  name: 'API Documentation',
+  description: 'drf-spectacular OpenAPI/Swagger documentation conventions for all API endpoints.',
 
   render(_ctx: SkillContext): string {
     return `## API Documentation — drf-spectacular (OpenAPI / Swagger)

@@ -50,30 +50,38 @@ export async function setupAiDev({ projectDir, projectName, includeBlacksmithUiS
 
     const ctx: SkillContext = { projectName }
 
-    // Separate inline skills (CLAUDE.md) from file-based skills (.claude/skills/)
-    const inlineSkills = skills.filter((s) => !s.filename)
-    const fileSkills = skills.filter((s) => s.filename)
+    // Separate inline skills (CLAUDE.md) from file-based skills (.claude/skills/[id]/SKILL.md)
+    const inlineSkills = skills.filter((s) => !s.name)
+    const fileSkills = skills.filter((s) => s.name)
 
-    // Create .claude/skills/ directory (clean existing files first)
+    // Create .claude/skills/ directory (clean existing skill directories first)
     const skillsDir = path.join(projectDir, '.claude', 'skills')
     if (fs.existsSync(skillsDir)) {
-      for (const file of fs.readdirSync(skillsDir)) {
-        if (file.endsWith('.md')) {
-          fs.unlinkSync(path.join(skillsDir, file))
+      for (const entry of fs.readdirSync(skillsDir)) {
+        const entryPath = path.join(skillsDir, entry)
+        const stat = fs.statSync(entryPath)
+        if (stat.isDirectory()) {
+          fs.rmSync(entryPath, { recursive: true })
+        } else if (entry.endsWith('.md')) {
+          // Clean up legacy flat .md files
+          fs.unlinkSync(entryPath)
         }
       }
     }
     fs.mkdirSync(skillsDir, { recursive: true })
 
-    // Write each file-based skill to its own .md file
+    // Write each file-based skill to .claude/skills/[id]/SKILL.md with frontmatter
     for (const skill of fileSkills) {
+      const skillDir = path.join(skillsDir, skill.id)
+      fs.mkdirSync(skillDir, { recursive: true })
+      const frontmatter = `---\nname: ${skill.name}\ndescription: ${skill.description}\n---\n\n`
       const content = skill.render(ctx).trim()
-      fs.writeFileSync(path.join(skillsDir, skill.filename!), content + '\n', 'utf-8')
+      fs.writeFileSync(path.join(skillDir, 'SKILL.md'), frontmatter + content + '\n', 'utf-8')
     }
 
     // Build CLAUDE.md with inline content + skills directory reference
     const inlineContent = inlineSkills.map((s) => s.render(ctx)).join('\n')
-    const skillsList = fileSkills.map((s) => `- \`.claude/skills/${s.filename}\` — ${s.id}`).join('\n')
+    const skillsList = fileSkills.map((s) => `- \`.claude/skills/${s.id}/SKILL.md\` — ${s.name}`).join('\n')
 
     const claudeMd = [
       inlineContent.trim(),
