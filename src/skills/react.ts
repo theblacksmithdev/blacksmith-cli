@@ -47,10 +47,7 @@ export const reactSkill: Skill = {
 - Add authenticated routes to the \`privateRoutes\` array; add public routes to \`publicRoutes\`
 
 ### State Management
-- **Server state**: TanStack React Query — use this for all API data
-  - Define query keys consistently: \`['resource', id]\` or \`['resources', filters]\`
-  - Use \`useQuery\` for reads, \`useMutation\` for writes
-  - Invalidate related queries after mutations
+- **Server state**: TanStack React Query — see the \`react-query\` skill for full conventions on \`useApiQuery\` and \`useApiMutation\`
 - **Form state**: React Hook Form — manages form values, validation, submission
 - **Local UI state**: React \`useState\` / \`useReducer\` for component-scoped state
 - Avoid global state libraries unless there is a clear cross-cutting concern not covered by React Query
@@ -77,7 +74,7 @@ export const reactSkill: Skill = {
 
 ### Error Handling
 - Use React Error Boundary (\`frontend/src/router/error-boundary.tsx\`) for render errors
-- Use \`onError\` callbacks in React Query mutations for API errors
+- API errors are handled by \`useApiQuery\` / \`useApiMutation\` — see the \`react-query\` skill for error display patterns
 - Display user-facing errors using the project's feedback components (Alert, Toast)
 
 ### Testing

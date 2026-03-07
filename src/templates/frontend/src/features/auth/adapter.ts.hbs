@@ -9,6 +9,7 @@
 
 import type { AuthAdapter, AuthUser, AuthResult, AuthError, SocialProvider } from '@blacksmith-ui/auth'
 import { setTokens, getAccessToken, clearTokens } from '@/api/client'
+import { parseApiError } from '@/shared/hooks/api-error'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:{{backendPort}}'
 
@@ -34,14 +35,19 @@ function mapDjangoUser(data: any): AuthUser {
   }
 }
 
-function mapError(error: any): AuthError {
-  if (error?.detail) {
-    return { code: 'auth/error', message: error.detail }
-  }
-  if (typeof error === 'string') {
-    return { code: 'auth/error', message: error }
-  }
-  return { code: 'auth/unknown', message: 'An unexpected error occurred.' }
+function toAuthError(error: unknown): AuthError {
+  const parsed = parseApiError(error)
+
+  // If there are field-level errors, include them in the message
+  const fieldMessages = Object.entries(parsed.fieldErrors)
+    .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
+    .join('. ')
+
+  const message = fieldMessages
+    ? `${parsed.message} ${fieldMessages}`
+    : parsed.message
+
+  return { code: `auth/${parsed.status || 'error'}`, message }
 }
 
 async function apiFetch(path: string, options: RequestInit = {}): Promise<any> {
@@ -56,7 +62,7 @@ async function apiFetch(path: string, options: RequestInit = {}): Promise<any> {
   const data = await response.json().catch(() => null)
 
   if (!response.ok) {
-    throw data || { detail: response.statusText }
+    throw { status: response.status, error: data || { detail: response.statusText } }
   }
 
   return data
@@ -94,8 +100,8 @@ export function createBlacksmithAuthAdapter(): AuthAdapter {
         notifyListeners(user)
 
         return { success: true, user }
-      } catch (error: any) {
-        return { success: false, error: mapError(error) }
+      } catch (error: unknown) {
+        return { success: false, error: toAuthError(error) }
       }
     },
 
@@ -120,8 +126,8 @@ export function createBlacksmithAuthAdapter(): AuthAdapter {
         notifyListeners(user)
 
         return { success: true, user }
-      } catch (error: any) {
-        return { success: false, error: mapError(error) }
+      } catch (error: unknown) {
+        return { success: false, error: toAuthError(error) }
       }
     },
 
@@ -142,8 +148,8 @@ export function createBlacksmithAuthAdapter(): AuthAdapter {
           body: JSON.stringify({ email }),
         })
         return { success: true as const }
-      } catch (error: any) {
-        return { success: false as const, error: mapError(error) }
+      } catch (error: unknown) {
+        return { success: false as const, error: toAuthError(error) }
       }
     },
 
@@ -158,8 +164,8 @@ export function createBlacksmithAuthAdapter(): AuthAdapter {
           }),
         })
         return { success: true as const }
-      } catch (error: any) {
-        return { success: false as const, error: mapError(error) }
+      } catch (error: unknown) {
+        return { success: false as const, error: toAuthError(error) }
       }
     },
 
