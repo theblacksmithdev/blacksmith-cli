@@ -21,26 +21,26 @@ export function getTemplatesDir(): string {
 }
 
 /**
- * Find the Forge project root by walking up directories
- * looking for forge.config.json
+ * Find the Blacksmith project root by walking up directories
+ * looking for blacksmith.config.json
  */
 export function findProjectRoot(startDir?: string): string {
   let dir = startDir || process.cwd()
 
   while (dir !== path.dirname(dir)) {
-    if (fs.existsSync(path.join(dir, 'forge.config.json'))) {
+    if (fs.existsSync(path.join(dir, 'blacksmith.config.json'))) {
       return dir
     }
     dir = path.dirname(dir)
   }
 
   throw new Error(
-    'Not inside a Forge project. Run "forge init <name>" to create one, or navigate to an existing Forge project.'
+    'Not inside a Blacksmith project. Run "blacksmith init <name>" to create one, or navigate to an existing Blacksmith project.'
   )
 }
 
 /**
- * Get the backend directory of a Forge project
+ * Get the backend directory of a Blacksmith project
  */
 export function getBackendDir(projectRoot?: string): string {
   const root = projectRoot || findProjectRoot()
@@ -48,7 +48,7 @@ export function getBackendDir(projectRoot?: string): string {
 }
 
 /**
- * Get the frontend directory of a Forge project
+ * Get the frontend directory of a Blacksmith project
  */
 export function getFrontendDir(projectRoot?: string): string {
   const root = projectRoot || findProjectRoot()

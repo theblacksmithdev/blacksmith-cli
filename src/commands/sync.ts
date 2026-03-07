@@ -7,7 +7,7 @@ export async function sync() {
   try {
     root = findProjectRoot()
   } catch {
-    log.error('Not inside a Forge project. Run "forge init <name>" first.')
+    log.error('Not inside a Blacksmith project. Run "blacksmith init <name>" first.')
     process.exit(1)
   }
 
@@ -27,7 +27,7 @@ export async function sync() {
     log.blank()
   } catch (error: any) {
     s.fail('Failed to sync OpenAPI schema')
-    log.error('Make sure Django is running on port 8000, or run "forge dev" first.')
+    log.error('Make sure Django is running on port 8000, or run "blacksmith dev" first.')
     log.error(error.message || error)
     process.exit(1)
   }

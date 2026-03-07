@@ -11,7 +11,7 @@ export async function makeResource(name: string) {
   try {
     root = findProjectRoot()
   } catch {
-    log.error('Not inside a Forge project. Run "forge init <name>" first.')
+    log.error('Not inside a Blacksmith project. Run "blacksmith init <name>" first.')
     process.exit(1)
   }
 
@@ -57,7 +57,7 @@ export async function makeResource(name: string) {
     const settingsPath = path.join(backendDir, 'config', 'settings', 'base.py')
     appendAfterMarker(
       settingsPath,
-      '# forge:apps',
+      '# blacksmith:apps',
       `    'apps.${names.snakes}',`
     )
     registerSpinner.succeed('Registered in INSTALLED_APPS')
@@ -73,7 +73,7 @@ export async function makeResource(name: string) {
     const urlsPath = path.join(backendDir, 'config', 'urls.py')
     insertBeforeMarker(
       urlsPath,
-      '# forge:urls',
+      '# blacksmith:urls',
       `    path('api/${names.snakes}/', include('apps.${names.snakes}.urls')),`
     )
     urlSpinner.succeed('Registered API URLs')
@@ -116,14 +116,14 @@ export async function makeResource(name: string) {
     await exec('npx', ['openapi-ts'], { cwd: frontendDir, silent: true })
     syncSpinner.succeed('Frontend types and hooks regenerated')
   } catch {
-    syncSpinner.warn('Could not sync OpenAPI (is Django running?). Run "forge sync" manually.')
+    syncSpinner.warn('Could not sync OpenAPI (is Django running?). Run "blacksmith sync" manually.')
   }
 
   // 7. Print next steps
   log.blank()
   log.success(`Resource "${names.Name}" created successfully!`)
   log.blank()
-  log.info('Add routes to frontend/src/forge.routes.ts:')
+  log.info('Add routes to frontend/src/blacksmith.routes.ts:')
   log.blank()
   console.log(`    {`)
   console.log(`      path: '/${names.kebabs}',`)

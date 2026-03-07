@@ -16,7 +16,7 @@ export function spinner(text: string): Ora {
 
 export function banner() {
   console.log()
-  console.log(chalk.bold.cyan('  ⚒  Forge'))
+  console.log(chalk.bold.cyan('  ⚒  Blacksmith'))
   console.log(chalk.dim('  Fullstack Django + React'))
   console.log()
 }
@@ -28,7 +28,7 @@ export function printNextSteps(projectName: string) {
   console.log(chalk.bold('  Next steps:'))
   console.log()
   console.log(`  ${chalk.cyan('cd')} ${projectName}`)
-  console.log(`  ${chalk.cyan('forge dev')}        ${chalk.dim('# Start development servers')}`)
+  console.log(`  ${chalk.cyan('blacksmith dev')}        ${chalk.dim('# Start development servers')}`)
   console.log()
   console.log(chalk.dim('  Django:   http://localhost:8000'))
   console.log(chalk.dim('  React:    http://localhost:5173'))

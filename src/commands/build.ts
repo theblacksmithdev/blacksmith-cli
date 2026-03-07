@@ -7,7 +7,7 @@ export async function build() {
   try {
     root = findProjectRoot()
   } catch {
-    log.error('Not inside a Forge project. Run "forge init <name>" first.')
+    log.error('Not inside a Blacksmith project. Run "blacksmith init <name>" first.')
     process.exit(1)
   }
 

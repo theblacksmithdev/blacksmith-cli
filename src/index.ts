@@ -10,7 +10,7 @@ import { eject } from './commands/eject.js'
 const program = new Command()
 
 program
-  .name('forge')
+  .name('blacksmith')
   .description('Fullstack Django + React framework')
   .version('0.1.0')
   .hook('preAction', () => {
@@ -20,7 +20,7 @@ program
 program
   .command('init')
   .argument('<name>', 'Project name')
-  .description('Create a new Forge project')
+  .description('Create a new Blacksmith project')
   .action(init)
 
 program
@@ -46,7 +46,7 @@ program
 
 program
   .command('eject')
-  .description('Remove Forge, keep a clean Django + React project')
+  .description('Remove Blacksmith, keep a clean Django + React project')
   .action(eject)
 
 program.parse()
