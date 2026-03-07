@@ -1,1 +1,62 @@
 @import '@blacksmith-ui/react/styles.css';
+
+{{#if (ne themePreset "default")}}
+@layer base {
+  :root {
+{{#if (eq themePreset "blue")}}
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --ring: 221.2 83.2% 53.3%;
+{{/if}}
+{{#if (eq themePreset "green")}}
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --ring: 142.1 76.2% 36.3%;
+{{/if}}
+{{#if (eq themePreset "red")}}
+    --primary: 0 72.2% 50.6%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --ring: 0 72.2% 50.6%;
+{{/if}}
+{{#if (eq themePreset "violet")}}
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 40% 98%;
+    --ring: 263.4 70% 50.4%;
+{{/if}}
+{{#if (eq themePreset "neutral")}}
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --ring: 240 5.9% 10%;
+    --radius: 0rem;
+{{/if}}
+  }
+
+  .dark {
+{{#if (eq themePreset "blue")}}
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --ring: 217.2 91.2% 59.8%;
+{{/if}}
+{{#if (eq themePreset "green")}}
+    --primary: 142.1 70.6% 45.3%;
+    --primary-foreground: 144.9 80.4% 10%;
+    --ring: 142.1 70.6% 45.3%;
+{{/if}}
+{{#if (eq themePreset "red")}}
+    --primary: 0 72.2% 50.6%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --ring: 0 72.2% 50.6%;
+{{/if}}
+{{#if (eq themePreset "violet")}}
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 40% 98%;
+    --ring: 263.4 70% 50.4%;
+{{/if}}
+{{#if (eq themePreset "neutral")}}
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --ring: 0 0% 98%;
+{{/if}}
+  }
+}
+{{/if}}

@@ -1,0 +1,102 @@
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Button,
+  Badge,
+  Separator,
+} from '@blacksmith-ui/react'
+import { Rocket, Terminal, Database, Layout, Plus } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '@/features/auth/hooks/use-auth'
+
+export default function DashboardPage() {
+  const { user } = useAuth()
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">
+          Welcome back, {user?.displayName || user?.email || 'there'}.
+        </p>
+      </div>
+
+      <Separator />
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Quick Start</CardTitle>
+              <Badge variant="outline">
+                <Rocket className="mr-1 h-3 w-3" />
+                Guide
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <CardDescription>
+              Scaffold a new resource with models, API, and pages in one command.
+            </CardDescription>
+            <div className="mt-4 rounded-lg bg-muted px-3 py-2 font-mono text-sm">
+              <Terminal className="inline h-3.5 w-3.5 text-muted-foreground mr-1.5" />
+              blacksmith make:resource Post
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Backend</CardTitle>
+              <Badge variant="outline">
+                <Database className="mr-1 h-3 w-3" />
+                Django
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <CardDescription>
+              Django REST API with JWT auth, serializers, and auto-generated OpenAPI docs.
+            </CardDescription>
+            <div className="mt-4">
+              <Button variant="outline" size="sm" asChild>
+                <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/docs/`} target="_blank" rel="noopener noreferrer">
+                  View API Docs
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Frontend</CardTitle>
+              <Badge variant="outline">
+                <Layout className="mr-1 h-3 w-3" />
+                React
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <CardDescription>
+              React + TypeScript with TanStack Query, React Router, and Tailwind CSS.
+            </CardDescription>
+            <div className="mt-4">
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/">
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />
+                  Home Page
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

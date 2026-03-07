@@ -37,13 +37,14 @@ export const reactSkill: Skill = {
 - Shared, cross-feature code lives in \`frontend/src/shared/\`
 
 ### Routing
-- Routes defined in \`frontend/src/routes.tsx\` using standard React Router \`RouteObject[]\` arrays
+- Routes defined in \`frontend/src/router/routes.tsx\` using standard React Router \`RouteObject[]\` arrays
+- Routes are organized into \`publicRoutes\`, \`privateRoutes\` (wrapped in \`AuthGuard\`), and \`authRoutes\`
 - Router created in \`frontend/src/router/index.tsx\` via \`createBrowserRouter\`
-- Auth guards in \`frontend/src/router/auth-guard.tsx\` — wrap routes with \`<AuthGuard>\` to require authentication
+- Auth guards in \`frontend/src/router/auth-guard.tsx\` — \`privateRoutes\` are automatically wrapped
 - Layouts in \`frontend/src/router/layouts/\`:
-  - \`main-layout.tsx\` — App shell with navbar for authenticated pages
+  - \`main-layout.tsx\` — App shell with navbar for app pages
   - \`auth-layout.tsx\` — Minimal layout for login/register/reset pages
-- Add new routes by importing the page component in \`routes.tsx\` and adding a \`RouteObject\` to the children array
+- Add authenticated routes to the \`privateRoutes\` array; add public routes to \`publicRoutes\`
 
 ### State Management
 - **Server state**: TanStack React Query — use this for all API data

@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process'
 import { renderDirectory } from '../utils/template.js'
 import { exec, execPython, execPip, commandExists } from '../utils/exec.js'
 import { getTemplatesDir } from '../utils/paths.js'
-import { log, spinner, printNextSteps, promptText, promptYesNo, printConfig } from '../utils/logger.js'
+import { log, spinner, printNextSteps, promptText, promptYesNo, promptSelect, printConfig } from '../utils/logger.js'
 import { setupAiDev } from './ai-setup.js'
 
 function parsePort(value: string, label: string): number {
@@ -16,11 +16,14 @@ function parsePort(value: string, label: string): number {
   return port
 }
 
+const THEME_PRESETS = ['default', 'blue', 'green', 'violet', 'red', 'neutral']
+
 interface InitOptions {
   ai?: boolean
   blacksmithUiSkill?: boolean
   backendPort?: string
   frontendPort?: string
+  themeColor?: string
 }
 
 export async function init(name: string | undefined, options: InitOptions) {
@@ -41,17 +44,23 @@ export async function init(name: string | undefined, options: InitOptions) {
     options.frontendPort = await promptText('Frontend port', '5173')
   }
 
+  if (!options.themeColor) {
+    options.themeColor = await promptSelect('Theme preset', THEME_PRESETS, 'default')
+  }
+
   if (options.ai === undefined) {
     options.ai = await promptYesNo('Set up AI coding support')
   }
 
   const backendPort = parsePort(options.backendPort, 'backend')
   const frontendPort = parsePort(options.frontendPort, 'frontend')
+  const themePreset = THEME_PRESETS.includes(options.themeColor) ? options.themeColor : 'default'
 
   printConfig({
     'Project': name,
     'Backend': `Django on :${backendPort}`,
     'Frontend': `React on :${frontendPort}`,
+    'Theme': themePreset,
     'AI support': options.ai ? 'Yes' : 'No',
   })
 
@@ -88,6 +97,7 @@ export async function init(name: string | undefined, options: InitOptions) {
     projectName: name,
     backendPort,
     frontendPort,
+    themePreset,
   }
 
   // 1. Create project directory and config

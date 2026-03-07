@@ -37,6 +37,24 @@ export function promptYesNo(label: string, defaultValue = false): Promise<boolea
   })
 }
 
+export function promptSelect(label: string, options: string[], defaultValue?: string): Promise<string> {
+  const rl = createInterface({ input: process.stdin, output: process.stdout })
+  const optionList = options.map((opt, i) => `${chalk.dim(`  ${i + 1}.`)} ${opt}`).join('\n')
+  const def = defaultValue ? chalk.dim(` (${defaultValue})`) : ''
+  const question = `  ${chalk.cyan('?')} ${chalk.bold(label)}${def}\n${optionList}\n  ${chalk.dim('Choice:')} `
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close()
+      const trimmed = answer.trim()
+      if (!trimmed && defaultValue) return resolve(defaultValue)
+      const index = parseInt(trimmed, 10)
+      if (index >= 1 && index <= options.length) return resolve(options[index - 1])
+      const match = options.find((opt) => opt.toLowerCase() === trimmed.toLowerCase())
+      resolve(match || defaultValue || options[0])
+    })
+  })
+}
+
 export function printConfig(config: Record<string, string>) {
   const bar = chalk.dim('│')
   console.log()

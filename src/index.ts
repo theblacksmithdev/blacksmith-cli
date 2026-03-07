@@ -7,6 +7,8 @@ import { makeResource } from './commands/make-resource.js'
 import { build } from './commands/build.js'
 import { eject } from './commands/eject.js'
 import { setupSkills, listSkills } from './commands/skills.js'
+import { backend } from './commands/backend.js'
+import { frontend } from './commands/frontend.js'
 
 const program = new Command()
 
@@ -25,6 +27,7 @@ program
   .option('--no-blacksmith-ui-skill', 'Disable blacksmith-ui skill when using --ai')
   .option('-b, --backend-port <port>', 'Django backend port (default: 8000)')
   .option('-f, --frontend-port <port>', 'Vite frontend port (default: 5173)')
+  .option('-t, --theme-color <color>', 'Theme color (zinc, slate, blue, green, orange, red, violet)')
   .description('Create a new Blacksmith project')
   .action(init)
 
@@ -64,5 +67,19 @@ program
   .command('skills')
   .description('List all available AI development skills')
   .action(listSkills)
+
+program
+  .command('backend')
+  .argument('[args...]', 'Django management command and arguments')
+  .description('Run a Django management command (e.g. blacksmith backend createsuperuser)')
+  .allowUnknownOption()
+  .action(backend)
+
+program
+  .command('frontend')
+  .argument('[args...]', 'npm command and arguments')
+  .description('Run an npm command in the frontend (e.g. blacksmith frontend install axios)')
+  .allowUnknownOption()
+  .action(frontend)
 
 program.parse()
