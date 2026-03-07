@@ -139,24 +139,27 @@ export async function makeResource(name: string) {
     syncSpinner.warn('Could not sync OpenAPI. Run "blacksmith sync" manually.')
   }
 
-  // 7. Print next steps
+  // 7. Register routes in frontend router
+  const routeSpinner = spinner('Registering frontend routes...')
+  try {
+    const routesPath = path.join(frontendDir, 'src', 'router', 'routes.tsx')
+    insertBeforeMarker(
+      routesPath,
+      '// blacksmith:import',
+      `import { ${names.names}Routes } from '@/features/${names.kebabs}'`
+    )
+    insertBeforeMarker(
+      routesPath,
+      '// blacksmith:routes',
+      `  ...${names.names}Routes,`
+    )
+    routeSpinner.succeed('Registered frontend routes')
+  } catch {
+    routeSpinner.warn('Could not auto-register routes. Add them manually to frontend/src/router/routes.tsx')
+  }
+
+  // 8. Print summary
   log.blank()
   log.success(`Resource "${names.Name}" created successfully!`)
-  log.blank()
-  log.info('Add routes to frontend/src/router/routes.tsx:')
-  log.blank()
-  console.log(`    // Add these imports at the top:`)
-  console.log(`    import ${names.Name}sPage from '@/features/${names.kebabs}/pages/${names.kebabs}-page'`)
-  console.log(`    import ${names.Name}DetailPage from '@/features/${names.kebabs}/pages/${names.kebab}-detail-page'`)
-  console.log(``)
-  console.log(`    // Add to the privateRoutes array:`)
-  console.log(`    {`)
-  console.log(`      path: '/${names.kebabs}',`)
-  console.log(`      element: <Outlet />,`)
-  console.log(`      children: [`)
-  console.log(`        { index: true, element: <${names.Name}sPage /> },`)
-  console.log(`        { path: ':id', element: <${names.Name}DetailPage /> },`)
-  console.log(`      ],`)
-  console.log(`    },`)
   log.blank()
 }
