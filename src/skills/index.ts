@@ -2,6 +2,7 @@ export { projectOverviewSkill } from './project-overview.js'
 export { djangoSkill } from './django.js'
 export { reactSkill } from './react.js'
 export { blacksmithUiSkill } from './blacksmith-ui.js'
+export { blacksmithCliSkill } from './blacksmith-cli.js'
 export { cleanCodeSkill } from './clean-code.js'
 export { aiGuidelinesSkill } from './ai-guidelines.js'
 

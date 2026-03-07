@@ -6,6 +6,7 @@ import { projectOverviewSkill } from '../skills/project-overview.js'
 import { djangoSkill } from '../skills/django.js'
 import { reactSkill } from '../skills/react.js'
 import { blacksmithUiSkill } from '../skills/blacksmith-ui.js'
+import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
 import { cleanCodeSkill } from '../skills/clean-code.js'
 import { aiGuidelinesSkill } from '../skills/ai-guidelines.js'
 
@@ -29,6 +30,7 @@ export async function setupAiDev({ projectDir, projectName, includeBlacksmithUiS
       skills.push(blacksmithUiSkill)
     }
 
+    skills.push(blacksmithCliSkill)
     skills.push(cleanCodeSkill)
     skills.push(aiGuidelinesSkill)
 

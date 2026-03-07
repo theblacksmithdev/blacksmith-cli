@@ -19,9 +19,11 @@ program
 
 program
   .command('init')
-  .argument('<name>', 'Project name')
+  .argument('[name]', 'Project name')
   .option('--ai', 'Set up AI development skills and documentation (CLAUDE.md)')
   .option('--no-blacksmith-ui-skill', 'Disable blacksmith-ui skill when using --ai')
+  .option('-b, --backend-port <port>', 'Django backend port (default: 8000)')
+  .option('-f, --frontend-port <port>', 'Vite frontend port (default: 5173)')
   .description('Create a new Blacksmith project')
   .action(init)
 

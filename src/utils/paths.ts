@@ -55,6 +55,19 @@ export function getFrontendDir(projectRoot?: string): string {
   return path.join(root, 'frontend')
 }
 
+export interface BlacksmithConfig {
+  name: string
+  version: string
+  backend: { port: number }
+  frontend: { port: number }
+}
+
+export function loadConfig(projectRoot?: string): BlacksmithConfig {
+  const root = projectRoot || findProjectRoot()
+  const configPath = path.join(root, 'blacksmith.config.json')
+  return JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+}
+
 /**
  * Check if a directory exists
  */

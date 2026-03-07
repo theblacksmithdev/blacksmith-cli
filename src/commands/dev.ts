@@ -1,6 +1,18 @@
+import net from 'node:net'
 import concurrently from 'concurrently'
-import { findProjectRoot, getBackendDir, getFrontendDir } from '../utils/paths.js'
+import { findProjectRoot, getBackendDir, getFrontendDir, loadConfig } from '../utils/paths.js'
 import { log } from '../utils/logger.js'
+
+function isPortAvailable(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const server = net.createServer()
+    server.once('error', () => resolve(false))
+    server.once('listening', () => {
+      server.close(() => resolve(true))
+    })
+    server.listen(port)
+  })
+}
 
 export async function dev() {
   let root: string
@@ -11,14 +23,36 @@ export async function dev() {
     process.exit(1)
   }
 
+  const config = loadConfig(root)
+  const backendPort = config.backend.port
+  const frontendPort = config.frontend.port
   const backendDir = getBackendDir(root)
   const frontendDir = getFrontendDir(root)
 
+  // Check port availability before starting
+  const [backendAvailable, frontendAvailable] = await Promise.all([
+    isPortAvailable(backendPort),
+    isPortAvailable(frontendPort),
+  ])
+
+  if (!backendAvailable || !frontendAvailable) {
+    if (!backendAvailable) {
+      log.error(`Port ${backendPort} is already in use (backend).`)
+    }
+    if (!frontendAvailable) {
+      log.error(`Port ${frontendPort} is already in use (frontend).`)
+    }
+    log.blank()
+    log.step('Free the port(s) or change them in blacksmith.config.json')
+    log.step(`Find what\'s using a port: lsof -i :${backendAvailable ? frontendPort : backendPort}`)
+    process.exit(1)
+  }
+
   log.info('Starting development servers...')
   log.blank()
-  log.step('Django      → http://localhost:8000')
-  log.step('Vite        → http://localhost:5173')
-  log.step('Swagger     → http://localhost:8000/api/docs/')
+  log.step(`Django      → http://localhost:${backendPort}`)
+  log.step(`Vite        → http://localhost:${frontendPort}`)
+  log.step(`Swagger     → http://localhost:${backendPort}/api/docs/`)
   log.step('OpenAPI sync → watching backend .py files')
   log.blank()
 
@@ -47,7 +81,7 @@ export async function dev() {
     await concurrently(
       [
         {
-          command: './venv/bin/python manage.py runserver 0.0.0.0:8000',
+          command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
           name: 'django',
           cwd: backendDir,
           prefixColor: 'green',

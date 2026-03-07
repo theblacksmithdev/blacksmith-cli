@@ -4,15 +4,57 @@ import { spawn } from 'node:child_process'
 import { renderDirectory } from '../utils/template.js'
 import { exec, execPython, execPip, commandExists } from '../utils/exec.js'
 import { getTemplatesDir } from '../utils/paths.js'
-import { log, spinner, printNextSteps } from '../utils/logger.js'
+import { log, spinner, printNextSteps, promptText, promptYesNo, printConfig } from '../utils/logger.js'
 import { setupAiDev } from './ai-setup.js'
+
+function parsePort(value: string, label: string): number {
+  const port = parseInt(value, 10)
+  if (isNaN(port) || port < 1 || port > 65535) {
+    log.error(`Invalid ${label} port: ${value}`)
+    process.exit(1)
+  }
+  return port
+}
 
 interface InitOptions {
   ai?: boolean
   blacksmithUiSkill?: boolean
+  backendPort?: string
+  frontendPort?: string
 }
 
-export async function init(name: string, options: InitOptions) {
+export async function init(name: string | undefined, options: InitOptions) {
+  // Interactive prompts for values not provided via flags
+  if (!name) {
+    name = await promptText('Project name')
+    if (!name) {
+      log.error('Project name is required.')
+      process.exit(1)
+    }
+  }
+
+  if (!options.backendPort) {
+    options.backendPort = await promptText('Backend port', '8000')
+  }
+
+  if (!options.frontendPort) {
+    options.frontendPort = await promptText('Frontend port', '5173')
+  }
+
+  if (options.ai === undefined) {
+    options.ai = await promptYesNo('Set up AI coding support')
+  }
+
+  const backendPort = parsePort(options.backendPort, 'backend')
+  const frontendPort = parsePort(options.frontendPort, 'frontend')
+
+  printConfig({
+    'Project': name,
+    'Backend': `Django on :${backendPort}`,
+    'Frontend': `React on :${frontendPort}`,
+    'AI support': options.ai ? 'Yes' : 'No',
+  })
+
   const projectDir = path.resolve(process.cwd(), name)
   const backendDir = path.join(projectDir, 'backend')
   const frontendDir = path.join(projectDir, 'frontend')
@@ -54,8 +96,8 @@ export async function init(name: string, options: InitOptions) {
       {
         name,
         version: '0.1.0',
-        backend: { port: 8000 },
-        frontend: { port: 5173 },
+        backend: { port: backendPort },
+        frontend: { port: frontendPort },
       },
       null,
       2
@@ -154,7 +196,7 @@ export async function init(name: string, options: InitOptions) {
     // Start Django in background
     const djangoProcess = spawn(
       './venv/bin/python',
-      ['manage.py', 'runserver', '0.0.0.0:8000', '--noreload'],
+      ['manage.py', 'runserver', `0.0.0.0:${backendPort}`, '--noreload'],
       {
         cwd: backendDir,
         stdio: 'ignore',
@@ -224,5 +266,5 @@ export async function init(name: string, options: InitOptions) {
   }
 
   // 11. Print success
-  printNextSteps(name)
+  printNextSteps(name, backendPort, frontendPort)
 }

@@ -1,4 +1,4 @@
-import { findProjectRoot, getFrontendDir } from '../utils/paths.js'
+import { findProjectRoot, getFrontendDir, loadConfig } from '../utils/paths.js'
 import { exec } from '../utils/exec.js'
 import { log, spinner } from '../utils/logger.js'
 
@@ -11,6 +11,7 @@ export async function sync() {
     process.exit(1)
   }
 
+  const config = loadConfig(root)
   const frontendDir = getFrontendDir(root)
   const s = spinner('Syncing OpenAPI schema to frontend...')
 
@@ -27,7 +28,7 @@ export async function sync() {
     log.blank()
   } catch (error: any) {
     s.fail('Failed to sync OpenAPI schema')
-    log.error('Make sure Django is running on port 8000, or run "blacksmith dev" first.')
+    log.error(`Make sure Django is running on port ${config.backend.port}, or run "blacksmith dev" first.`)
     log.error(error.message || error)
     process.exit(1)
   }
