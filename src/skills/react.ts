@@ -23,44 +23,9 @@ export const reactSkill: Skill = {
 - Query client setup and default options in \`frontend/src/api/query-client.ts\`
 - After any backend API change, run \`blacksmith sync\` to regenerate the client
 
-### Page Structure
-- Each page lives in its own folder under \`frontend/src/pages/<page>/\`
-- Standard page folder structure:
-  \`\`\`
-  pages/<page>/
-  ├── <page>.tsx       # Page component
-  ├── routes.tsx       # RouteObject[] for this page (the exportable)
-  ├── index.ts         # Re-exports (routes, etc.)
-  ├── components/      # Components private to this page (optional)
-  └── hooks/           # Hooks private to this page (optional)
-  \`\`\`
-- The \`routes.tsx\` exports a \`RouteObject[]\` that the central router composes
-- The \`index.ts\` only exports public members (typically just the routes)
-
-### Feature Modules
-- Each feature lives in \`frontend/src/features/<feature>/\`
-- Standard structure:
-  \`\`\`
-  features/<feature>/
-  ├── components/    # UI components scoped to this feature
-  ├── hooks/         # Custom hooks (queries, mutations, logic)
-  ├── pages/         # Route-level page components
-  ├── routes.tsx     # RouteObject[] for this feature's pages
-  └── index.ts       # Public API — re-export routes and what other features may import
-  \`\`\`
-- Keep features self-contained; import from other features only through their \`index.ts\`
+### Project Structure
+- See the \`page-structure\` skill for page folders, feature modules, routing, and route composition conventions
 - Shared, cross-feature code lives in \`frontend/src/shared/\`
-
-### Routing
-- Each page/feature owns its own \`routes.tsx\` that exports a \`RouteObject[]\`
-- \`frontend/src/router/routes.tsx\` composes all route arrays into the final config — it imports and spreads route objects, not page components directly
-- Routes are organized into \`publicRoutes\`, \`privateRoutes\` (wrapped in \`AuthGuard\`), and \`authRoutes\`
-- Router created in \`frontend/src/router/index.tsx\` via \`createBrowserRouter\`
-- Auth guards in \`frontend/src/router/auth-guard.tsx\` — \`privateRoutes\` are automatically wrapped
-- Layouts in \`frontend/src/router/layouts/\`:
-  - \`main-layout.tsx\` — App shell with navbar for app pages
-  - \`auth-layout.tsx\` — Minimal layout for login/register/reset pages
-- Marker comments \`// blacksmith:import\` and \`// blacksmith:routes\` in \`routes.tsx\` enable auto-registration by \`blacksmith make:resource\`
 
 ### State Management
 - **Server state**: TanStack React Query — see the \`react-query\` skill for full conventions on \`useApiQuery\` and \`useApiMutation\`

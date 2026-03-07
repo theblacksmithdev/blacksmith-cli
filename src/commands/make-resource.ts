@@ -21,16 +21,17 @@ export async function makeResource(name: string) {
   const templatesDir = getTemplatesDir()
 
   const backendAppDir = path.join(backendDir, 'apps', names.snakes)
-  const frontendFeatureDir = path.join(frontendDir, 'src', 'features', names.kebabs)
 
-  // Check if resource already exists
+  // Check if backend resource already exists
   if (fs.existsSync(backendAppDir)) {
     log.error(`Backend app "${names.snakes}" already exists.`)
     process.exit(1)
   }
 
-  if (fs.existsSync(frontendFeatureDir)) {
-    log.error(`Frontend feature "${names.kebabs}" already exists.`)
+  const frontendPageDir = path.join(frontendDir, 'src', 'pages', names.kebabs)
+
+  if (fs.existsSync(frontendPageDir)) {
+    log.error(`Frontend page "${names.kebabs}" already exists.`)
     process.exit(1)
   }
 
@@ -95,22 +96,7 @@ export async function makeResource(name: string) {
     process.exit(1)
   }
 
-  // 5. Generate frontend feature
-  const frontendSpinner = spinner(`Creating frontend feature: features/${names.kebabs}/`)
-  try {
-    renderDirectory(
-      path.join(templatesDir, 'resource', 'frontend'),
-      frontendFeatureDir,
-      context
-    )
-    frontendSpinner.succeed(`Created frontend/src/features/${names.kebabs}/`)
-  } catch (error: any) {
-    frontendSpinner.fail('Failed to create frontend feature')
-    log.error(error.message)
-    process.exit(1)
-  }
-
-  // 6. Sync OpenAPI (generate schema offline, no running Django needed)
+  // 5. Sync OpenAPI (generate schema offline, no running Django needed)
   const syncSpinner = spinner('Syncing OpenAPI schema...')
   try {
     const schemaPath = path.join(frontendDir, '_schema.yml')
@@ -139,6 +125,21 @@ export async function makeResource(name: string) {
     syncSpinner.warn('Could not sync OpenAPI. Run "blacksmith sync" manually.')
   }
 
+  // 6. Generate frontend page
+  const frontendSpinner = spinner(`Creating frontend page: pages/${names.kebabs}/`)
+  try {
+    renderDirectory(
+      path.join(templatesDir, 'resource', 'pages'),
+      frontendPageDir,
+      context
+    )
+    frontendSpinner.succeed(`Created frontend/src/pages/${names.kebabs}/`)
+  } catch (error: any) {
+    frontendSpinner.fail('Failed to create frontend page')
+    log.error(error.message)
+    process.exit(1)
+  }
+
   // 7. Register routes in frontend router
   const routeSpinner = spinner('Registering frontend routes...')
   try {
@@ -146,7 +147,7 @@ export async function makeResource(name: string) {
     insertBeforeMarker(
       routesPath,
       '// blacksmith:import',
-      `import { ${names.names}Routes } from '@/features/${names.kebabs}'`
+      `import { ${names.names}Routes } from '@/pages/${names.kebabs}'`
     )
     insertBeforeMarker(
       routesPath,

@@ -1,0 +1,14 @@
+import { Outlet, type RouteObject } from 'react-router-dom'
+import {{Names}}Page from './{{kebabs}}-page'
+import {{Name}}DetailPage from './{{kebab}}-detail-page'
+
+export const {{names}}Routes: RouteObject[] = [
+  {
+    path: '/{{kebabs}}',
+    element: <Outlet />,
+    children: [
+      { index: true, element: <{{Names}}Page /> },
+      { path: ':id', element: <{{Name}}DetailPage /> },
+    ],
+  },
+]

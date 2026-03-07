@@ -8,6 +8,7 @@ import { djangoRestAdvancedSkill } from '../skills/django-rest-advanced.js'
 import { apiDocumentationSkill } from '../skills/api-documentation.js'
 import { reactSkill } from '../skills/react.js'
 import { reactQuerySkill } from '../skills/react-query.js'
+import { pageStructureSkill } from '../skills/page-structure.js'
 import { blacksmithUiReactSkill } from '../skills/blacksmith-ui-react.js'
 import { blacksmithUiFormsSkill } from '../skills/blacksmith-ui-forms.js'
 import { blacksmithUiAuthSkill } from '../skills/blacksmith-ui-auth.js'
@@ -33,6 +34,7 @@ export async function setupAiDev({ projectDir, projectName, includeBlacksmithUiS
       apiDocumentationSkill,
       reactSkill,
       reactQuerySkill,
+      pageStructureSkill,
     ]
 
     if (includeBlacksmithUiSkill) {
