@@ -4,7 +4,10 @@
   "description": "Fullstack Django + React framework — one command, one codebase, one mental model",
   "type": "module",
   "bin": {
-    "blacksmith": "./dist/index.js"
+    "blacksmith": "./bin/blacksmith.js"
+  },
+  "engines": {
+    "node": ">=20.5.0"
   },
   "main": "./dist/index.js",
   "scripts": {
@@ -14,6 +17,7 @@
     "prepare": "npm run build"
   },
   "files": [
+    "bin",
     "dist",
     "src/templates"
   ],
