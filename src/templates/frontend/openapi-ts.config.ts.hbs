@@ -2,7 +2,7 @@ import { defineConfig } from '@hey-api/openapi-ts'
 
 export default defineConfig({
   input: {
-    path: 'http://localhost:8000/api/schema/',
+    path: 'http://localhost:{{backendPort}}/api/schema/',
   },
   output: {
     path: './src/api/generated',
@@ -24,6 +24,6 @@ export default defineConfig({
       infiniteQueryOptions: true,
       mutationOptions: true,
     },
-    '@hey-api/zod',
+    'zod',
   ],
 })

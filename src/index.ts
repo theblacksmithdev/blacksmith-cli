@@ -6,6 +6,7 @@ import { sync } from './commands/sync.js'
 import { makeResource } from './commands/make-resource.js'
 import { build } from './commands/build.js'
 import { eject } from './commands/eject.js'
+import { setupSkills, listSkills } from './commands/skills.js'
 
 const program = new Command()
 
@@ -52,5 +53,16 @@ program
   .command('eject')
   .description('Remove Blacksmith, keep a clean Django + React project')
   .action(eject)
+
+program
+  .command('setup:ai')
+  .description('Generate CLAUDE.md with AI development skills for the project')
+  .option('--no-blacksmith-ui-skill', 'Exclude blacksmith-ui skill')
+  .action(setupSkills)
+
+program
+  .command('skills')
+  .description('List all available AI development skills')
+  .action(listSkills)
 
 program.parse()

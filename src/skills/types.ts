@@ -5,6 +5,8 @@ export interface SkillContext {
 export interface Skill {
   /** Unique identifier for the skill */
   id: string
-  /** Section returned by this skill for CLAUDE.md */
+  /** Filename in .claude/skills/ (e.g. 'django.md'). If omitted, content is inlined in CLAUDE.md */
+  filename?: string
+  /** Content rendered by this skill */
   render(ctx: SkillContext): string
 }

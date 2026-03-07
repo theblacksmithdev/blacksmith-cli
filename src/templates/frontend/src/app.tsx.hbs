@@ -10,13 +10,10 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router-dom'
 import { queryClient } from '@/api/query-client'
 import { AuthProvider } from '@/features/auth/components/auth-provider'
-import { createBlacksmithRouter } from '@/router'
-import routeConfig from '@/blacksmith.routes'
+import { router } from '@/router'
 
 // Initialize API client (registers interceptors)
 import '@/api/client'
-
-const router = createBlacksmithRouter(routeConfig)
 
 export function App() {
   return (

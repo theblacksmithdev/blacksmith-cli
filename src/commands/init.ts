@@ -211,7 +211,7 @@ export async function init(name: string | undefined, options: InitOptions) {
     await new Promise((resolve) => setTimeout(resolve, 4000))
 
     try {
-      await exec('npx', ['openapi-ts'], { cwd: frontendDir, silent: true })
+      await exec(process.execPath, [path.join(frontendDir, 'node_modules', '.bin', 'openapi-ts')], { cwd: frontendDir, silent: true })
       syncSpinner.succeed('OpenAPI types synced')
     } catch {
       syncSpinner.warn('OpenAPI sync skipped (run "blacksmith sync" after starting Django)')

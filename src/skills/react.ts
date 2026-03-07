@@ -2,6 +2,7 @@ import type { Skill, SkillContext } from './types.js'
 
 export const reactSkill: Skill = {
   id: 'react',
+  filename: 'react.md',
 
   render(_ctx: SkillContext): string {
     return `## React Frontend Conventions
@@ -36,13 +37,13 @@ export const reactSkill: Skill = {
 - Shared, cross-feature code lives in \`frontend/src/shared/\`
 
 ### Routing
-- Route config in \`frontend/src/blacksmith.routes.ts\` — defines paths and auth settings
-- Router setup in \`frontend/src/router/index.tsx\` — builds routes from config
-- Auth guards in \`frontend/src/router/auth-guard.tsx\` — redirects unauthenticated users
+- Routes defined in \`frontend/src/routes.tsx\` using standard React Router \`RouteObject[]\` arrays
+- Router created in \`frontend/src/router/index.tsx\` via \`createBrowserRouter\`
+- Auth guards in \`frontend/src/router/auth-guard.tsx\` — wrap routes with \`<AuthGuard>\` to require authentication
 - Layouts in \`frontend/src/router/layouts/\`:
   - \`main-layout.tsx\` — App shell with navbar for authenticated pages
   - \`auth-layout.tsx\` — Minimal layout for login/register/reset pages
-- Add new routes by updating the route config and creating the page component
+- Add new routes by importing the page component in \`routes.tsx\` and adding a \`RouteObject\` to the children array
 
 ### State Management
 - **Server state**: TanStack React Query — use this for all API data

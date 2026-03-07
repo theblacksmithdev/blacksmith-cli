@@ -110,27 +110,52 @@ export async function makeResource(name: string) {
     process.exit(1)
   }
 
-  // 6. Sync OpenAPI
+  // 6. Sync OpenAPI (generate schema offline, no running Django needed)
   const syncSpinner = spinner('Syncing OpenAPI schema...')
   try {
-    await exec('npx', ['openapi-ts'], { cwd: frontendDir, silent: true })
+    const schemaPath = path.join(frontendDir, '_schema.yml')
+    await execPython(['manage.py', 'spectacular', '--file', schemaPath], backendDir, true)
+
+    const configPath = path.join(frontendDir, 'openapi-ts.config.ts')
+    const configBackup = fs.readFileSync(configPath, 'utf-8')
+    const configWithFile = configBackup.replace(
+      /path:\s*['"]http[^'"]+['"]/,
+      `path: './_schema.yml'`
+    )
+    fs.writeFileSync(configPath, configWithFile, 'utf-8')
+
+    try {
+      await exec(process.execPath, [path.join(frontendDir, 'node_modules', '.bin', 'openapi-ts')], {
+        cwd: frontendDir,
+        silent: true,
+      })
+    } finally {
+      fs.writeFileSync(configPath, configBackup, 'utf-8')
+      if (fs.existsSync(schemaPath)) fs.unlinkSync(schemaPath)
+    }
+
     syncSpinner.succeed('Frontend types and hooks regenerated')
   } catch {
-    syncSpinner.warn('Could not sync OpenAPI (is Django running?). Run "blacksmith sync" manually.')
+    syncSpinner.warn('Could not sync OpenAPI. Run "blacksmith sync" manually.')
   }
 
   // 7. Print next steps
   log.blank()
   log.success(`Resource "${names.Name}" created successfully!`)
   log.blank()
-  log.info('Add routes to frontend/src/blacksmith.routes.ts:')
+  log.info('Add routes to frontend/src/routes.tsx:')
   log.blank()
+  console.log(`    // Add these imports at the top:`)
+  console.log(`    import ${names.Name}sPage from '@/features/${names.kebabs}/pages/${names.kebabs}-page'`)
+  console.log(`    import ${names.Name}DetailPage from '@/features/${names.kebabs}/pages/${names.kebab}-detail-page'`)
+  console.log(``)
+  console.log(`    // Add to the App routes children array:`)
   console.log(`    {`)
   console.log(`      path: '/${names.kebabs}',`)
-  console.log(`      auth: true,`)
+  console.log(`      element: <AuthGuard><Outlet /></AuthGuard>,`)
   console.log(`      children: [`)
-  console.log(`        { index: true, page: '${names.kebabs}/${names.kebabs}-page' },`)
-  console.log(`        { path: ':id', page: '${names.kebabs}/${names.kebab}-detail-page' },`)
+  console.log(`        { index: true, element: <${names.Name}sPage /> },`)
+  console.log(`        { path: ':id', element: <${names.Name}DetailPage /> },`)
   console.log(`      ],`)
   console.log(`    },`)
   log.blank()

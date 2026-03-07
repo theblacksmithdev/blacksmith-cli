@@ -2,6 +2,7 @@ import type { Skill, SkillContext } from './types.js'
 
 export const blacksmithCliSkill: Skill = {
   id: 'blacksmith-cli',
+  filename: 'blacksmith-cli.md',
 
   render(_ctx: SkillContext): string {
     return `## Blacksmith CLI
@@ -18,6 +19,8 @@ Blacksmith is the CLI that scaffolded and manages this project. It lives outside
 | \`blacksmith make:resource <Name>\` | Scaffold a full CRUD resource across backend and frontend |
 | \`blacksmith build\` | Production build (Vite build + Django collectstatic) |
 | \`blacksmith eject\` | Remove Blacksmith dependency, keep a clean project |
+| \`blacksmith setup:ai\` | Generate CLAUDE.md with AI development skills |
+| \`blacksmith skills\` | List all available AI development skills |
 
 ### Configuration
 
@@ -60,7 +63,7 @@ Given a PascalCase name (e.g. \`BlogPost\`), it generates:
 **Frontend:**
 - \`frontend/src/features/blog-posts/\` — Feature module with hooks and components
 - \`frontend/src/pages/blog-posts/\` — List and detail pages
-- Wires routes into the router
+- Prints instructions for adding routes to \`frontend/src/routes.tsx\`
 
 Then runs \`blacksmith sync\` to generate the TypeScript API client.
 

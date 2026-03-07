@@ -8,7 +8,6 @@
 import { RegisterForm } from '@blacksmith-ui/auth'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/use-auth'
-import routeConfig from '@/blacksmith.routes'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
@@ -21,14 +20,14 @@ export default function RegisterPage() {
   }) => {
     const result = await register(data.email, data.password, data.displayName)
     if (result.success) {
-      navigate(routeConfig.auth.afterLogin, { replace: true })
+      navigate('/', { replace: true })
     }
   }
 
   return (
     <RegisterForm
       onSubmit={handleSubmit}
-      onLoginClick={() => navigate(routeConfig.auth.login)}
+      onLoginClick={() => navigate('/login')}
       error={error}
       loading={isLoading}
     />

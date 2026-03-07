@@ -1,4 +1,4 @@
-import { execa, type Options as ExecaOptions } from 'execa'
+import { execa } from 'execa'
 import { log } from './logger.js'
 
 export interface ExecOptions {

@@ -2,6 +2,7 @@ import type { Skill, SkillContext } from './types.js'
 
 export const djangoRestAdvancedSkill: Skill = {
   id: 'django-rest-advanced',
+  filename: 'django-rest-advanced.md',
 
   render(_ctx: SkillContext): string {
     return `## Advanced Django REST Framework — Senior-Level Patterns

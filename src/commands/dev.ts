@@ -1,6 +1,7 @@
 import net from 'node:net'
 import concurrently from 'concurrently'
 import { findProjectRoot, getBackendDir, getFrontendDir, loadConfig } from '../utils/paths.js'
+import path from 'node:path'
 import { log } from '../utils/logger.js'
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -14,6 +15,15 @@ function isPortAvailable(port: number): Promise<boolean> {
   })
 }
 
+async function findAvailablePort(startPort: number): Promise<number> {
+  let port = startPort
+  while (port < startPort + 100) {
+    if (await isPortAvailable(port)) return port
+    port++
+  }
+  throw new Error(`No available port found in range ${startPort}-${port - 1}`)
+}
+
 export async function dev() {
   let root: string
   try {
@@ -24,28 +34,26 @@ export async function dev() {
   }
 
   const config = loadConfig(root)
-  const backendPort = config.backend.port
-  const frontendPort = config.frontend.port
   const backendDir = getBackendDir(root)
   const frontendDir = getFrontendDir(root)
 
-  // Check port availability before starting
-  const [backendAvailable, frontendAvailable] = await Promise.all([
-    isPortAvailable(backendPort),
-    isPortAvailable(frontendPort),
-  ])
-
-  if (!backendAvailable || !frontendAvailable) {
-    if (!backendAvailable) {
-      log.error(`Port ${backendPort} is already in use (backend).`)
-    }
-    if (!frontendAvailable) {
-      log.error(`Port ${frontendPort} is already in use (frontend).`)
-    }
-    log.blank()
-    log.step('Free the port(s) or change them in blacksmith.config.json')
-    log.step(`Find what\'s using a port: lsof -i :${backendAvailable ? frontendPort : backendPort}`)
+  let backendPort: number
+  let frontendPort: number
+  try {
+    ;[backendPort, frontendPort] = await Promise.all([
+      findAvailablePort(config.backend.port),
+      findAvailablePort(config.frontend.port),
+    ])
+  } catch (err) {
+    log.error((err as Error).message)
     process.exit(1)
+  }
+
+  if (backendPort !== config.backend.port) {
+    log.step(`Backend port ${config.backend.port} in use, using ${backendPort}`)
+  }
+  if (frontendPort !== config.frontend.port) {
+    log.step(`Frontend port ${config.frontend.port} in use, using ${frontendPort}`)
   }
 
   log.info('Starting development servers...')
@@ -58,6 +66,7 @@ export async function dev() {
 
   // Build an inline watcher script that watches backend .py files.
   // Runs as a separate child process via concurrently so fs.watch works reliably.
+  const syncCmd = `${process.execPath} ${path.join(frontendDir, 'node_modules', '.bin', 'openapi-ts')}`
   const watcherCode = [
     `const{watch}=require("fs"),{exec}=require("child_process");`,
     `let t=null,s=false;`,
@@ -68,7 +77,7 @@ export async function dev() {
     `t=setTimeout(()=>{`,
     `if(s)return;s=true;`,
     `console.log("Backend change detected — syncing OpenAPI types...");`,
-    `exec("npx openapi-ts",{cwd:${JSON.stringify(frontendDir)}},(err,o,se)=>{`,
+    `exec(${JSON.stringify(syncCmd)},{cwd:${JSON.stringify(frontendDir)}},(err,o,se)=>{`,
     `s=false;`,
     `if(err)console.error("Sync failed:",se||err.message);`,
     `else console.log("OpenAPI types synced");`,
@@ -77,37 +86,46 @@ export async function dev() {
     `console.log("Watching for .py changes...");`,
   ].join('')
 
-  try {
-    await concurrently(
-      [
-        {
-          command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
-          name: 'django',
-          cwd: backendDir,
-          prefixColor: 'green',
-        },
-        {
-          command: 'npm run dev',
-          name: 'vite',
-          cwd: frontendDir,
-          prefixColor: 'blue',
-        },
-        {
-          command: `node -e '${watcherCode}'`,
-          name: 'sync',
-          cwd: frontendDir,
-          prefixColor: 'yellow',
-        },
-      ],
+  const { result } = concurrently(
+    [
       {
-        prefix: 'name',
-        killOthers: ['failure'],
-        restartTries: 3,
-      }
-    )
-  } catch {
-    // concurrently exits when processes are killed (e.g. Ctrl+C)
+        command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
+        name: 'django',
+        cwd: backendDir,
+        prefixColor: 'green',
+      },
+      {
+        command: 'npm run dev',
+        name: 'vite',
+        cwd: frontendDir,
+        prefixColor: 'blue',
+      },
+      {
+        command: `node -e '${watcherCode}'`,
+        name: 'sync',
+        cwd: frontendDir,
+        prefixColor: 'yellow',
+      },
+    ],
+    {
+      prefix: 'name',
+      killOthers: ['failure'],
+      restartTries: 3,
+    }
+  )
+
+  const shutdown = () => {
     log.blank()
     log.info('Development servers stopped.')
+    process.exit(0)
+  }
+
+  process.on('SIGINT', shutdown)
+  process.on('SIGTERM', shutdown)
+
+  try {
+    await result
+  } catch {
+    // concurrently rejects when processes are killed
   }
 }

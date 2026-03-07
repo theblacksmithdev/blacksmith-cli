@@ -2,6 +2,7 @@ import type { Skill, SkillContext } from './types.js'
 
 export const djangoSkill: Skill = {
   id: 'django',
+  filename: 'django.md',
 
   render(_ctx: SkillContext): string {
     return `## Django Backend Conventions

@@ -45,7 +45,44 @@ export async function setupAiDev({ projectDir, projectName, includeBlacksmithUiS
     skills.push(aiGuidelinesSkill)
 
     const ctx: SkillContext = { projectName }
-    const claudeMd = skills.map((skill) => skill.render(ctx)).join('\n')
+
+    // Separate inline skills (CLAUDE.md) from file-based skills (.claude/skills/)
+    const inlineSkills = skills.filter((s) => !s.filename)
+    const fileSkills = skills.filter((s) => s.filename)
+
+    // Create .claude/skills/ directory (clean existing files first)
+    const skillsDir = path.join(projectDir, '.claude', 'skills')
+    if (fs.existsSync(skillsDir)) {
+      for (const file of fs.readdirSync(skillsDir)) {
+        if (file.endsWith('.md')) {
+          fs.unlinkSync(path.join(skillsDir, file))
+        }
+      }
+    }
+    fs.mkdirSync(skillsDir, { recursive: true })
+
+    // Write each file-based skill to its own .md file
+    for (const skill of fileSkills) {
+      const content = skill.render(ctx).trim()
+      fs.writeFileSync(path.join(skillsDir, skill.filename!), content + '\n', 'utf-8')
+    }
+
+    // Build CLAUDE.md with inline content + skills directory reference
+    const inlineContent = inlineSkills.map((s) => s.render(ctx)).join('\n')
+    const skillsList = fileSkills.map((s) => `- \`.claude/skills/${s.filename}\` — ${s.id}`).join('\n')
+
+    const claudeMd = [
+      inlineContent.trim(),
+      '',
+      '## AI Skills',
+      '',
+      'Detailed skills and conventions are in `.claude/skills/`:',
+      '',
+      skillsList,
+      '',
+      'These files are auto-loaded by Claude Code. Run `blacksmith setup:ai` to regenerate.',
+      '',
+    ].join('\n')
 
     fs.writeFileSync(path.join(projectDir, 'CLAUDE.md'), claudeMd, 'utf-8')
 

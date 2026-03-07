@@ -11,11 +11,23 @@ Handlebars.registerHelper('upper', (str: string) => str?.toUpperCase())
 Handlebars.registerHelper('lower', (str: string) => str?.toLowerCase())
 
 /**
- * Render a Handlebars template string with context data
+ * Render a Handlebars template string with context data.
+ * Pre-processes JSX-style braces that collide with Handlebars triple-brace syntax.
  */
 export function renderTemplate(templateStr: string, context: Record<string, any>): string {
-  const template = Handlebars.compile(templateStr, { noEscape: true })
-  return template(context)
+  // Replace literal JSX braces adjacent to Handlebars expressions:
+  //   `{ {{var}}` → `OPEN_BRACE {{var}}`  (prevents `{{{` triple-brace parse)
+  //   `{{var}}} ` → `{{var}} CLOSE_BRACE` (prevents `}}}` triple-brace parse)
+  let safeStr = templateStr
+    .replace(/\{(\s*)(?=\{\{[^{])/g, 'BLACKSMITH_OB$1')
+    .replace(/([^}]\}\})(\s*)\}/g, '$1$2BLACKSMITH_CB')
+
+  const template = Handlebars.compile(safeStr, { noEscape: true })
+  const rendered = template(context)
+
+  return rendered
+    .replace(/BLACKSMITH_OB/g, '{')
+    .replace(/BLACKSMITH_CB/g, '}')
 }
 
 /**
