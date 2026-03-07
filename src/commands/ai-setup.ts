@@ -4,8 +4,13 @@ import { log, spinner } from '../utils/logger.js'
 import type { Skill, SkillContext } from '../skills/types.js'
 import { projectOverviewSkill } from '../skills/project-overview.js'
 import { djangoSkill } from '../skills/django.js'
+import { djangoRestAdvancedSkill } from '../skills/django-rest-advanced.js'
+import { apiDocumentationSkill } from '../skills/api-documentation.js'
 import { reactSkill } from '../skills/react.js'
-import { blacksmithUiSkill } from '../skills/blacksmith-ui.js'
+import { blacksmithUiReactSkill } from '../skills/blacksmith-ui-react.js'
+import { blacksmithUiFormsSkill } from '../skills/blacksmith-ui-forms.js'
+import { blacksmithUiAuthSkill } from '../skills/blacksmith-ui-auth.js'
+import { blacksmithHooksSkill } from '../skills/blacksmith-hooks.js'
 import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
 import { cleanCodeSkill } from '../skills/clean-code.js'
 import { aiGuidelinesSkill } from '../skills/ai-guidelines.js'
@@ -23,11 +28,16 @@ export async function setupAiDev({ projectDir, projectName, includeBlacksmithUiS
     const skills: Skill[] = [
       projectOverviewSkill,
       djangoSkill,
+      djangoRestAdvancedSkill,
+      apiDocumentationSkill,
       reactSkill,
     ]
 
     if (includeBlacksmithUiSkill) {
-      skills.push(blacksmithUiSkill)
+      skills.push(blacksmithUiReactSkill)
+      skills.push(blacksmithUiFormsSkill)
+      skills.push(blacksmithUiAuthSkill)
+      skills.push(blacksmithHooksSkill)
     }
 
     skills.push(blacksmithCliSkill)
