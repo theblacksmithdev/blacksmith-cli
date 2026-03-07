@@ -5,8 +5,14 @@ import { renderDirectory } from '../utils/template.js'
 import { exec, execPython, execPip, commandExists } from '../utils/exec.js'
 import { getTemplatesDir } from '../utils/paths.js'
 import { log, spinner, printNextSteps } from '../utils/logger.js'
+import { setupAiDev } from './ai-setup.js'
 
-export async function init(name: string) {
+interface InitOptions {
+  ai?: boolean
+  blacksmithUiSkill?: boolean
+}
+
+export async function init(name: string, options: InitOptions) {
   const projectDir = path.resolve(process.cwd(), name)
   const backendDir = path.join(projectDir, 'backend')
   const frontendDir = path.join(projectDir, 'frontend')
@@ -208,6 +214,15 @@ export async function init(name: string) {
     )
   }
 
-  // 10. Print success
+  // 10. AI development setup (opt-in)
+  if (options.ai) {
+    await setupAiDev({
+      projectDir,
+      projectName: name,
+      includeBlacksmithUiSkill: options.blacksmithUiSkill !== false,
+    })
+  }
+
+  // 11. Print success
   printNextSteps(name)
 }

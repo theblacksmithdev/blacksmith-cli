@@ -20,6 +20,8 @@ program
 program
   .command('init')
   .argument('<name>', 'Project name')
+  .option('--ai', 'Set up AI development skills and documentation (CLAUDE.md)')
+  .option('--no-blacksmith-ui-skill', 'Disable blacksmith-ui skill when using --ai')
   .description('Create a new Blacksmith project')
   .action(init)
 
