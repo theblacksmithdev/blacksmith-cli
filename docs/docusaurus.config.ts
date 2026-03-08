@@ -55,6 +55,11 @@ const config: Config = {
           label: 'Documentation',
         },
         {
+          href: 'https://oluwatobimaxwell.github.io/libraries-project/',
+          label: 'Blacksmith UI',
+          position: 'left',
+        },
+        {
           href: 'https://github.com/oluwatobimaxwell/blacksmith-cli',
           label: 'GitHub',
           position: 'right',
@@ -82,8 +87,12 @@ const config: Config = {
           ],
         },
         {
-          title: 'Stack',
+          title: 'Ecosystem',
           items: [
+            {
+              label: 'Blacksmith UI',
+              href: 'https://oluwatobimaxwell.github.io/libraries-project/',
+            },
             {
               label: 'Django',
               href: 'https://www.djangoproject.com/',

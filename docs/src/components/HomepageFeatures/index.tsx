@@ -1,102 +1,85 @@
 import type {ReactNode} from 'react';
-import clsx from 'clsx';
-import Heading from '@theme/Heading';
-import styles from './styles.module.css';
 
-type FeatureItem = {
+const BLACKSMITH_UI_URL = 'https://oluwatobimaxwell.github.io/libraries-project/';
+
+type Capability = {
   title: string;
   description: ReactNode;
-  icon: string;
 };
 
-const FeatureList: FeatureItem[] = [
+const capabilities: Capability[] = [
   {
-    title: 'One Command Setup',
-    icon: '$ _',
+    title: '60+ UI components',
     description: (
       <>
-        Scaffold a complete fullstack project with Django backend and React
-        frontend in a single command. No boilerplate, no configuration headaches.
+        Stop rebuilding buttons, forms, and modals from scratch. {' '}
+        <a href={BLACKSMITH_UI_URL} target="_blank" rel="noopener noreferrer">blacksmith-ui</a> gives
+        you a complete, themed component library that saves hundreds of hours across a project's lifetime.
       </>
     ),
   },
   {
-    title: 'Automatic Type Sync',
-    icon: '{ }',
+    title: '75+ React hooks',
     description: (
       <>
-        OpenAPI schema generation keeps your Django serializers and TypeScript
-        types in perfect sync. Change your backend, frontend types update
-        automatically.
+        Common patterns like data fetching, form validation, auth state, and pagination are
+        already solved in{' '}
+        <a href={BLACKSMITH_UI_URL} target="_blank" rel="noopener noreferrer">blacksmith-ui/hooks</a>.
+        Less reinventing, more building.
       </>
     ),
   },
   {
-    title: 'Full-Stack Scaffolding',
-    icon: '+ R',
-    description: (
-      <>
-        Generate complete CRUD resources across both stacks with{' '}
-        <code>blacksmith make:resource</code>. Models, serializers, viewsets,
-        pages, hooks, and routes — all wired up.
-      </>
-    ),
+    title: 'Auth in minutes, not days',
+    description:
+      'Login, registration, session management, and route guards wired across Django and React. What typically takes 2-3 days is done before you write your first line of code.',
   },
   {
-    title: 'AI-Ready Development',
-    icon: 'AI',
-    description: (
-      <>
-        Generate project-aware CLAUDE.md and skill files that give AI coding
-        assistants deep context about your project architecture and conventions.
-      </>
-    ),
+    title: 'AI that writes better code',
+    description:
+      'Advanced, curated AI skills give coding assistants 40% more context about your project. Better suggestions, fewer hallucinations, faster iteration.',
   },
   {
-    title: 'Production Ready',
-    icon: '>>',
-    description: (
-      <>
-        Built-in authentication, production builds, static file collection, and
-        environment management. Your project is deployment-ready from day one.
-      </>
-    ),
+    title: 'Zero-drift type sync',
+    description:
+      'OpenAPI schema generation keeps Django serializers and TypeScript types in lockstep. Eliminates an entire class of bugs that typically costs teams hours per week.',
   },
   {
-    title: 'Clean Ejection',
-    icon: '</>',
-    description: (
-      <>
-        Eject anytime to get a standard Django + React project. No lock-in — all
-        generated code is yours to keep and modify.
-      </>
-    ),
+    title: 'Full CRUD in seconds',
+    description:
+      'One command generates models, serializers, viewsets, pages, hooks, and routes across both stacks. What used to take a full day now takes under 30 seconds.',
+  },
+  {
+    title: 'Professional architecture',
+    description:
+      'An opinionated, scalable project structure with clear domain separation, shared utilities, and configuration layers. Built the way senior engineers would set it up.',
+  },
+  {
+    title: 'No lock-in, ever',
+    description:
+      'Eject anytime to a standard Django + React project. Every line of generated code is clean, readable, and yours to keep. No proprietary runtime or hidden dependencies.',
   },
 ];
 
-function Feature({title, icon, description}: FeatureItem) {
-  return (
-    <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <div className={styles.featureIcon}>
-          <span>{icon}</span>
-        </div>
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function HomepageFeatures(): ReactNode {
   return (
-    <section className={styles.features}>
+    <section className="bs-section bs-section--alt">
       <div className="container">
-        <div className="row">
-          {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
+        <div className="bs-section__header">
+          <h2 className="bs-section__title">
+            Everything you need to ship faster, nothing that slows you down
+          </h2>
+          <p className="bs-section__desc">
+            Blacksmith CLI is built for developers who value speed and quality equally.
+            Every feature exists to remove friction from your workflow.
+          </p>
+        </div>
+        <div className="bs-caps">
+          {capabilities.map((cap) => (
+            <div key={cap.title} className="bs-cap">
+              <h3 className="bs-cap__title">{cap.title}</h3>
+              <p className="bs-cap__desc">{cap.description}</p>
+            </div>
           ))}
         </div>
       </div>
