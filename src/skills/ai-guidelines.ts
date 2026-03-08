@@ -18,6 +18,12 @@ export const aiGuidelinesSkill: Skill = {
 - **Frontend**: TypeScript strict mode. Functional components. Named exports (not default, except for page components used in routes). Descriptive variable names
 - Use existing patterns in the codebase as reference before inventing new ones
 
+### Frontend Architecture (Mandatory)
+- **Use \`@blacksmith-ui/react\` for ALL UI** — \`Stack\`, \`Flex\`, \`Grid\` for layout; \`Typography\`, \`Text\` for text; \`Card\`, \`Button\`, \`Badge\`, etc. for all elements. Never use raw HTML (\`<div>\`, \`<h1>\`, \`<p>\`, \`<button>\`) when a Blacksmith-UI component exists
+- **Pages are thin orchestrators** — compose child components from \`components/\`, extract logic into \`hooks/\`. A page file should be ~20-30 lines, not a monolith
+- **Use the \`Path\` enum** — all route paths come from \`src/router/paths.ts\`. Never hardcode path strings like \`'/login'\` or \`'/dashboard'\`
+- **Add new paths to the enum** — when creating a new page, add its path to the \`Path\` enum before the \`// blacksmith:path\` marker
+
 ### Environment
 - Backend: \`http://localhost:8000\`
 - Frontend: \`http://localhost:5173\`
@@ -30,6 +36,10 @@ export const aiGuidelinesSkill: Skill = {
 2. Frontend builds: \`cd frontend && npm run build\`
 3. API types are in sync: \`blacksmith sync\`
 4. No lint errors in modified files
+5. All UI uses \`@blacksmith-ui/react\` components — no raw \`<div>\` for layout, no raw \`<h1>\`-\`<h6>\` for text
+6. Pages are modular — page file is a thin orchestrator, sections are in \`components/\`, logic in \`hooks/\`
+7. No hardcoded route paths — all paths use the \`Path\` enum from \`@/router/paths\`
+8. New routes have a corresponding \`Path\` enum entry
 `
   },
 }

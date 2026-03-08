@@ -175,7 +175,8 @@ pages/dashboard/
 \`\`\`
 
 \`\`\`tsx
-// dashboard.tsx — thin orchestrator
+// dashboard.tsx — thin orchestrator using @blacksmith-ui/react layout
+import { Stack, Grid, Divider } from '@blacksmith-ui/react'
 import { StatsCards } from './components/stats-cards'
 import { RecentActivity } from './components/recent-activity'
 import { QuickActions } from './components/quick-actions'
@@ -185,13 +186,14 @@ export default function DashboardPage() {
   const { stats, activity, isLoading } = useDashboardData()
 
   return (
-    <div className="space-y-6">
+    <Stack gap={6}>
       <StatsCards stats={stats} isLoading={isLoading} />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Divider />
+      <Grid columns={{ base: 1, lg: 3 }} gap={6}>
         <RecentActivity items={activity} isLoading={isLoading} className="lg:col-span-2" />
         <QuickActions />
-      </div>
-    </div>
+      </Grid>
+    </Stack>
   )
 }
 \`\`\`
@@ -251,6 +253,7 @@ export function useOrdersPage() {
 }
 
 // orders-page.tsx
+import { Stack } from '@blacksmith-ui/react'
 import { useOrdersPage } from './hooks/use-orders-page'
 import { OrdersTable } from './components/orders-table'
 import { OrdersToolbar } from './components/orders-toolbar'
@@ -259,10 +262,10 @@ export default function OrdersPage() {
   const { orders, total, isLoading, page, setPage, search, setSearch, deleteOrder } = useOrdersPage()
 
   return (
-    <div className="space-y-4">
+    <Stack gap={4}>
       <OrdersToolbar search={search} onSearchChange={setSearch} />
       <OrdersTable orders={orders} isLoading={isLoading} onDelete={(id) => deleteOrder.mutate({ path: { id } })} />
-    </div>
+    </Stack>
   )
 }
 \`\`\`

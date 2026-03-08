@@ -1,3 +1,4 @@
+export { coreRulesSkill } from './core-rules.js'
 export { projectOverviewSkill } from './project-overview.js'
 export { djangoSkill } from './django.js'
 export { djangoRestAdvancedSkill } from './django-rest-advanced.js'

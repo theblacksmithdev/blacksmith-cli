@@ -40,6 +40,19 @@ export const reactSkill: Skill = {
 - Keep components focused — extract sub-components when a file exceeds ~150 lines
 - Use custom hooks to encapsulate data fetching and mutation logic
 - Prefer composition over prop drilling — use context for deeply shared state
+- **Pages must be thin orchestrators** — break into child components in \`components/\`, extract logic into \`hooks/\`. See the \`page-structure\` skill for the full pattern
+
+### UI Components
+- **All UI must use \`@blacksmith-ui/react\` components** — see the \`blacksmith-ui-react\` skill for the full component list
+- Use \`Stack\`, \`Flex\`, \`Grid\`, \`Box\` for layout — never raw \`<div>\` with flex/grid classes
+- Use \`Typography\` and \`Text\` for headings and text — never raw \`<h1>\`–\`<h6>\` or \`<p>\`
+- Use \`Divider\` instead of \`<Separator>\` or \`<hr>\`
+- Use \`StatCard\`, \`EmptyState\`, \`Skeleton\` instead of building custom equivalents
+
+### Route Paths
+- All route paths live in the \`Path\` enum at \`src/router/paths.ts\` — **never hardcode path strings**
+- Use \`Path\` in route definitions, \`navigate()\`, and \`<Link to={}>\`
+- Use \`buildPath()\` for dynamic segments — see the \`page-structure\` skill for details
 
 ### Styling
 - Use Tailwind CSS utility classes for all styling

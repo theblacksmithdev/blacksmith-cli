@@ -2,6 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { log, spinner } from '../utils/logger.js'
 import type { Skill, SkillContext } from '../skills/types.js'
+import { coreRulesSkill } from '../skills/core-rules.js'
 import { projectOverviewSkill } from '../skills/project-overview.js'
 import { djangoSkill } from '../skills/django.js'
 import { djangoRestAdvancedSkill } from '../skills/django-rest-advanced.js'
@@ -30,6 +31,7 @@ export async function setupAiDev({ projectDir, projectName, includeBlacksmithUiS
 
   try {
     const skills: Skill[] = [
+      coreRulesSkill,
       projectOverviewSkill,
       djangoSkill,
       djangoRestAdvancedSkill,
