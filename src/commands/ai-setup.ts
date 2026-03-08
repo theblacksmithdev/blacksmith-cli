@@ -14,6 +14,8 @@ import { blacksmithUiFormsSkill } from '../skills/blacksmith-ui-forms.js'
 import { blacksmithUiAuthSkill } from '../skills/blacksmith-ui-auth.js'
 import { blacksmithHooksSkill } from '../skills/blacksmith-hooks.js'
 import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
+import { uiDesignSkill } from '../skills/ui-design.js'
+import { programmingParadigmsSkill } from '../skills/programming-paradigms.js'
 import { cleanCodeSkill } from '../skills/clean-code.js'
 import { aiGuidelinesSkill } from '../skills/ai-guidelines.js'
 
@@ -42,9 +44,11 @@ export async function setupAiDev({ projectDir, projectName, includeBlacksmithUiS
       skills.push(blacksmithUiFormsSkill)
       skills.push(blacksmithUiAuthSkill)
       skills.push(blacksmithHooksSkill)
+      skills.push(uiDesignSkill)
     }
 
     skills.push(blacksmithCliSkill)
+    skills.push(programmingParadigmsSkill)
     skills.push(cleanCodeSkill)
     skills.push(aiGuidelinesSkill)
 

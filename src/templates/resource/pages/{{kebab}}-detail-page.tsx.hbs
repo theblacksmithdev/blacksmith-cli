@@ -9,6 +9,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useApiQuery } from '@/shared/hooks/use-api-query'
 import { useDelete{{Name}} } from './hooks/use-{{kebab}}-mutations'
 import { Alert, AlertDescription } from '@blacksmith-ui/react'
+import { Path } from '@/router/paths'
 import {
   {{snakes}}RetrieveOptions,
 } from '@/api/generated/@tanstack/react-query.gen'
@@ -49,7 +50,7 @@ export default function {{Name}}DetailPage() {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this {{name}}?')) {
       await delete{{Name}}.mutateAsync({ path: { id: Number(id) } })
-      navigate('/{{kebabs}}')
+      navigate(Path.{{Names}})
     }
   }
 
@@ -67,7 +68,7 @@ export default function {{Name}}DetailPage() {
         </h1>
         <div className="flex gap-2">
           <button
-            onClick={() => navigate(`/{{kebabs}}/${id}/edit`)}
+            onClick={() => navigate(`${Path.{{Names}}}/${id}/edit`)}
             className="px-4 py-2 text-sm border border-border rounded-md hover:bg-muted"
           >
             Edit

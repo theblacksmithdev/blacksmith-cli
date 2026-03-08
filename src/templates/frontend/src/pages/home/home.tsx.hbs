@@ -33,6 +33,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/use-auth'
+import { Path } from '@/router/paths'
 import { useCopyToClipboard } from '@blacksmith-ui/hooks'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -146,7 +147,7 @@ export default function HomePage() {
             </Button>
           ) : (
             <Button size="lg" asChild>
-              <Link to="/login">
+              <Link to={Path.Login}>
                 <Rocket className="mr-2 h-4 w-4" />
                 Sign In
               </Link>

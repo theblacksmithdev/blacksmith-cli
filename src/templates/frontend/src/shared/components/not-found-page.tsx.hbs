@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@blacksmith-ui/react'
 import { ArrowLeft, FileQuestion } from 'lucide-react'
+import { Path } from '@/router/paths'
 
 export default function NotFoundPage() {
   const navigate = useNavigate()
@@ -19,7 +20,7 @@ export default function NotFoundPage() {
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="pt-2">
-          <Button onClick={() => navigate('/')}>
+          <Button onClick={() => navigate(Path.Home)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Home
           </Button>

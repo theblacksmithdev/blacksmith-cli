@@ -8,13 +8,14 @@
 import { LoginForm } from '@blacksmith-ui/auth'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/use-auth'
+import { Path } from '@/router/paths'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { login, error, isLoading } = useAuth()
 
-  const redirectTo = searchParams.get('redirect') || '/'
+  const redirectTo = searchParams.get('redirect') || Path.Home
 
   const handleSubmit = async (data: { email: string; password: string }) => {
     const result = await login(data.email, data.password)
@@ -26,8 +27,8 @@ export default function LoginPage() {
   return (
     <LoginForm
       onSubmit={handleSubmit}
-      onRegisterClick={() => navigate('/register')}
-      onForgotPasswordClick={() => navigate('/forgot-password')}
+      onRegisterClick={() => navigate(Path.Register)}
+      onForgotPasswordClick={() => navigate(Path.ForgotPassword)}
       error={error}
       loading={isLoading}
     />

@@ -64,7 +64,8 @@ Given a PascalCase name (e.g. \`BlogPost\`), it generates:
 **Frontend:**
 - \`frontend/src/features/blog-posts/\` — Feature module with hooks and components
 - \`frontend/src/pages/blog-posts/\` — List and detail pages
-- Prints instructions for adding routes to \`frontend/src/router/routes.tsx\`
+- Registers route path in \`frontend/src/router/paths.ts\` (\`Path\` enum)
+- Registers routes in \`frontend/src/router/routes.tsx\`
 
 Then runs \`blacksmith sync\` to generate the TypeScript API client.
 

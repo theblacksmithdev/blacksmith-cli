@@ -23,13 +23,14 @@ pages/<page>/
 └── hooks/             # Hooks private to this page (optional)
 \`\`\`
 
-**\`routes.tsx\`** — defines the route config:
+**\`routes.tsx\`** — defines the route config using the \`Path\` enum:
 \`\`\`tsx
 import type { RouteObject } from 'react-router-dom'
+import { Path } from '@/router/paths'
 import SettingsPage from './settings'
 
 export const settingsRoutes: RouteObject[] = [
-  { path: '/settings', element: <SettingsPage /> },
+  { path: Path.Settings, element: <SettingsPage /> },
 ]
 \`\`\`
 
@@ -51,15 +52,16 @@ features/<feature>/
 └── index.ts           # Re-exports routes + public API
 \`\`\`
 
-**\`routes.tsx\`** — groups related routes:
+**\`routes.tsx\`** — groups related routes using the \`Path\` enum:
 \`\`\`tsx
 import { Outlet, type RouteObject } from 'react-router-dom'
+import { Path } from '@/router/paths'
 import PostsPage from './pages/posts-page'
 import PostDetailPage from './pages/post-detail-page'
 
 export const postsRoutes: RouteObject[] = [
   {
-    path: '/posts',
+    path: Path.Posts,
     element: <Outlet />,
     children: [
       { index: true, element: <PostsPage /> },
@@ -75,6 +77,44 @@ export { postsRoutes } from './routes'
 export { usePosts } from './hooks/use-posts'
 export { useCreatePost, useUpdatePost, useDeletePost } from './hooks/use-post-mutations'
 \`\`\`
+
+### Route Paths (\`src/router/paths.ts\`)
+
+All route paths are defined in a central \`Path\` enum — **never use hardcoded path strings**:
+
+\`\`\`ts
+export enum Path {
+  Home = '/',
+  Login = '/login',
+  Register = '/register',
+  ForgotPassword = '/forgot-password',
+  ResetPassword = '/reset-password/:token',
+  Dashboard = '/dashboard',
+  // blacksmith:path
+}
+\`\`\`
+
+Use \`Path\` everywhere — in route definitions, \`navigate()\`, \`<Link to={}\`\`, etc.:
+\`\`\`tsx
+import { Path } from '@/router/paths'
+
+// In routes
+{ path: Path.Dashboard, element: <DashboardPage /> }
+
+// In navigation
+navigate(Path.Login)
+<Link to={Path.Home}>Home</Link>
+\`\`\`
+
+For dynamic paths, use the \`buildPath\` helper:
+\`\`\`ts
+import { Path, buildPath } from '@/router/paths'
+
+buildPath(Path.ResetPassword, { token: 'abc123' })
+// => '/reset-password/abc123'
+\`\`\`
+
+The \`Path\` enum is re-exported from \`@/router\` along with \`buildPath\`.
 
 ### Central Router (\`src/router/routes.tsx\`)
 
@@ -101,10 +141,11 @@ const privateRoutes: RouteObject[] = [
 ### Auto-Registration
 
 \`blacksmith make:resource\` automatically registers routes using marker comments:
-- \`// blacksmith:import\` — new import line is inserted above this marker
-- \`// blacksmith:routes\` — new spread line is inserted above this marker
+- \`// blacksmith:path\` — new \`Path\` enum entry is inserted above this marker in \`paths.ts\`
+- \`// blacksmith:import\` — new import line is inserted above this marker in \`routes.tsx\`
+- \`// blacksmith:routes\` — new spread line is inserted above this marker in \`routes.tsx\`
 
-Never remove these markers. They must stay in the \`privateRoutes\` array and import block.
+Never remove these markers. They must stay in the \`Path\` enum, \`privateRoutes\` array, and import block.
 
 ### When to Use Pages vs Features
 
@@ -241,14 +282,15 @@ export default function OrdersPage() {
 ### Key Rules
 
 1. **Every page/feature owns its routes** — the route config lives next to the page, not in the central router
-2. **\`index.ts\` is the public API** — only export what other modules need (routes, hooks, components)
-3. **Page components use default exports** — this is the one exception to the named-export convention
-4. **Routes use named exports** — \`export const settingsRoutes\` not \`export default\`
-5. **Private components/hooks stay in the page folder** — if only one page uses it, co-locate it there
-6. **Never import across page folders** — if something is shared, move it to \`shared/\` or a feature
-7. **Keep marker comments intact** — \`// blacksmith:import\` and \`// blacksmith:routes\` are required for auto-registration
-8. **Pages are orchestrators** — break pages into child components in \`components/\`, extract logic into hooks in \`hooks/\`
-9. **Components render, hooks think** — never put data fetching, transformations, or complex state directly in component bodies
+2. **Use the \`Path\` enum for all route paths** — never hardcode path strings; import \`Path\` from \`@/router/paths\`
+3. **\`index.ts\` is the public API** — only export what other modules need (routes, hooks, components)
+4. **Page components use default exports** — this is the one exception to the named-export convention
+5. **Routes use named exports** — \`export const settingsRoutes\` not \`export default\`
+6. **Private components/hooks stay in the page folder** — if only one page uses it, co-locate it there
+7. **Never import across page folders** — if something is shared, move it to \`shared/\` or a feature
+8. **Keep marker comments intact** — \`// blacksmith:path\`, \`// blacksmith:import\`, and \`// blacksmith:routes\` are required for auto-registration
+9. **Pages are orchestrators** — break pages into child components in \`components/\`, extract logic into hooks in \`hooks/\`
+10. **Components render, hooks think** — never put data fetching, transformations, or complex state directly in component bodies
 `
   },
 }

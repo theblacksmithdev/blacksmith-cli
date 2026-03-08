@@ -1,4 +1,5 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom'
+import { Path } from '@/router/paths'
 import {
   Button,
   Separator,
@@ -33,14 +34,14 @@ export function MainLayout() {
 
   const handleLogout = () => {
     logout()
-    navigate('/login')
+    navigate(Path.Login)
   }
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-7xl mx-auto flex h-14 items-center px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center gap-2 mr-6">
+          <Link to={Path.Home} className="flex items-center gap-2 mr-6">
             <Anvil className="h-5 w-5" />
             <span className="text-lg font-semibold tracking-tight">{{projectName}}</span>
           </Link>
@@ -95,10 +96,10 @@ export function MainLayout() {
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to="/login">Sign In</Link>
+                  <Link to={Path.Login}>Sign In</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link to="/register">Sign Up</Link>
+                  <Link to={Path.Register}>Sign Up</Link>
                 </Button>
               </>
             )}

@@ -140,7 +140,21 @@ export async function makeResource(name: string) {
     process.exit(1)
   }
 
-  // 7. Register routes in frontend router
+  // 7. Register path in paths enum
+  const pathSpinner = spinner('Registering route path...')
+  try {
+    const pathsFile = path.join(frontendDir, 'src', 'router', 'paths.ts')
+    insertBeforeMarker(
+      pathsFile,
+      '// blacksmith:path',
+      `  ${names.Names} = '/${names.kebabs}',`
+    )
+    pathSpinner.succeed('Registered route path')
+  } catch {
+    pathSpinner.warn('Could not auto-register path. Add it manually to frontend/src/router/paths.ts')
+  }
+
+  // 8. Register routes in frontend router
   const routeSpinner = spinner('Registering frontend routes...')
   try {
     const routesPath = path.join(frontendDir, 'src', 'router', 'routes.tsx')
@@ -159,7 +173,7 @@ export async function makeResource(name: string) {
     routeSpinner.warn('Could not auto-register routes. Add them manually to frontend/src/router/routes.tsx')
   }
 
-  // 8. Print summary
+  // 9. Print summary
   log.blank()
   log.success(`Resource "${names.Name}" created successfully!`)
   log.blank()

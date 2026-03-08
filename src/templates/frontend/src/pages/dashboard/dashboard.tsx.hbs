@@ -11,6 +11,7 @@ import {
 import { Rocket, Terminal, Database, Layout, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/use-auth'
+import { Path } from '@/router/paths'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -88,7 +89,7 @@ export default function DashboardPage() {
             </CardDescription>
             <div className="mt-4">
               <Button variant="outline" size="sm" asChild>
-                <Link to="/">
+                <Link to={Path.Home}>
                   <Plus className="mr-1.5 h-3.5 w-3.5" />
                   Home Page
                 </Link>

@@ -6,6 +6,7 @@
  */
 
 import { Link } from 'react-router-dom'
+import { Path } from '@/router/paths'
 
 interface {{Name}}CardProps {
   {{name}}: {
@@ -19,7 +20,7 @@ interface {{Name}}CardProps {
 export function {{Name}}Card({ {{name}} }: {{Name}}CardProps) {
   return (
     <Link
-      to={`/{{kebabs}}/${ {{name}}.id}`}
+      to={`${Path.{{Names}}}/${ {{name}}.id}`}
       className="block p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
     >
       <h3 className="text-lg font-semibold text-gray-900">

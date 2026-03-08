@@ -1,6 +1,7 @@
 import { Outlet, Link } from 'react-router-dom'
 import { Separator, Button } from '@blacksmith-ui/react'
 import { Anvil } from 'lucide-react'
+import { Path } from '@/router/paths'
 
 export function AuthLayoutWrapper() {
   return (
@@ -35,7 +36,7 @@ export function AuthLayoutWrapper() {
           </div>
           <div className="lg:ml-auto">
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/">Back to Home</Link>
+              <Link to={Path.Home}>Back to Home</Link>
             </Button>
           </div>
         </div>
