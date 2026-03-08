@@ -11,10 +11,10 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://blacksmith-cli.dev',
-  baseUrl: '/',
+  url: 'https://theblacksmithdev.github.io',
+  baseUrl: '/blacksmith-cli/',
 
-  organizationName: 'blacksmith-cli',
+  organizationName: 'theblacksmithdev',
   projectName: 'blacksmith-cli',
 
   onBrokenLinks: 'throw',
@@ -31,7 +31,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/oluwatobimaxwell/blacksmith-cli/tree/main/docs/',
+            'https://github.com/theblacksmithdev/blacksmith-cli/tree/main/docs/',
         },
         blog: false,
         theme: {
@@ -60,7 +60,7 @@ const config: Config = {
           position: 'left',
         },
         {
-          href: 'https://github.com/oluwatobimaxwell/blacksmith-cli',
+          href: 'https://github.com/theblacksmithdev/blacksmith-cli',
           label: 'GitHub',
           position: 'right',
         },
@@ -112,7 +112,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/oluwatobimaxwell/blacksmith-cli',
+              href: 'https://github.com/theblacksmithdev/blacksmith-cli',
             },
             {
               label: 'npm',
