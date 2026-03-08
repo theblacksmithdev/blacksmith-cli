@@ -114,6 +114,130 @@ Never remove these markers. They must stay in the \`privateRoutes\` array and im
 | No shared hooks or components | Has hooks, components, and pages that belong together |
 | Single route | Multiple related routes (list + detail + edit) |
 
+### Component Decomposition
+
+> **RULE: Pages are orchestrators, not monoliths. Break every page into small, focused child components stored in \`components/\`.**
+
+A page component should read data (via hooks), pass it down as props, and compose child components. It should contain minimal JSX itself.
+
+\`\`\`
+pages/dashboard/
+├── dashboard.tsx              # Page: composes children, calls hooks
+├── components/
+│   ├── stats-cards.tsx        # Renders the stats grid
+│   ├── recent-activity.tsx    # Renders activity feed
+│   └── quick-actions.tsx      # Renders action buttons
+├── hooks/
+│   └── use-dashboard-data.ts  # All data fetching for this page
+├── routes.tsx
+└── index.ts
+\`\`\`
+
+\`\`\`tsx
+// dashboard.tsx — thin orchestrator
+import { StatsCards } from './components/stats-cards'
+import { RecentActivity } from './components/recent-activity'
+import { QuickActions } from './components/quick-actions'
+import { useDashboardData } from './hooks/use-dashboard-data'
+
+export default function DashboardPage() {
+  const { stats, activity, isLoading } = useDashboardData()
+
+  return (
+    <div className="space-y-6">
+      <StatsCards stats={stats} isLoading={isLoading} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <RecentActivity items={activity} isLoading={isLoading} className="lg:col-span-2" />
+        <QuickActions />
+      </div>
+    </div>
+  )
+}
+\`\`\`
+
+**When to extract a child component:**
+- A section of JSX exceeds ~30 lines
+- A block has its own loading/error state
+- A block is logically independent (e.g. a table, a form, a sidebar)
+- A block could be reused on another page (move to \`shared/\` or the feature's \`components/\`)
+
+**When NOT to extract:**
+- A few lines of simple, static markup (headings, wrappers)
+- Extracting would just move props through another layer with no clarity gain
+
+### Separating Logic into Hooks
+
+> **RULE: Components render. Hooks think. Never mix data fetching, transformations, or complex state logic into component bodies.**
+
+Extract logic into hooks in the \`hooks/\` folder co-located with the page or feature:
+
+\`\`\`tsx
+// BAD — logic mixed into the component
+export default function OrdersPage() {
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 300)
+  const { data, isLoading } = useApiQuery({
+    ...ordersListOptions({ query: { page, search: debouncedSearch } }),
+    select: (d: any) => ({ orders: d.results ?? [], total: d.count ?? 0 }),
+  })
+
+  const deleteOrder = useApiMutation({
+    ...ordersDestroyMutation(),
+    invalidateKeys: [ordersListQueryKey()],
+  })
+
+  return ( /* 200 lines of JSX using all of the above */ )
+}
+\`\`\`
+
+\`\`\`tsx
+// GOOD — logic in a hook, component just renders
+// hooks/use-orders-page.ts
+export function useOrdersPage() {
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 300)
+
+  const { data, isLoading, errorMessage } = useOrders({
+    page,
+    search: debouncedSearch,
+  })
+
+  const deleteOrder = useDeleteOrder()
+
+  return { orders: data?.orders ?? [], total: data?.total ?? 0, isLoading, errorMessage, page, setPage, search, setSearch, deleteOrder }
+}
+
+// orders-page.tsx
+import { useOrdersPage } from './hooks/use-orders-page'
+import { OrdersTable } from './components/orders-table'
+import { OrdersToolbar } from './components/orders-toolbar'
+
+export default function OrdersPage() {
+  const { orders, total, isLoading, page, setPage, search, setSearch, deleteOrder } = useOrdersPage()
+
+  return (
+    <div className="space-y-4">
+      <OrdersToolbar search={search} onSearchChange={setSearch} />
+      <OrdersTable orders={orders} isLoading={isLoading} onDelete={(id) => deleteOrder.mutate({ path: { id } })} />
+    </div>
+  )
+}
+\`\`\`
+
+**What goes into a hook:**
+- API queries and mutations
+- Derived/computed state
+- Debouncing, pagination, filtering logic
+- Form setup (\`useForm\`, schema, submit handler)
+- Any \`useEffect\` or \`useState\` beyond a simple UI toggle
+
+**What stays in the component:**
+- Simple UI toggles (\`useState\` for a modal open/close is fine inline)
+- JSX composition and prop passing
+- Event handler wiring (calling \`hook.mutate()\`, \`navigate()\`, etc.)
+
 ### Key Rules
 
 1. **Every page/feature owns its routes** — the route config lives next to the page, not in the central router
@@ -123,6 +247,8 @@ Never remove these markers. They must stay in the \`privateRoutes\` array and im
 5. **Private components/hooks stay in the page folder** — if only one page uses it, co-locate it there
 6. **Never import across page folders** — if something is shared, move it to \`shared/\` or a feature
 7. **Keep marker comments intact** — \`// blacksmith:import\` and \`// blacksmith:routes\` are required for auto-registration
+8. **Pages are orchestrators** — break pages into child components in \`components/\`, extract logic into hooks in \`hooks/\`
+9. **Components render, hooks think** — never put data fetching, transformations, or complex state directly in component bodies
 `
   },
 }

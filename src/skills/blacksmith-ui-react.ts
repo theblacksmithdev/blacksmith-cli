@@ -54,6 +54,9 @@ Every visual element should come from this package. Available components:
 - \`Toast\` / \`useToast\` — Use for transient notifications
 - \`Spinner\` — Use for loading indicators
 
+**Hooks:**
+- \`useDarkMode\` — Dark mode toggle (\`.dark\` class on documentElement). Returns \`{ isDark, toggle }\`
+
 **Navigation:**
 - \`Breadcrumb\`, \`BreadcrumbList\`, \`BreadcrumbItem\`, \`BreadcrumbLink\`, \`BreadcrumbSeparator\` — Use for breadcrumb trails
 - \`NavigationMenu\`, \`NavigationMenuList\`, \`NavigationMenuItem\`, \`NavigationMenuTrigger\`, \`NavigationMenuContent\` — Use for complex nav menus

@@ -3,12 +3,12 @@ import type { Skill, SkillContext } from './types.js'
 export const blacksmithHooksSkill: Skill = {
   id: 'blacksmith-hooks',
   name: '@blacksmith-ui/hooks',
-  description: '75 production-ready React hooks for state, DOM, timers, async, browser APIs, and layout.',
+  description: '74 production-ready React hooks for state, DOM, timers, async, browser APIs, and layout.',
 
   render(_ctx: SkillContext): string {
     return `## @blacksmith-ui/hooks — React Hooks Library
 
-A collection of 75 production-ready React hooks. SSR-safe, fully typed, zero dependencies, tree-shakeable.
+A collection of 74 production-ready React hooks. SSR-safe, fully typed, zero dependencies, tree-shakeable.
 
 > **RULE: Use \`@blacksmith-ui/hooks\` instead of writing custom hooks when one exists for that purpose.**
 > Before creating a new hook, check if one already exists below.
@@ -105,7 +105,6 @@ import { useToggle, useLocalStorage, useDebounce, useClickOutside } from '@black
 | Hook | Description |
 |------|-------------|
 | \`useMediaQuery\` | Reactive CSS media query matching |
-| \`useDarkMode\` | Dark mode toggle (\`.dark\` class on documentElement) |
 | \`useColorScheme\` | Detect system color scheme preference |
 | \`useCopyToClipboard\` | Copy text to clipboard with status feedback |
 | \`useOnline\` | Track network connectivity |
