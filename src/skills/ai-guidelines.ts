@@ -38,8 +38,9 @@ export const aiGuidelinesSkill: Skill = {
 4. No lint errors in modified files
 5. All UI uses \`@blacksmith-ui/react\` components — no raw \`<div>\` for layout, no raw \`<h1>\`-\`<h6>\` for text
 6. Pages are modular — page file is a thin orchestrator, sections are in \`components/\`, logic in \`hooks/\`
-7. No hardcoded route paths — all paths use the \`Path\` enum from \`@/router/paths\`
-8. New routes have a corresponding \`Path\` enum entry
+7. Logic is in hooks — no \`useApiQuery\`, \`useApiMutation\`, \`useEffect\`, or multi-\`useState\` in component bodies
+8. No hardcoded route paths — all paths use the \`Path\` enum from \`@/router/paths\`
+9. New routes have a corresponding \`Path\` enum entry
 `
   },
 }

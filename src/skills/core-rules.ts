@@ -25,16 +25,21 @@ export const coreRulesSkill: Skill = {
 ### 2. Pages Are Thin Orchestrators
 - A page file should be ~20-30 lines: import components, call hooks, compose JSX
 - Break every page into child components in a \`components/\` folder
-- Extract data fetching and logic into hooks in a \`hooks/\` folder
 - See the \`page-structure\` skill for the full pattern with examples
 
-### 3. Use the \`Path\` Enum — Never Hardcode Paths
+### 3. Components Render, Hooks Think
+- Extract ALL logic into hooks in a \`hooks/\` folder — API calls, mutations, form setup, filtering, pagination, debouncing, computed state
+- Components should contain only JSX composition, prop passing, and simple event handler wiring
+- The only \`useState\` acceptable inline in a component is a simple UI toggle (e.g. modal open/close)
+- If a component has more than one \`useState\`, one \`useEffect\`, or any \`useApiQuery\`/\`useApiMutation\` — extract to a hook
+
+### 4. Use the \`Path\` Enum — Never Hardcode Paths
 - All route paths are in \`src/router/paths.ts\` as a \`Path\` enum
 - Use \`Path.Login\`, \`Path.Dashboard\`, etc. in \`navigate()\`, \`<Link to={}>\`, and route definitions
 - When adding a new page, add its path to the enum before \`// blacksmith:path\`
 - Use \`buildPath(Path.ResetPassword, { token })\` for dynamic segments
 
-### 4. Follow the Page/Feature Folder Structure
+### 5. Follow the Page/Feature Folder Structure
 \`\`\`
 pages/<page>/
 ├── <page>.tsx         # Thin orchestrator (default export)
