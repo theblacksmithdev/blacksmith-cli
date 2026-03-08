@@ -1,0 +1,36 @@
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Badge,
+  Flex,
+  Text,
+} from '@blacksmith-ui/react'
+import { Rocket, Terminal } from 'lucide-react'
+
+export function QuickStartCard() {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <Flex align="center" justify="between">
+          <CardTitle className="text-base">Quick Start</CardTitle>
+          <Badge variant="outline">
+            <Rocket className="mr-1 h-3 w-3" />
+            Guide
+          </Badge>
+        </Flex>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>
+          Scaffold a new resource with models, API, and pages in one command.
+        </CardDescription>
+        <Flex align="center" gap={2} className="mt-4 rounded-lg bg-muted px-3 py-2">
+          <Terminal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <Text as="code" size="sm" className="font-mono">blacksmith make:resource Post</Text>
+        </Flex>
+      </CardContent>
+    </Card>
+  )
+}

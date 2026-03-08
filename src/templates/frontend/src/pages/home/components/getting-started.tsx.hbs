@@ -1,0 +1,88 @@
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Button,
+  Tooltip,
+  Stack,
+  Flex,
+  Grid,
+  Typography,
+  Text,
+} from '@blacksmith-ui/react'
+import { Terminal, Copy, Check } from 'lucide-react'
+import { useCopyToClipboard } from '@blacksmith-ui/hooks'
+
+const steps = [
+  {
+    command: 'blacksmith dev',
+    title: 'Start the dev server',
+    description: 'Runs Django, Vite, and OpenAPI watcher concurrently.',
+  },
+  {
+    command: 'blacksmith make:resource Post',
+    title: 'Scaffold a resource',
+    description: 'Generates model, serializer, viewset, hooks, and pages.',
+  },
+  {
+    command: 'blacksmith sync',
+    title: 'Sync API types',
+    description: 'Regenerates the TypeScript client from your Django schema.',
+  },
+]
+
+function CommandBlock({ command }: { command: string }) {
+  const { status, copy } = useCopyToClipboard(2000)
+  const copied = status === 'copied'
+
+  return (
+    <Flex align="center" gap={2} className="rounded-lg bg-muted px-3 py-2">
+      <Terminal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+      <Text as="code" size="sm" className="flex-1 font-mono">{command}</Text>
+      <Tooltip content={copied ? 'Copied!' : 'Copy command'}>
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copy(command)}>
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-green-500" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
+        </Button>
+      </Tooltip>
+    </Flex>
+  )
+}
+
+export function GettingStarted() {
+  return (
+    <Stack as="section" gap={6}>
+      <Stack gap={2} align="center">
+        <Typography variant="h2">Get Started in 3 Steps</Typography>
+        <Text color="muted">
+          Everything you need to go from scaffold to production.
+        </Text>
+      </Stack>
+      <Grid columns={{ base: 1, md: 3 }} gap={4}>
+        {steps.map((step, index) => (
+          <Card key={step.command}>
+            <CardHeader className="pb-3">
+              <Flex align="center" gap={3}>
+                <Flex align="center" justify="center" className="h-8 w-8 shrink-0 rounded-full bg-primary text-primary-foreground">
+                  <Text size="sm" weight="semibold">{index + 1}</Text>
+                </Flex>
+                <CardTitle className="text-base">{step.title}</CardTitle>
+              </Flex>
+            </CardHeader>
+            <CardContent>
+              <Stack gap={3}>
+                <CardDescription>{step.description}</CardDescription>
+                <CommandBlock command={step.command} />
+              </Stack>
+            </CardContent>
+          </Card>
+        ))}
+      </Grid>
+    </Stack>
+  )
+}

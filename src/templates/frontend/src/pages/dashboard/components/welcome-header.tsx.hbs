@@ -1,0 +1,14 @@
+import { Stack, Typography, Text } from '@blacksmith-ui/react'
+
+interface WelcomeHeaderProps {
+  displayName: string
+}
+
+export function WelcomeHeader({ displayName }: WelcomeHeaderProps) {
+  return (
+    <Stack gap={1}>
+      <Typography variant="h2">Dashboard</Typography>
+      <Text color="muted">Welcome back, {displayName}.</Text>
+    </Stack>
+  )
+}

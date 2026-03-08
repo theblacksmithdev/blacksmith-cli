@@ -1,0 +1,47 @@
+import { Stack, Flex, Typography, Text, Button } from '@blacksmith-ui/react'
+import { Rocket, BookOpen } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Path } from '@/router/paths'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+interface HeroSectionProps {
+  isAuthenticated: boolean
+}
+
+export function HeroSection({ isAuthenticated }: HeroSectionProps) {
+  return (
+    <Stack as="section" gap={6} align="center" className="pt-10 pb-2">
+      <Typography variant="h1" className="sm:text-5xl">
+        Welcome to{' '}
+        <Text as="span" color="primary">{{projectName}}</Text>
+      </Typography>
+      <Text size="lg" color="muted" align="center" className="max-w-2xl">
+        Your fullstack Django + React application is ready to go.
+      </Text>
+      <Flex justify="center" gap={3} className="pt-2">
+        {isAuthenticated ? (
+          <Button size="lg" asChild>
+            <Link to={Path.Dashboard}>
+              <Rocket className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+          </Button>
+        ) : (
+          <Button size="lg" asChild>
+            <Link to={Path.Login}>
+              <Rocket className="mr-2 h-4 w-4" />
+              Sign In
+            </Link>
+          </Button>
+        )}
+        <Button variant="outline" size="lg" asChild>
+          <a href={`${API_URL}/api/docs/`} target="_blank" rel="noopener noreferrer">
+            <BookOpen className="mr-2 h-4 w-4" />
+            API Docs
+          </a>
+        </Button>
+      </Flex>
+    </Stack>
+  )
+}
