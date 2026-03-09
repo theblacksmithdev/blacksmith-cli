@@ -1,6 +1,6 @@
 {
   "name": "blacksmith-cli",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Fullstack Django + React framework — one command, one codebase, one mental model",
   "type": "module",
   "bin": {
