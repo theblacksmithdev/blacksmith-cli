@@ -153,7 +153,7 @@ function useOrdersPage() {
     orders: data?.results ?? [],
     pagination: { ...pagination, total: data?.count ?? 0 },
     search,
-    deleteOrder: (id: number) => deleteOrder.mutate({ path: { id } }),
+    deleteOrder: (id: string) => deleteOrder.mutate({ path: { id } }),
   }
 }
 \`\`\`

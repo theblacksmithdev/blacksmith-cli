@@ -125,7 +125,23 @@ export async function makeResource(name: string) {
     syncSpinner.warn('Could not sync OpenAPI. Run "blacksmith sync" manually.')
   }
 
-  // 6. Generate frontend page
+  // 6. Generate API hooks
+  const apiHooksDir = path.join(frontendDir, 'src', 'api', 'hooks', names.kebabs)
+  const apiHooksSpinner = spinner(`Creating API hooks: api/hooks/${names.kebabs}/`)
+  try {
+    renderDirectory(
+      path.join(templatesDir, 'resource', 'api-hooks'),
+      apiHooksDir,
+      context
+    )
+    apiHooksSpinner.succeed(`Created frontend/src/api/hooks/${names.kebabs}/`)
+  } catch (error: any) {
+    apiHooksSpinner.fail('Failed to create API hooks')
+    log.error(error.message)
+    process.exit(1)
+  }
+
+  // 7. Generate frontend page
   const frontendSpinner = spinner(`Creating frontend page: pages/${names.kebabs}/`)
   try {
     renderDirectory(
@@ -140,7 +156,7 @@ export async function makeResource(name: string) {
     process.exit(1)
   }
 
-  // 7. Register path in paths enum
+  // 8. Register path in paths enum
   const pathSpinner = spinner('Registering route path...')
   try {
     const pathsFile = path.join(frontendDir, 'src', 'router', 'paths.ts')
@@ -154,7 +170,7 @@ export async function makeResource(name: string) {
     pathSpinner.warn('Could not auto-register path. Add it manually to frontend/src/router/paths.ts')
   }
 
-  // 8. Register routes in frontend router
+  // 9. Register routes in frontend router
   const routeSpinner = spinner('Registering frontend routes...')
   try {
     const routesPath = path.join(frontendDir, 'src', 'router', 'routes.tsx')
@@ -173,7 +189,7 @@ export async function makeResource(name: string) {
     routeSpinner.warn('Could not auto-register routes. Add them manually to frontend/src/router/routes.tsx')
   }
 
-  // 9. Print summary
+  // 10. Print summary
   log.blank()
   log.success(`Resource "${names.Name}" created successfully!`)
   log.blank()

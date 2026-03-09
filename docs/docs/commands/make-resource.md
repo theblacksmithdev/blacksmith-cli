@@ -35,7 +35,17 @@ Created in `backend/apps/<resource_name>/`:
 | `apps.py` | Django app configuration |
 | `__init__.py` | Python package init |
 
-### Frontend Files
+### API Hooks
+
+Created in `frontend/src/api/hooks/<resource_name>/`:
+
+| File | Description |
+|------|-------------|
+| `index.ts` | Barrel export for all resource hooks |
+| `use-<resources>-query.ts` | List query with pagination, search, and ordering |
+| `use-<resource>-mutations.ts` | Create, update, and delete with cache invalidation |
+
+### Frontend Pages
 
 Created in `frontend/src/pages/<resource_name>/`:
 
@@ -46,6 +56,7 @@ Created in `frontend/src/pages/<resource_name>/`:
 | Create form | Form for creating new resources |
 | Edit form | Form for editing existing resources |
 | Card component | Resource card for list views |
+| `hooks/index.ts` | Placeholder for page-local UI hooks |
 
 ### Automatic Integration
 
@@ -56,8 +67,9 @@ The command also:
 3. **Creates database migrations** via `manage.py makemigrations`
 4. **Runs migrations** via `manage.py migrate`
 5. **Syncs the OpenAPI schema** to generate new TypeScript types and hooks
-6. **Registers frontend routes** in React Router
-7. **Adds the route path** to the paths enum
+6. **Creates API hooks** in `frontend/src/api/hooks/<resource>/`
+7. **Registers frontend routes** in React Router
+8. **Adds the route path** to the paths enum
 
 ## Name Conventions
 

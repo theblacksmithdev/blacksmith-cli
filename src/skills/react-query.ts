@@ -40,12 +40,12 @@ const { data, errorMessage } = useApiQuery({
 import { postsRetrieveOptions } from '@/api/generated/@tanstack/react-query.gen'
 
 const { data: post, isLoading, errorMessage } = useApiQuery({
-  ...postsRetrieveOptions({ path: { id: Number(id) } }),
+  ...postsRetrieveOptions({ path: { id: id! } }),
 })
 
 // Conditional query (skip until id is available)
 const { data } = useApiQuery({
-  ...postsRetrieveOptions({ path: { id: Number(id) } }),
+  ...postsRetrieveOptions({ path: { id: id! } }),
   enabled: !!id,
 })
 \`\`\`
@@ -100,7 +100,7 @@ const deletePost = useApiMutation({
 })
 
 const handleDelete = async () => {
-  await deletePost.mutateAsync({ path: { id: Number(id) } })
+  await deletePost.mutateAsync({ path: { id: id! } })
   navigate('/posts')
 }
 \`\`\`
@@ -195,7 +195,7 @@ export function useCreatePost() {
   })
 }
 
-export function useUpdatePost(id: number) {
+export function useUpdatePost(id: string) {
   return useApiMutation({
     ...postsUpdateMutation(),
     invalidateKeys: [

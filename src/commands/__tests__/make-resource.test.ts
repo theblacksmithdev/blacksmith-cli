@@ -68,6 +68,26 @@ describe('makeResource', () => {
       "    path('api/blog_posts/', include('apps.blog_posts.urls')),"
     )
 
+    expect(templateMocks.renderDirectory).toHaveBeenCalledWith(
+      '/templates/resource/api-hooks',
+      path.join(getTmpDir(), 'frontend', 'src', 'api', 'hooks', 'blog-posts'),
+      expect.objectContaining({
+        Name: 'BlogPost',
+        Names: 'BlogPosts',
+        kebabs: 'blog-posts',
+      })
+    )
+
+    expect(templateMocks.renderDirectory).toHaveBeenCalledWith(
+      '/templates/resource/pages',
+      path.join(getTmpDir(), 'frontend', 'src', 'pages', 'blog-posts'),
+      expect.objectContaining({
+        Name: 'BlogPost',
+        Names: 'BlogPosts',
+        kebabs: 'blog-posts',
+      })
+    )
+
     expect(execMocks.execPython).toHaveBeenCalledWith(
       ['manage.py', 'makemigrations', 'blog_posts'],
       path.join(getTmpDir(), 'backend'),

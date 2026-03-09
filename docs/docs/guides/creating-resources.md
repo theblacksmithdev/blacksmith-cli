@@ -99,25 +99,20 @@ interface Product {
 
 ## Step 6: Customize the Frontend
 
-Update the generated pages and forms to use your new fields. The generated React Query hooks are ready to use:
+Update the generated pages and forms to use your new fields. The generated API hooks in `src/api/hooks/products/` are ready to use:
 
 ```typescript
-import {
-  useProductsList,
-  useProductsCreate,
-  useProductsRetrieve,
-  useProductsUpdate,
-  useProductsDestroy,
-} from '@/api/generated/@tanstack/react-query.gen';
+// API hooks wrap the auto-generated query options with pagination, search, and cache invalidation
+import { useProducts, useCreateProduct, useDeleteProduct } from '@/api/hooks/products'
 
 function ProductListPage() {
-  const { data, isLoading } = useProductsList();
+  const { data, isLoading } = useProducts({ ordering: '-created_at' });
 
   if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
-      {data?.map(product => (
+      {data?.products.map(product => (
         <div key={product.id}>
           <h3>{product.name}</h3>
           <p>${product.price}</p>
@@ -127,6 +122,12 @@ function ProductListPage() {
     </div>
   );
 }
+```
+
+You can also import directly from the auto-generated layer for lower-level access:
+
+```typescript
+import { productsRetrieveOptions } from '@/api/generated/@tanstack/react-query.gen';
 ```
 
 ## Step 7: Customize the Viewset

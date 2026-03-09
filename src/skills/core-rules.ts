@@ -46,7 +46,7 @@ pages/<page>/
 ├── routes.tsx         # RouteObject[] using Path enum
 ├── index.ts           # Re-exports public API
 ├── components/        # Child components
-└── hooks/             # Data hooks
+└── hooks/             # Page-local hooks (UI logic, not API hooks)
 \`\`\`
 - See the \`page-structure\` skill for full conventions
 `

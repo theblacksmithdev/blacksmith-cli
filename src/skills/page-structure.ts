@@ -20,7 +20,7 @@ pages/<page>/
 ├── routes.tsx         # Exports RouteObject[] for this page
 ├── index.ts           # Re-exports public members (routes)
 ├── components/        # Components private to this page (optional)
-└── hooks/             # Hooks private to this page (optional)
+└── hooks/             # Page-local hooks (UI logic, not API hooks)
 \`\`\`
 
 **\`routes.tsx\`** — defines the route config using the \`Path\` enum:
@@ -74,8 +74,7 @@ export const postsRoutes: RouteObject[] = [
 **\`index.ts\`** — exports routes first:
 \`\`\`ts
 export { postsRoutes } from './routes'
-export { usePosts } from './hooks/use-posts'
-export { useCreatePost, useUpdatePost, useDeletePost } from './hooks/use-post-mutations'
+export { usePosts, useCreatePost, useUpdatePost, useDeletePost } from '@/api/hooks/posts'
 \`\`\`
 
 ### Route Paths (\`src/router/paths.ts\`)

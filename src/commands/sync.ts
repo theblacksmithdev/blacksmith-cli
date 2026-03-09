@@ -55,4 +55,5 @@ export async function sync() {
     log.error(error.message || error)
     process.exit(1)
   }
+
 }

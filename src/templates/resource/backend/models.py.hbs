@@ -1,8 +1,9 @@
 from django.db import models
 from django.conf import settings
+from utils.models import BaseModel
 
 
-class {{Name}}(models.Model):
+class {{Name}}(BaseModel):
     """{{Name}} model."""
 
     title = models.CharField(max_length=255)
@@ -12,8 +13,6 @@ class {{Name}}(models.Model):
         on_delete=models.CASCADE,
         related_name='{{snakes}}',
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']

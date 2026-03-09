@@ -21,7 +21,7 @@ export function useCreate{{Name}}() {
   })
 }
 
-export function useUpdate{{Name}}(id: number) {
+export function useUpdate{{Name}}(id: string) {
   return useApiMutation({
     ...{{snakes}}UpdateMutation(),
     invalidateKeys: [
