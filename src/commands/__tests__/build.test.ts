@@ -1,64 +1,40 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { createLoggerMock } from '../../__tests__/helpers.js'
+import { mockExit } from '../../__tests__/setup.js'
 
-// Mock all dependencies
-vi.mock('../../utils/logger.js', () => ({
-  log: {
-    info: vi.fn(),
-    success: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    step: vi.fn(),
-    blank: vi.fn(),
-  },
-  spinner: vi.fn(() => ({
-    succeed: vi.fn(),
-    fail: vi.fn(),
-    warn: vi.fn(),
-  })),
+vi.mock('../../utils/logger.js', () => createLoggerMock())
+
+const pathMocks = vi.hoisted(() => ({
+  findProjectRoot: vi.fn(),
+  getBackendDir: vi.fn(),
+  getFrontendDir: vi.fn(),
 }))
+vi.mock('../../utils/paths.js', () => pathMocks)
 
-const mockFindProjectRoot = vi.fn()
-const mockGetBackendDir = vi.fn()
-const mockGetFrontendDir = vi.fn()
-vi.mock('../../utils/paths.js', () => ({
-  findProjectRoot: (...args: any[]) => mockFindProjectRoot(...args),
-  getBackendDir: (...args: any[]) => mockGetBackendDir(...args),
-  getFrontendDir: (...args: any[]) => mockGetFrontendDir(...args),
+const execMocks = vi.hoisted(() => ({
+  exec: vi.fn(),
+  execPython: vi.fn(),
 }))
-
-const mockExec = vi.fn()
-const mockExecPython = vi.fn()
-vi.mock('../../utils/exec.js', () => ({
-  exec: (...args: any[]) => mockExec(...args),
-  execPython: (...args: any[]) => mockExecPython(...args),
-}))
-
-const mockExit = vi.spyOn(process, 'exit').mockImplementation((() => {
-  throw new Error('process.exit called')
-}) as any)
+vi.mock('../../utils/exec.js', () => execMocks)
 
 import { build } from '../build.js'
 import { log } from '../../utils/logger.js'
 
 describe('build', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('should build frontend and collect static files', async () => {
-    mockFindProjectRoot.mockReturnValue('/project')
-    mockGetBackendDir.mockReturnValue('/project/backend')
-    mockGetFrontendDir.mockReturnValue('/project/frontend')
-    mockExec.mockResolvedValue({})
-    mockExecPython.mockResolvedValue({})
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    execMocks.exec.mockResolvedValue({})
+    execMocks.execPython.mockResolvedValue({})
 
     await build()
 
-    expect(mockExec).toHaveBeenCalledWith('npm', ['run', 'build'], {
+    expect(execMocks.exec).toHaveBeenCalledWith('npm', ['run', 'build'], {
       cwd: '/project/frontend',
       silent: true,
     })
-    expect(mockExecPython).toHaveBeenCalledWith(
+    expect(execMocks.execPython).toHaveBeenCalledWith(
       ['manage.py', 'collectstatic', '--noinput'],
       '/project/backend',
       true
@@ -67,7 +43,7 @@ describe('build', () => {
   })
 
   it('should exit when not in a project', async () => {
-    mockFindProjectRoot.mockImplementation(() => {
+    pathMocks.findProjectRoot.mockImplementation(() => {
       throw new Error()
     })
 
@@ -76,21 +52,21 @@ describe('build', () => {
   })
 
   it('should exit when frontend build fails', async () => {
-    mockFindProjectRoot.mockReturnValue('/project')
-    mockGetBackendDir.mockReturnValue('/project/backend')
-    mockGetFrontendDir.mockReturnValue('/project/frontend')
-    mockExec.mockRejectedValue(new Error('Build failed'))
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    execMocks.exec.mockRejectedValue(new Error('Build failed'))
 
     await expect(build()).rejects.toThrow('process.exit called')
     expect(mockExit).toHaveBeenCalledWith(1)
   })
 
   it('should exit when collectstatic fails', async () => {
-    mockFindProjectRoot.mockReturnValue('/project')
-    mockGetBackendDir.mockReturnValue('/project/backend')
-    mockGetFrontendDir.mockReturnValue('/project/frontend')
-    mockExec.mockResolvedValue({})
-    mockExecPython.mockRejectedValue(new Error('collectstatic failed'))
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    execMocks.exec.mockResolvedValue({})
+    execMocks.execPython.mockRejectedValue(new Error('collectstatic failed'))
 
     await expect(build()).rejects.toThrow('process.exit called')
     expect(mockExit).toHaveBeenCalledWith(1)

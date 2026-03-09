@@ -1,54 +1,38 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { createLoggerMock } from '../../__tests__/helpers.js'
+import { mockExit } from '../../__tests__/setup.js'
 
-vi.mock('../../utils/logger.js', () => ({
-  log: {
-    info: vi.fn(),
-    success: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    step: vi.fn(),
-    blank: vi.fn(),
-  },
+vi.mock('../../utils/logger.js', () => createLoggerMock())
+
+const pathMocks = vi.hoisted(() => ({
+  findProjectRoot: vi.fn(),
+  getFrontendDir: vi.fn(),
 }))
+vi.mock('../../utils/paths.js', () => pathMocks)
 
-const mockFindProjectRoot = vi.fn()
-const mockGetFrontendDir = vi.fn()
-vi.mock('../../utils/paths.js', () => ({
-  findProjectRoot: (...args: any[]) => mockFindProjectRoot(...args),
-  getFrontendDir: (...args: any[]) => mockGetFrontendDir(...args),
+const execMocks = vi.hoisted(() => ({
+  exec: vi.fn(),
 }))
-
-const mockExec = vi.fn()
-vi.mock('../../utils/exec.js', () => ({
-  exec: (...args: any[]) => mockExec(...args),
-}))
-
-const mockExit = vi.spyOn(process, 'exit').mockImplementation((() => {
-  throw new Error('process.exit called')
-}) as any)
+vi.mock('../../utils/exec.js', () => execMocks)
 
 import { frontend } from '../frontend.js'
 import { log } from '../../utils/logger.js'
 
 describe('frontend', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('should run npm command in frontend directory', async () => {
-    mockFindProjectRoot.mockReturnValue('/project')
-    mockGetFrontendDir.mockReturnValue('/project/frontend')
-    mockExec.mockResolvedValue({})
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    execMocks.exec.mockResolvedValue({})
 
     await frontend(['install', 'axios'])
 
-    expect(mockExec).toHaveBeenCalledWith('npm', ['install', 'axios'], {
+    expect(execMocks.exec).toHaveBeenCalledWith('npm', ['install', 'axios'], {
       cwd: '/project/frontend',
     })
   })
 
   it('should exit with error when no args provided', async () => {
-    mockFindProjectRoot.mockReturnValue('/project')
+    pathMocks.findProjectRoot.mockReturnValue('/project')
 
     await expect(frontend([])).rejects.toThrow('process.exit called')
     expect(log.error).toHaveBeenCalledWith('Please provide an npm command.')
@@ -56,7 +40,7 @@ describe('frontend', () => {
   })
 
   it('should exit when not in a project', async () => {
-    mockFindProjectRoot.mockImplementation(() => {
+    pathMocks.findProjectRoot.mockImplementation(() => {
       throw new Error()
     })
 
@@ -65,9 +49,9 @@ describe('frontend', () => {
   })
 
   it('should exit when npm command fails', async () => {
-    mockFindProjectRoot.mockReturnValue('/project')
-    mockGetFrontendDir.mockReturnValue('/project/frontend')
-    mockExec.mockRejectedValue(new Error('npm failed'))
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    execMocks.exec.mockRejectedValue(new Error('npm failed'))
 
     await expect(frontend(['run', 'bad'])).rejects.toThrow('process.exit called')
     expect(mockExit).toHaveBeenCalledWith(1)

@@ -1,47 +1,29 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import net from 'node:net'
+import { createLoggerMock } from '../../__tests__/helpers.js'
+import { mockExit } from '../../__tests__/setup.js'
 
-vi.mock('../../utils/logger.js', () => ({
-  log: {
-    info: vi.fn(),
-    success: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    step: vi.fn(),
-    blank: vi.fn(),
-  },
+vi.mock('../../utils/logger.js', () => createLoggerMock())
+
+const pathMocks = vi.hoisted(() => ({
+  findProjectRoot: vi.fn(),
+  getBackendDir: vi.fn(),
+  getFrontendDir: vi.fn(),
+  loadConfig: vi.fn(),
 }))
+vi.mock('../../utils/paths.js', () => pathMocks)
 
-const mockFindProjectRoot = vi.fn()
-const mockGetBackendDir = vi.fn()
-const mockGetFrontendDir = vi.fn()
-const mockLoadConfig = vi.fn()
-vi.mock('../../utils/paths.js', () => ({
-  findProjectRoot: (...args: any[]) => mockFindProjectRoot(...args),
-  getBackendDir: (...args: any[]) => mockGetBackendDir(...args),
-  getFrontendDir: (...args: any[]) => mockGetFrontendDir(...args),
-  loadConfig: (...args: any[]) => mockLoadConfig(...args),
+const concurrentlyMocks = vi.hoisted(() => ({
+  default: vi.fn(),
 }))
-
-const mockConcurrently = vi.fn()
-vi.mock('concurrently', () => ({
-  default: (...args: any[]) => mockConcurrently(...args),
-}))
-
-const mockExit = vi.spyOn(process, 'exit').mockImplementation((() => {
-  throw new Error('process.exit called')
-}) as any)
+vi.mock('concurrently', () => concurrentlyMocks)
 
 import { dev } from '../dev.js'
 import { log } from '../../utils/logger.js'
 
 describe('dev', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('should exit when not in a project', async () => {
-    mockFindProjectRoot.mockImplementation(() => {
+    pathMocks.findProjectRoot.mockImplementation(() => {
       throw new Error()
     })
 
@@ -53,33 +35,25 @@ describe('dev', () => {
   })
 
   it('should start concurrent servers with correct config', async () => {
-    mockFindProjectRoot.mockReturnValue('/project')
-    mockGetBackendDir.mockReturnValue('/project/backend')
-    mockGetFrontendDir.mockReturnValue('/project/frontend')
-    mockLoadConfig.mockReturnValue({
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.loadConfig.mockReturnValue({
       name: 'test',
       backend: { port: 8000 },
       frontend: { port: 5173 },
     })
-    mockConcurrently.mockReturnValue({
+    concurrentlyMocks.default.mockReturnValue({
       result: Promise.resolve(),
     })
 
     await dev()
 
-    expect(mockConcurrently).toHaveBeenCalledWith(
+    expect(concurrentlyMocks.default).toHaveBeenCalledWith(
       expect.arrayContaining([
-        expect.objectContaining({
-          name: 'django',
-          cwd: '/project/backend',
-        }),
-        expect.objectContaining({
-          name: 'vite',
-          cwd: '/project/frontend',
-        }),
-        expect.objectContaining({
-          name: 'sync',
-        }),
+        expect.objectContaining({ name: 'django', cwd: '/project/backend' }),
+        expect.objectContaining({ name: 'vite', cwd: '/project/frontend' }),
+        expect.objectContaining({ name: 'sync' }),
       ]),
       expect.objectContaining({
         prefix: 'name',
@@ -89,32 +63,29 @@ describe('dev', () => {
   })
 
   it('should find alternative port when configured port is in use', async () => {
-    // Occupy a port
     const server = net.createServer()
     await new Promise<void>((resolve) => server.listen(8000, resolve))
 
     try {
-      mockFindProjectRoot.mockReturnValue('/project')
-      mockGetBackendDir.mockReturnValue('/project/backend')
-      mockGetFrontendDir.mockReturnValue('/project/frontend')
-      mockLoadConfig.mockReturnValue({
+      pathMocks.findProjectRoot.mockReturnValue('/project')
+      pathMocks.getBackendDir.mockReturnValue('/project/backend')
+      pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+      pathMocks.loadConfig.mockReturnValue({
         name: 'test',
         backend: { port: 8000 },
         frontend: { port: 5173 },
       })
-      mockConcurrently.mockReturnValue({
+      concurrentlyMocks.default.mockReturnValue({
         result: Promise.resolve(),
       })
 
       await dev()
 
-      // Should have logged that port was in use
       expect(log.step).toHaveBeenCalledWith(
         expect.stringContaining('Backend port 8000 in use')
       )
 
-      // The concurrently command should use a different port
-      const djangoCmd = mockConcurrently.mock.calls[0][0].find(
+      const djangoCmd = concurrentlyMocks.default.mock.calls[0][0].find(
         (c: any) => c.name === 'django'
       )
       expect(djangoCmd.command).not.toContain(':8000')

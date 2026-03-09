@@ -1,56 +1,34 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
-import os from 'node:os'
+import { createLoggerMock, useTmpDir } from '../../__tests__/helpers.js'
+import { mockExit } from '../../__tests__/setup.js'
 
-vi.mock('../../utils/logger.js', () => ({
-  log: {
-    info: vi.fn(),
-    success: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    step: vi.fn(),
-    blank: vi.fn(),
-  },
-  spinner: vi.fn(() => ({
-    succeed: vi.fn(),
-    fail: vi.fn(),
-    warn: vi.fn(),
-  })),
+vi.mock('../../utils/logger.js', () => createLoggerMock())
+
+const pathMocks = vi.hoisted(() => ({
+  findProjectRoot: vi.fn(),
+  loadConfig: vi.fn(),
 }))
+vi.mock('../../utils/paths.js', () => pathMocks)
 
-const mockFindProjectRoot = vi.fn()
-const mockLoadConfig = vi.fn()
-vi.mock('../../utils/paths.js', () => ({
-  findProjectRoot: (...args: any[]) => mockFindProjectRoot(...args),
-  loadConfig: (...args: any[]) => mockLoadConfig(...args),
+const aiMocks = vi.hoisted(() => ({
+  setupAiDev: vi.fn(),
 }))
-
-const mockSetupAiDev = vi.fn()
-vi.mock('../ai-setup.js', () => ({
-  setupAiDev: (...args: any[]) => mockSetupAiDev(...args),
-}))
-
-const mockExit = vi.spyOn(process, 'exit').mockImplementation((() => {
-  throw new Error('process.exit called')
-}) as any)
+vi.mock('../ai-setup.js', () => aiMocks)
 
 import { setupSkills, listSkills } from '../skills.js'
 import { log } from '../../utils/logger.js'
 
 describe('setupSkills', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('should call setupAiDev with correct parameters', async () => {
-    mockFindProjectRoot.mockReturnValue('/project')
-    mockLoadConfig.mockReturnValue({ name: 'my-project' })
-    mockSetupAiDev.mockResolvedValue(undefined)
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.loadConfig.mockReturnValue({ name: 'my-project' })
+    aiMocks.setupAiDev.mockResolvedValue(undefined)
 
     await setupSkills({})
 
-    expect(mockSetupAiDev).toHaveBeenCalledWith({
+    expect(aiMocks.setupAiDev).toHaveBeenCalledWith({
       projectDir: '/project',
       projectName: 'my-project',
       includeBlacksmithUiSkill: true,
@@ -59,13 +37,13 @@ describe('setupSkills', () => {
   })
 
   it('should respect blacksmithUiSkill option', async () => {
-    mockFindProjectRoot.mockReturnValue('/project')
-    mockLoadConfig.mockReturnValue({ name: 'my-project' })
-    mockSetupAiDev.mockResolvedValue(undefined)
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.loadConfig.mockReturnValue({ name: 'my-project' })
+    aiMocks.setupAiDev.mockResolvedValue(undefined)
 
     await setupSkills({ blacksmithUiSkill: false })
 
-    expect(mockSetupAiDev).toHaveBeenCalledWith(
+    expect(aiMocks.setupAiDev).toHaveBeenCalledWith(
       expect.objectContaining({
         includeBlacksmithUiSkill: false,
       })
@@ -73,7 +51,7 @@ describe('setupSkills', () => {
   })
 
   it('should exit when not in a project', async () => {
-    mockFindProjectRoot.mockImplementation(() => {
+    pathMocks.findProjectRoot.mockImplementation(() => {
       throw new Error()
     })
 
@@ -83,23 +61,13 @@ describe('setupSkills', () => {
 })
 
 describe('listSkills', () => {
-  let tmpDir: string
-
-  beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'blacksmith-test-'))
-    vi.clearAllMocks()
-  })
-
-  afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true })
-  })
+  const getTmpDir = useTmpDir()
 
   it('should list skills and show setup status', () => {
-    mockFindProjectRoot.mockReturnValue(tmpDir)
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
 
-    // Create CLAUDE.md and skills directory
-    fs.writeFileSync(path.join(tmpDir, 'CLAUDE.md'), '# AI Skills')
-    fs.mkdirSync(path.join(tmpDir, '.claude', 'skills'), { recursive: true })
+    fs.writeFileSync(path.join(getTmpDir(), 'CLAUDE.md'), '# AI Skills')
+    fs.mkdirSync(path.join(getTmpDir(), '.claude', 'skills'), { recursive: true })
 
     listSkills()
 
@@ -111,7 +79,7 @@ describe('listSkills', () => {
   })
 
   it('should show setup instructions when not configured', () => {
-    mockFindProjectRoot.mockReturnValue(tmpDir)
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
 
     listSkills()
 
@@ -121,7 +89,7 @@ describe('listSkills', () => {
   })
 
   it('should exit when not in a project', () => {
-    mockFindProjectRoot.mockImplementation(() => {
+    pathMocks.findProjectRoot.mockImplementation(() => {
       throw new Error()
     })
 

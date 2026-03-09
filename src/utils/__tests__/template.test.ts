@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
-import os from 'node:os'
+import { useTmpDir } from '../../__tests__/helpers.js'
 import {
   renderTemplate,
   renderTemplateFile,
@@ -48,7 +48,6 @@ describe('renderTemplate', () => {
   })
 
   it('should preserve JSX braces next to Handlebars expressions', () => {
-    // Simulates JSX like: { {{var}} }
     const result = renderTemplate('{ {{name}} }', { name: 'value' })
     expect(result).toBe('{ value }')
   })
@@ -60,19 +59,11 @@ describe('renderTemplate', () => {
 })
 
 describe('file-based template operations', () => {
-  let tmpDir: string
-
-  beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'blacksmith-test-'))
-  })
-
-  afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true })
-  })
+  const getTmpDir = useTmpDir()
 
   describe('renderTemplateFile', () => {
     it('should read and render a template file', () => {
-      const templatePath = path.join(tmpDir, 'test.hbs')
+      const templatePath = path.join(getTmpDir(), 'test.hbs')
       fs.writeFileSync(templatePath, 'Hello {{name}}!')
 
       const result = renderTemplateFile(templatePath, { name: 'World' })
@@ -82,8 +73,8 @@ describe('file-based template operations', () => {
 
   describe('renderToFile', () => {
     it('should render a template and write to destination', () => {
-      const templatePath = path.join(tmpDir, 'test.hbs')
-      const destPath = path.join(tmpDir, 'output', 'result.txt')
+      const templatePath = path.join(getTmpDir(), 'test.hbs')
+      const destPath = path.join(getTmpDir(), 'output', 'result.txt')
       fs.writeFileSync(templatePath, 'Hello {{name}}!')
 
       renderToFile(templatePath, destPath, { name: 'World' })
@@ -92,8 +83,8 @@ describe('file-based template operations', () => {
     })
 
     it('should create destination directories if they do not exist', () => {
-      const templatePath = path.join(tmpDir, 'test.hbs')
-      const destPath = path.join(tmpDir, 'a', 'b', 'c', 'result.txt')
+      const templatePath = path.join(getTmpDir(), 'test.hbs')
+      const destPath = path.join(getTmpDir(), 'a', 'b', 'c', 'result.txt')
       fs.writeFileSync(templatePath, 'content')
 
       renderToFile(templatePath, destPath, {})
@@ -104,8 +95,8 @@ describe('file-based template operations', () => {
 
   describe('renderDirectory', () => {
     it('should render .hbs files and remove extension', () => {
-      const srcDir = path.join(tmpDir, 'src')
-      const destDir = path.join(tmpDir, 'dest')
+      const srcDir = path.join(getTmpDir(), 'src')
+      const destDir = path.join(getTmpDir(), 'dest')
       fs.mkdirSync(srcDir)
       fs.writeFileSync(path.join(srcDir, 'index.tsx.hbs'), 'const app = "{{name}}"')
 
@@ -117,8 +108,8 @@ describe('file-based template operations', () => {
     })
 
     it('should copy non-hbs files as-is', () => {
-      const srcDir = path.join(tmpDir, 'src')
-      const destDir = path.join(tmpDir, 'dest')
+      const srcDir = path.join(getTmpDir(), 'src')
+      const destDir = path.join(getTmpDir(), 'dest')
       fs.mkdirSync(srcDir)
       fs.writeFileSync(path.join(srcDir, 'logo.png'), 'binary-content')
 
@@ -128,8 +119,8 @@ describe('file-based template operations', () => {
     })
 
     it('should recursively process subdirectories', () => {
-      const srcDir = path.join(tmpDir, 'src')
-      const destDir = path.join(tmpDir, 'dest')
+      const srcDir = path.join(getTmpDir(), 'src')
+      const destDir = path.join(getTmpDir(), 'dest')
       fs.mkdirSync(path.join(srcDir, 'sub'), { recursive: true })
       fs.writeFileSync(path.join(srcDir, 'sub', 'file.ts.hbs'), '{{name}}')
 
@@ -139,8 +130,8 @@ describe('file-based template operations', () => {
     })
 
     it('should render directory names with Handlebars expressions', () => {
-      const srcDir = path.join(tmpDir, 'src')
-      const destDir = path.join(tmpDir, 'dest')
+      const srcDir = path.join(getTmpDir(), 'src')
+      const destDir = path.join(getTmpDir(), 'dest')
       fs.mkdirSync(path.join(srcDir, '{{kebab}}'), { recursive: true })
       fs.writeFileSync(path.join(srcDir, '{{kebab}}', 'index.ts.hbs'), 'export default "{{name}}"')
 
@@ -152,7 +143,7 @@ describe('file-based template operations', () => {
     })
 
     it('should throw when source directory does not exist', () => {
-      expect(() => renderDirectory('/nonexistent', tmpDir, {})).toThrow(
+      expect(() => renderDirectory('/nonexistent', getTmpDir(), {})).toThrow(
         'Template directory not found'
       )
     })
@@ -160,7 +151,7 @@ describe('file-based template operations', () => {
 
   describe('appendAfterMarker', () => {
     it('should insert content after the marker line', () => {
-      const filePath = path.join(tmpDir, 'test.txt')
+      const filePath = path.join(getTmpDir(), 'test.txt')
       fs.writeFileSync(filePath, 'line1\n// MARKER\nline3')
 
       appendAfterMarker(filePath, '// MARKER', 'inserted')
@@ -169,7 +160,7 @@ describe('file-based template operations', () => {
     })
 
     it('should throw when marker is not found', () => {
-      const filePath = path.join(tmpDir, 'test.txt')
+      const filePath = path.join(getTmpDir(), 'test.txt')
       fs.writeFileSync(filePath, 'no marker here')
 
       expect(() => appendAfterMarker(filePath, '// MISSING', 'content')).toThrow(
@@ -180,7 +171,7 @@ describe('file-based template operations', () => {
 
   describe('insertBeforeMarker', () => {
     it('should insert content before the marker line', () => {
-      const filePath = path.join(tmpDir, 'test.txt')
+      const filePath = path.join(getTmpDir(), 'test.txt')
       fs.writeFileSync(filePath, 'line1\n// MARKER\nline3')
 
       insertBeforeMarker(filePath, '// MARKER', 'inserted')
@@ -189,7 +180,7 @@ describe('file-based template operations', () => {
     })
 
     it('should throw when marker is not found', () => {
-      const filePath = path.join(tmpDir, 'test.txt')
+      const filePath = path.join(getTmpDir(), 'test.txt')
       fs.writeFileSync(filePath, 'no marker here')
 
       expect(() => insertBeforeMarker(filePath, '// MISSING', 'content')).toThrow(

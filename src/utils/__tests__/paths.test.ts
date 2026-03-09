@@ -1,36 +1,28 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
-import os from 'node:os'
+import { useTmpDir } from '../../__tests__/helpers.js'
 import { findProjectRoot, getBackendDir, getFrontendDir, loadConfig, dirExists, fileExists } from '../paths.js'
 
 describe('findProjectRoot', () => {
-  let tmpDir: string
-
-  beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'blacksmith-test-'))
-  })
-
-  afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true })
-  })
+  const getTmpDir = useTmpDir()
 
   it('should find the project root from a subdirectory', () => {
-    fs.writeFileSync(path.join(tmpDir, 'blacksmith.config.json'), '{}')
-    const subDir = path.join(tmpDir, 'a', 'b', 'c')
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), '{}')
+    const subDir = path.join(getTmpDir(), 'a', 'b', 'c')
     fs.mkdirSync(subDir, { recursive: true })
 
-    expect(findProjectRoot(subDir)).toBe(tmpDir)
+    expect(findProjectRoot(subDir)).toBe(getTmpDir())
   })
 
   it('should find the project root from the root directory itself', () => {
-    fs.writeFileSync(path.join(tmpDir, 'blacksmith.config.json'), '{}')
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), '{}')
 
-    expect(findProjectRoot(tmpDir)).toBe(tmpDir)
+    expect(findProjectRoot(getTmpDir())).toBe(getTmpDir())
   })
 
   it('should throw when no config file is found', () => {
-    expect(() => findProjectRoot(tmpDir)).toThrow('Not inside a Blacksmith project')
+    expect(() => findProjectRoot(getTmpDir())).toThrow('Not inside a Blacksmith project')
   })
 })
 
@@ -49,15 +41,7 @@ describe('getFrontendDir', () => {
 })
 
 describe('loadConfig', () => {
-  let tmpDir: string
-
-  beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'blacksmith-test-'))
-  })
-
-  afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true })
-  })
+  const getTmpDir = useTmpDir()
 
   it('should load and parse blacksmith.config.json', () => {
     const config = {
@@ -66,61 +50,45 @@ describe('loadConfig', () => {
       backend: { port: 8000 },
       frontend: { port: 5173 },
     }
-    fs.writeFileSync(path.join(tmpDir, 'blacksmith.config.json'), JSON.stringify(config))
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify(config))
 
-    const result = loadConfig(tmpDir)
+    const result = loadConfig(getTmpDir())
     expect(result).toEqual(config)
   })
 })
 
 describe('dirExists', () => {
-  let tmpDir: string
-
-  beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'blacksmith-test-'))
-  })
-
-  afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true })
-  })
+  const getTmpDir = useTmpDir()
 
   it('should return true for existing directories', () => {
-    expect(dirExists(tmpDir)).toBe(true)
+    expect(dirExists(getTmpDir())).toBe(true)
   })
 
   it('should return false for non-existent paths', () => {
-    expect(dirExists(path.join(tmpDir, 'nope'))).toBe(false)
+    expect(dirExists(path.join(getTmpDir(), 'nope'))).toBe(false)
   })
 
   it('should return false for files', () => {
-    const filePath = path.join(tmpDir, 'file.txt')
+    const filePath = path.join(getTmpDir(), 'file.txt')
     fs.writeFileSync(filePath, '')
     expect(dirExists(filePath)).toBe(false)
   })
 })
 
 describe('fileExists', () => {
-  let tmpDir: string
-
-  beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'blacksmith-test-'))
-  })
-
-  afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true })
-  })
+  const getTmpDir = useTmpDir()
 
   it('should return true for existing files', () => {
-    const filePath = path.join(tmpDir, 'file.txt')
+    const filePath = path.join(getTmpDir(), 'file.txt')
     fs.writeFileSync(filePath, '')
     expect(fileExists(filePath)).toBe(true)
   })
 
   it('should return false for non-existent paths', () => {
-    expect(fileExists(path.join(tmpDir, 'nope.txt'))).toBe(false)
+    expect(fileExists(path.join(getTmpDir(), 'nope.txt'))).toBe(false)
   })
 
   it('should return false for directories', () => {
-    expect(fileExists(tmpDir)).toBe(false)
+    expect(fileExists(getTmpDir())).toBe(false)
   })
 })
