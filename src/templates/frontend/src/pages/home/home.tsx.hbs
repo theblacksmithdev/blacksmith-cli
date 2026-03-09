@@ -1,20 +1,102 @@
-import { Stack, Divider } from '@blacksmith-ui/react'
+import {
+  Stack,
+  Flex,
+  Typography,
+  Text,
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Grid,
+} from '@blacksmith-ui/react'
 import { useAuth } from '@/features/auth/hooks/use-auth'
-import { HeroSection } from './components/hero-section'
-import { GettingStarted } from './components/getting-started'
-import { FeaturesGrid } from './components/features-grid'
-import { ResourcesSection } from './components/resources-section'
+import { Link } from 'react-router-dom'
+import { Path } from '@/router/paths'
+import { BookOpen, Terminal, Layout } from 'lucide-react'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export default function HomePage() {
   const { isAuthenticated } = useAuth()
 
   return (
-    <Stack gap={12}>
-      <HeroSection isAuthenticated={isAuthenticated} />
-      <Divider />
-      <GettingStarted />
-      <FeaturesGrid />
-      <ResourcesSection />
+    <Stack gap={10} className="pt-16 pb-12">
+      <Stack gap={4} align="center">
+        <Typography variant="h1" className="sm:text-5xl">
+          {{projectName}}
+        </Typography>
+        <Text size="lg" color="muted" align="center" className="max-w-md">
+          Your app is ready. Sign in to get started or explore the API.
+        </Text>
+        <Flex justify="center" gap="md" className="pt-2">
+          {isAuthenticated ? (
+            <Button size="lg" asChild>
+              <Link to={Path.Dashboard}>Dashboard</Link>
+            </Button>
+          ) : (
+            <Button size="lg" asChild>
+              <Link to={Path.Login}>Sign In</Link>
+            </Button>
+          )}
+          <Button variant="outline" size="lg" asChild>
+            <a href={`${API_URL}/api/docs/`} target="_blank" rel="noopener noreferrer">
+              API Docs
+            </a>
+          </Button>
+        </Flex>
+      </Stack>
+
+      <Grid columns=\{{ base: 1, md: 3 }} gap={4} className="max-w-3xl mx-auto w-full">
+        <Card>
+          <CardHeader className="pb-2">
+            <Flex align="center" gap={2}>
+              <Terminal className="h-4 w-4 text-primary" />
+              <CardTitle className="text-sm">CLI</CardTitle>
+            </Flex>
+          </CardHeader>
+          <CardContent>
+            <CardDescription>
+              Run <Text as="code" size="sm" className="font-mono">blacksmith dev</Text> to start the full stack.
+            </CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <Flex align="center" gap={2}>
+              <BookOpen className="h-4 w-4 text-primary" />
+              <CardTitle className="text-sm">API</CardTitle>
+            </Flex>
+          </CardHeader>
+          <CardContent>
+            <CardDescription>
+              <a href={`${API_URL}/api/docs/`} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-foreground">
+                Swagger UI
+              </a>
+              {' / '}
+              <a href={`${API_URL}/admin/`} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-foreground">
+                Django Admin
+              </a>
+            </CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <Flex align="center" gap={2}>
+              <Layout className="h-4 w-4 text-primary" />
+              <CardTitle className="text-sm">Frontend</CardTitle>
+            </Flex>
+          </CardHeader>
+          <CardContent>
+            <CardDescription>
+              React, TanStack Query, and Tailwind CSS with typed API hooks.
+            </CardDescription>
+          </CardContent>
+        </Card>
+      </Grid>
     </Stack>
   )
 }
