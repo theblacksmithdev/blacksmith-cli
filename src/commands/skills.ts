@@ -13,6 +13,7 @@ import { blacksmithUiFormsSkill } from '../skills/blacksmith-ui-forms.js'
 import { blacksmithUiAuthSkill } from '../skills/blacksmith-ui-auth.js'
 import { blacksmithHooksSkill } from '../skills/blacksmith-hooks.js'
 import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
+import { frontendTestingSkill } from '../skills/frontend-testing.js'
 import { cleanCodeSkill } from '../skills/clean-code.js'
 import { aiGuidelinesSkill } from '../skills/ai-guidelines.js'
 import type { Skill } from '../skills/types.js'
@@ -28,6 +29,7 @@ const allSkills: Skill[] = [
   blacksmithUiAuthSkill,
   blacksmithHooksSkill,
   blacksmithCliSkill,
+  frontendTestingSkill,
   cleanCodeSkill,
   aiGuidelinesSkill,
 ]

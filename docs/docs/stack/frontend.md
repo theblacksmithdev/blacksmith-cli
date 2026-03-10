@@ -178,6 +178,64 @@ function MyComponent() {
 }
 ```
 
+## Testing
+
+Blacksmith projects come with a complete frontend testing setup out of the box.
+
+### Stack
+
+| Package | Purpose |
+|---------|---------|
+| `vitest` | Test runner (configured in `vite.config.ts`) |
+| `jsdom` | Browser environment for tests |
+| `@testing-library/react` | Component rendering and queries |
+| `@testing-library/user-event` | User interaction simulation |
+| `@testing-library/jest-dom` | DOM assertion matchers |
+
+### Running Tests
+
+```bash
+# Run all tests
+blacksmith frontend test
+
+# Watch mode
+blacksmith frontend run test:watch
+
+# With coverage
+blacksmith frontend run test:coverage
+```
+
+### Test File Placement
+
+Tests live in `__tests__/` folders co-located with the code they test:
+
+```
+pages/customers/
+├── customers-page.tsx
+├── __tests__/
+│   └── customers-page.spec.tsx      # Page integration test
+├── components/
+│   ├── customer-card.tsx
+│   └── __tests__/
+│       └── customer-card.spec.tsx   # Component unit test
+```
+
+### Test Utilities
+
+All component tests use `renderWithProviders` from `src/__tests__/test-utils.tsx`, which wraps components with the app's providers (ThemeProvider, QueryClientProvider, MemoryRouter):
+
+```typescript
+import { screen } from '@/__tests__/test-utils'
+import { renderWithProviders } from '@/__tests__/test-utils'
+
+it('renders the heading', () => {
+  renderWithProviders(<CustomersPage />)
+  expect(screen.getByText('Customers')).toBeInTheDocument()
+})
+```
+
+See the [Testing Guide](/docs/guides/testing) for detailed patterns and examples.
+
 ## Dependencies
 
 Key packages in `package.json`:
@@ -192,4 +250,5 @@ Key packages in `package.json`:
 | `@hookform/resolvers` | Form + Zod integration |
 | `tailwindcss` | Utility-first CSS |
 | `@hey-api/openapi-ts` | API client code generation |
-| `axios` | HTTP client |
+| `vitest` | Test runner |
+| `@testing-library/react` | Component testing utilities |

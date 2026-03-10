@@ -11,6 +11,7 @@ export { blacksmithUiFormsSkill } from './blacksmith-ui-forms.js'
 export { blacksmithUiAuthSkill } from './blacksmith-ui-auth.js'
 export { blacksmithHooksSkill } from './blacksmith-hooks.js'
 export { blacksmithCliSkill } from './blacksmith-cli.js'
+export { frontendTestingSkill } from './frontend-testing.js'
 export { cleanCodeSkill } from './clean-code.js'
 export { aiGuidelinesSkill } from './ai-guidelines.js'
 

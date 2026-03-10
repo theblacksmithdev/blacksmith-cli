@@ -33,14 +33,16 @@ export const aiGuidelinesSkill: Skill = {
 
 ### Checklist Before Finishing a Task
 1. Backend tests pass: \`cd backend && ./venv/bin/python manage.py test\`
-2. Frontend builds: \`cd frontend && npm run build\`
-3. API types are in sync: \`blacksmith sync\`
-4. No lint errors in modified files
-5. All UI uses \`@blacksmith-ui/react\` components — no raw \`<div>\` for layout, no raw \`<h1>\`-\`<h6>\` for text
-6. Pages are modular — page file is a thin orchestrator, sections are in \`components/\`, logic in \`hooks/\`
-7. Logic is in hooks — no \`useApiQuery\`, \`useApiMutation\`, \`useEffect\`, or multi-\`useState\` in component bodies
-8. No hardcoded route paths — all paths use the \`Path\` enum from \`@/router/paths\`
-9. New routes have a corresponding \`Path\` enum entry
+2. Frontend tests pass: \`cd frontend && npm test\`
+3. Frontend builds: \`cd frontend && npm run build\`
+4. API types are in sync: \`blacksmith sync\`
+5. No lint errors in modified files
+6. All UI uses \`@blacksmith-ui/react\` components — no raw \`<div>\` for layout, no raw \`<h1>\`-\`<h6>\` for text
+7. Pages are modular — page file is a thin orchestrator, sections are in \`components/\`, logic in \`hooks/\`
+8. Logic is in hooks — no \`useApiQuery\`, \`useApiMutation\`, \`useEffect\`, or multi-\`useState\` in component bodies
+9. No hardcoded route paths — all paths use the \`Path\` enum from \`@/router/paths\`
+10. New routes have a corresponding \`Path\` enum entry
+11. **Tests are co-located** — every new or modified page, component, or hook has a corresponding \`.spec.tsx\` / \`.spec.ts\` in a \`__tests__/\` folder next to the source file (see the \`frontend-testing\` skill)
 `
   },
 }

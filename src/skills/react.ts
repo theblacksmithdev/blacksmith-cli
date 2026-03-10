@@ -73,9 +73,10 @@ export const reactSkill: Skill = {
 - Display user-facing errors using the project's feedback components (Alert, Toast)
 
 ### Testing
-- Run all tests: \`cd frontend && npm test\`
-- Run a specific test: \`cd frontend && npm test -- --grep "test name"\`
-- Test files live alongside the code they test (\`component.test.tsx\`)
+- See the \`frontend-testing\` skill for full conventions on test placement, utilities, mocking, and what to test
+- **Every code change must include corresponding tests** — see the \`frontend-testing\` skill for the complete rules
+- Tests use \`.spec.tsx\` / \`.spec.ts\` and live in \`__tests__/\` folders co-located with source code
+- Always use \`renderWithProviders\` from \`@/__tests__/test-utils\` — never import \`render\` from \`@testing-library/react\` directly
 `
   },
 }

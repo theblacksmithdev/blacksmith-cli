@@ -50,6 +50,11 @@ const capabilities: Capability[] = [
       'One command generates models, serializers, viewsets, pages, hooks, and routes across both stacks. What used to take a full day now takes under 30 seconds.',
   },
   {
+    title: 'Test-ready from day one',
+    description:
+      'Vitest, React Testing Library, and co-located test utilities are pre-configured. Every generated page and component has a test pattern to follow, so your team writes tests from the start — not as an afterthought.',
+  },
+  {
     title: 'Professional architecture',
     description:
       'An opinionated, scalable project structure with clear domain separation, shared utilities, and configuration layers. Built the way senior engineers would set it up.',

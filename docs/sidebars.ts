@@ -36,6 +36,7 @@ const sidebars: SidebarsConfig = {
         'guides/openapi-sync',
         'guides/authentication',
         'guides/creating-resources',
+        'guides/testing',
         'guides/ai-development',
         'guides/deployment',
       ],
