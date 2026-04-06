@@ -7,6 +7,7 @@ import { makeResource } from './commands/make-resource.js'
 import { build } from './commands/build.js'
 import { eject } from './commands/eject.js'
 import { setupSkills, listSkills } from './commands/skills.js'
+import { setupMcp } from './commands/mcp-setup.js'
 import { backend } from './commands/backend.js'
 import { frontend } from './commands/frontend.js'
 
@@ -62,6 +63,11 @@ program
   .description('Generate CLAUDE.md with AI development skills for the project')
   .option('--no-chakra-ui-skill', 'Exclude Chakra UI skill')
   .action(setupSkills)
+
+program
+  .command('setup:mcp')
+  .description('Configure MCP servers for Claude Code AI integration')
+  .action(setupMcp)
 
 program
   .command('skills')
