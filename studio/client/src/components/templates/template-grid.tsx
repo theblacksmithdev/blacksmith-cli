@@ -3,6 +3,7 @@ import { Box, Text, useDisclosure } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
 import { TemplateCard } from './template-card'
 import { TemplateModal } from './template-modal'
+import { PageContainer } from '@/components/shared/page-container'
 import { useClaude } from '@/hooks/use-claude'
 import { useSessions } from '@/hooks/use-sessions'
 import { useSessionStore } from '@/stores/session-store'
@@ -41,20 +42,14 @@ export function TemplateGrid() {
   }
 
   return (
-    <Box
-      css={{
-        padding: '32px 24px',
-        maxWidth: '960px',
-        margin: '0 auto',
-      }}
-    >
+    <PageContainer size="lg">
       <Box css={{ marginBottom: '28px' }}>
         <Text
           css={{
             fontSize: '24px',
             fontWeight: 600,
             letterSpacing: '-0.02em',
-            color: '#e8e8ed',
+            color: '#ececec',
             marginBottom: '6px',
           }}
         >
@@ -63,7 +58,7 @@ export function TemplateGrid() {
         <Text
           css={{
             fontSize: '14px',
-            color: '#55555f',
+            color: '#8e8e8e',
           }}
         >
           Choose a template to get started quickly
@@ -90,6 +85,6 @@ export function TemplateGrid() {
           onSubmit={handleSubmit}
         />
       )}
-    </Box>
+    </PageContainer>
   )
 }

@@ -45,8 +45,8 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
           display: 'flex',
           alignItems: 'center',
           padding: '8px 16px',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
-          background: 'rgba(20,20,22,0.8)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(47,47,47,0.8)',
           gap: '8px',
         }}
       >
@@ -63,12 +63,12 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
           {pathParts.map((part, i) => (
             <Box key={i} css={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
               {i > 0 && (
-                <Text css={{ color: '#55555f', fontSize: '11px' }}>/</Text>
+                <Text css={{ color: '#8e8e8e', fontSize: '11px' }}>/</Text>
               )}
               <Text
                 css={{
                   fontSize: '12px',
-                  color: i === pathParts.length - 1 ? '#e8e8ed' : '#55555f',
+                  color: i === pathParts.length - 1 ? '#ececec' : '#8e8e8e',
                   fontWeight: i === pathParts.length - 1 ? 500 : 400,
                 }}
               >
@@ -100,7 +100,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
             borderRadius: '4px',
             background: 'rgba(255,255,255,0.04)',
             fontSize: '11px',
-            color: '#55555f',
+            color: '#8e8e8e',
             fontWeight: 500,
             textTransform: 'uppercase',
             letterSpacing: '0.03em',
@@ -122,12 +122,12 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
             borderRadius: '6px',
             background: 'transparent',
             border: 'none',
-            color: copied ? '#10b981' : '#55555f',
+            color: copied ? '#10a37f' : '#8e8e8e',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             '&:hover': {
-              background: '#1c1c20',
-              color: '#85858f',
+              background: '#3a3a3a',
+              color: '#b4b4b4',
             },
           }}
         >
@@ -140,7 +140,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
         css={{
           flex: 1,
           overflowY: 'auto',
-          background: '#0c0c0e',
+          background: '#171717',
         }}
       >
         <Box
@@ -169,7 +169,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
                 key={i}
                 css={{
                   padding: '0 12px',
-                  color: '#55555f',
+                  color: '#676767',
                   fontSize: '12px',
                 }}
               >
@@ -184,7 +184,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
             css={{
               padding: '12px 16px',
               overflowX: 'auto',
-              color: '#e8e8ed',
+              color: '#ececec',
               flex: 1,
             }}
           >

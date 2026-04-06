@@ -39,11 +39,11 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
         marginTop: '8px',
         borderRadius: '8px',
         overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.07)',
-        background: '#141416',
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: '#2f2f2f',
         transition: 'all 0.2s ease',
         '&:hover': {
-          borderColor: 'rgba(255,255,255,0.13)',
+          borderColor: 'rgba(255,255,255,0.15)',
         },
       }}
     >
@@ -59,12 +59,12 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
-          color: '#85858f',
+          color: '#b4b4b4',
           fontSize: '12px',
-          borderLeft: '2px solid rgba(13,148,136,0.4)',
+          borderLeft: '2px solid rgba(255,255,255,0.1)',
           transition: 'all 0.2s ease',
           '&:hover': {
-            color: '#e8e8ed',
+            color: '#ececec',
           },
         }}
       >
@@ -75,7 +75,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
             fontSize: '11px',
             textTransform: 'uppercase',
             letterSpacing: '0.04em',
-            color: '#0d9488',
+            color: '#b4b4b4',
             flexShrink: 0,
           }}
         >
@@ -85,7 +85,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
           css={{
             fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace",
             fontSize: '11px',
-            color: '#85858f',
+            color: '#b4b4b4',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -111,7 +111,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
             css={{
               fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace",
               fontSize: '11px',
-              color: '#85858f',
+              color: '#b4b4b4',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-all',
             }}

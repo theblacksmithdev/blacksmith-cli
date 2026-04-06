@@ -22,8 +22,8 @@ export function SessionCard({ session, isActive, onSelect, onDelete }: SessionCa
         width: '100%',
         padding: '14px 16px',
         borderBottom: '1px solid rgba(255,255,255,0.04)',
-        background: isActive ? 'rgba(13,148,136,0.06)' : 'transparent',
-        borderLeft: isActive ? '2px solid #0d9488' : '2px solid transparent',
+        background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+        borderLeft: isActive ? '2px solid #ececec' : '2px solid transparent',
         cursor: 'pointer',
         transition: 'all 0.15s ease',
         textAlign: 'left',
@@ -35,9 +35,9 @@ export function SessionCard({ session, isActive, onSelect, onDelete }: SessionCa
         borderBottomColor: 'rgba(255,255,255,0.04)',
         borderLeftStyle: 'solid',
         borderLeftWidth: '2px',
-        borderLeftColor: isActive ? '#0d9488' : 'transparent',
+        borderLeftColor: isActive ? '#ececec' : 'transparent',
         '&:hover': {
-          background: '#141416',
+          background: '#2f2f2f',
         },
         '&:hover .delete-btn': {
           opacity: 1,
@@ -49,7 +49,7 @@ export function SessionCard({ session, isActive, onSelect, onDelete }: SessionCa
           css={{
             fontSize: '14px',
             fontWeight: 500,
-            color: '#e8e8ed',
+            color: '#ececec',
             marginBottom: '4px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -63,7 +63,7 @@ export function SessionCard({ session, isActive, onSelect, onDelete }: SessionCa
           <Text
             css={{
               fontSize: '12px',
-              color: '#55555f',
+              color: '#8e8e8e',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
@@ -79,12 +79,12 @@ export function SessionCard({ session, isActive, onSelect, onDelete }: SessionCa
             alignItems: 'center',
             gap: '10px',
             fontSize: '11px',
-            color: '#55555f',
+            color: '#8e8e8e',
           }}
         >
           <Box css={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <MessageSquare size={10} />
-            <Text css={{ fontSize: '11px', color: '#55555f' }}>{session.messageCount}</Text>
+            <Text css={{ fontSize: '11px', color: '#8e8e8e' }}>{session.messageCount}</Text>
           </Box>
         </Box>
       </Box>
@@ -93,7 +93,7 @@ export function SessionCard({ session, isActive, onSelect, onDelete }: SessionCa
       <Text
         css={{
           fontSize: '11px',
-          color: '#55555f',
+          color: '#8e8e8e',
           flexShrink: 0,
           whiteSpace: 'nowrap',
         }}
@@ -112,7 +112,7 @@ export function SessionCard({ session, isActive, onSelect, onDelete }: SessionCa
           css={{
             opacity: 0,
             transition: 'all 0.15s ease',
-            color: '#55555f',
+            color: '#8e8e8e',
             borderRadius: '6px',
             flexShrink: 0,
             '&:hover': {

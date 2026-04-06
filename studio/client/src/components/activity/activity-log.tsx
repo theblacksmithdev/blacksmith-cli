@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { History } from 'lucide-react'
 import { SessionCard } from './session-card'
 import { EmptyState } from '@/components/shared/empty-state'
+import { PageContainer } from '@/components/shared/page-container'
 import { useSessions } from '@/hooks/use-sessions'
 import { useSessionStore } from '@/stores/session-store'
 import { Path } from '@/router/paths'
@@ -25,7 +26,7 @@ export function ActivityLog() {
 
   if (sessions.length === 0) {
     return (
-      <Box p={6} display="flex" alignItems="center" justifyContent="center" h="full">
+      <Box display="flex" alignItems="center" justifyContent="center" h="full">
         <EmptyState
           icon={<History size={40} />}
           title="No sessions yet"
@@ -36,19 +37,13 @@ export function ActivityLog() {
   }
 
   return (
-    <Box
-      css={{
-        padding: '32px 24px',
-        maxWidth: '720px',
-        margin: '0 auto',
-      }}
-    >
+    <PageContainer>
       <Text
         css={{
           fontSize: '24px',
           fontWeight: 600,
           letterSpacing: '-0.02em',
-          color: '#e8e8ed',
+          color: '#ececec',
           marginBottom: '24px',
         }}
       >
@@ -66,6 +61,6 @@ export function ActivityLog() {
           />
         ))}
       </VStack>
-    </Box>
+    </PageContainer>
   )
 }

@@ -32,21 +32,23 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
     <Box
       css={{
         padding: '12px 24px 20px',
+        maxWidth: '720px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        width: '100%',
       }}
     >
       <Box
         css={{
           position: 'relative',
-          maxWidth: '720px',
-          margin: '0 auto',
-          background: '#141416',
+          background: '#2f2f2f',
           borderRadius: '16px',
-          border: '1px solid rgba(255,255,255,0.07)',
+          border: '1px solid rgba(255,255,255,0.08)',
           transition: 'all 0.2s ease',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
           '&:focus-within': {
-            borderColor: 'rgba(13,148,136,0.5)',
-            boxShadow: '0 0 0 2px rgba(13,148,136,0.2), 0 4px 24px rgba(0,0,0,0.3)',
+            borderColor: 'rgba(255,255,255,0.2)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.15)',
           },
         }}
       >
@@ -66,11 +68,11 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
             background: 'transparent',
             border: 'none',
             outline: 'none',
-            color: '#e8e8ed',
+            color: '#ececec',
             fontSize: '14px',
             lineHeight: '1.6',
             '&::placeholder': {
-              color: '#55555f',
+              color: '#8e8e8e',
             },
             '&:focus': {
               outline: 'none',
@@ -96,7 +98,7 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
             as="span"
             css={{
               fontSize: '11px',
-              color: '#55555f',
+              color: '#676767',
               userSelect: 'none',
               letterSpacing: '0.02em',
             }}
@@ -141,19 +143,18 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
                   height: '32px',
                   borderRadius: '50%',
                   background: value.trim() && !disabled
-                    ? 'linear-gradient(135deg, #0d9488, #14b8a6)'
-                    : '#1c1c20',
+                    ? '#ececec'
+                    : '#3a3a3a',
                   border: 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: value.trim() && !disabled ? 'pointer' : 'default',
-                  color: value.trim() && !disabled ? '#fff' : '#55555f',
+                  color: value.trim() && !disabled ? '#212121' : '#676767',
                   transition: 'all 0.2s ease',
                   flexShrink: 0,
                   '&:hover': value.trim() && !disabled ? {
                     transform: 'scale(1.05)',
-                    boxShadow: '0 4px 16px rgba(13,148,136,0.25)',
                   } : {},
                 }}
               >

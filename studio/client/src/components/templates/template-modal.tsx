@@ -31,19 +31,19 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
     .every((f) => values[f.name]?.trim())
 
   const inputCss = {
-    background: '#0c0c0e',
-    border: '1px solid rgba(255,255,255,0.07)',
+    background: '#171717',
+    border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: '8px',
-    color: '#e8e8ed',
+    color: '#ececec',
     fontSize: '14px',
     transition: 'all 0.2s ease',
     '&:focus': {
-      borderColor: 'rgba(13,148,136,0.5)',
-      boxShadow: '0 0 0 2px rgba(13,148,136,0.2)',
+      borderColor: 'rgba(255,255,255,0.2)',
+      boxShadow: '0 0 0 1px rgba(255,255,255,0.15)',
       outline: 'none',
     },
     '&::placeholder': {
-      color: '#55555f',
+      color: '#8e8e8e',
     },
   }
 
@@ -58,15 +58,15 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
       <Dialog.Positioner>
         <Dialog.Content
           css={{
-            background: '#141416',
+            background: '#2f2f2f',
             borderRadius: '16px',
-            border: '1px solid rgba(255,255,255,0.07)',
+            border: '1px solid rgba(255,255,255,0.08)',
             boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
           }}
         >
           <Dialog.Header
             css={{
-              borderBottom: '1px solid rgba(255,255,255,0.07)',
+              borderBottom: '1px solid rgba(255,255,255,0.08)',
               padding: '20px 24px',
             }}
           >
@@ -74,7 +74,7 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
               css={{
                 fontSize: '16px',
                 fontWeight: 600,
-                color: '#e8e8ed',
+                color: '#ececec',
                 letterSpacing: '-0.01em',
               }}
             >
@@ -83,8 +83,8 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
           </Dialog.Header>
           <Dialog.CloseTrigger
             css={{
-              color: '#55555f',
-              '&:hover': { color: '#85858f' },
+              color: '#8e8e8e',
+              '&:hover': { color: '#b4b4b4' },
             }}
           />
           <Dialog.Body css={{ padding: '20px 24px' }}>
@@ -95,7 +95,7 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
                     css={{
                       fontSize: '13px',
                       fontWeight: 500,
-                      color: '#85858f',
+                      color: '#b4b4b4',
                       marginBottom: '4px',
                     }}
                   >
@@ -137,7 +137,7 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
           </Dialog.Body>
           <Dialog.Footer
             css={{
-              borderTop: '1px solid rgba(255,255,255,0.07)',
+              borderTop: '1px solid rgba(255,255,255,0.08)',
               padding: '16px 24px',
               gap: '8px',
             }}
@@ -146,11 +146,11 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
               variant="ghost"
               onClick={onClose}
               css={{
-                color: '#85858f',
+                color: '#b4b4b4',
                 borderRadius: '8px',
                 '&:hover': {
-                  background: '#1c1c20',
-                  color: '#e8e8ed',
+                  background: '#3a3a3a',
+                  color: '#ececec',
                 },
               }}
             >
@@ -163,16 +163,16 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
                 padding: '8px 20px',
                 borderRadius: '8px',
                 background: allRequiredFilled
-                  ? 'linear-gradient(135deg, #0d9488, #14b8a6)'
-                  : '#1c1c20',
-                color: allRequiredFilled ? '#ffffff' : '#55555f',
+                  ? '#ececec'
+                  : '#2f2f2f',
+                color: allRequiredFilled ? '#212121' : '#676767',
                 fontWeight: 500,
                 fontSize: '14px',
                 border: 'none',
                 cursor: allRequiredFilled ? 'pointer' : 'default',
                 transition: 'all 0.2s ease',
                 '&:hover': allRequiredFilled ? {
-                  boxShadow: '0 4px 12px rgba(13,148,136,0.3)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                 } : {},
               }}
               aria-disabled={!allRequiredFilled}

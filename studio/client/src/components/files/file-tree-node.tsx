@@ -5,22 +5,22 @@ import type { FileNode } from '@/types'
 
 const extColorMap: Record<string, string> = {
   ts: '#10b981',
-  tsx: '#0d9488',
+  tsx: '#10a37f',
   js: '#f59e0b',
   jsx: '#f59e0b',
   py: '#3b82f6',
-  json: '#85858f',
+  json: '#b4b4b4',
   css: '#e879f9',
   scss: '#e879f9',
   html: '#ef4444',
-  md: '#85858f',
-  yml: '#85858f',
-  yaml: '#85858f',
+  md: '#b4b4b4',
+  yml: '#b4b4b4',
+  yaml: '#b4b4b4',
 }
 
 function getFileColor(name: string): string {
   const ext = name.split('.').pop()?.toLowerCase() || ''
-  return extColorMap[ext] || '#55555f'
+  return extColorMap[ext] || '#8e8e8e'
 }
 
 interface FileTreeNodeProps {
@@ -55,17 +55,17 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
           paddingTop: '3px',
           paddingBottom: '3px',
           cursor: 'pointer',
-          background: isSelected ? 'rgba(13,148,136,0.08)' : 'transparent',
-          borderLeft: isSelected ? '2px solid #0d9488' : '2px solid transparent',
+          background: isSelected ? 'rgba(255,255,255,0.08)' : 'transparent',
+          borderLeft: isSelected ? '2px solid #ececec' : '2px solid transparent',
           transition: 'all 0.15s ease',
           border: 'none',
           borderLeftStyle: 'solid',
           borderLeftWidth: '2px',
-          borderLeftColor: isSelected ? '#0d9488' : 'transparent',
+          borderLeftColor: isSelected ? '#ececec' : 'transparent',
           position: 'relative',
           textAlign: 'left',
           '&:hover': {
-            background: isSelected ? 'rgba(13,148,136,0.1)' : 'rgba(255,255,255,0.03)',
+            background: isSelected ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
           },
         }}
       >
@@ -86,7 +86,7 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
 
         {isDir ? (
           <>
-            <Box css={{ color: '#55555f', flexShrink: 0, display: 'flex' }}>
+            <Box css={{ color: '#8e8e8e', flexShrink: 0, display: 'flex' }}>
               {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
             </Box>
             <Box css={{ color: '#f59e0b', flexShrink: 0, display: 'flex' }}>
@@ -105,7 +105,7 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
         <Text
           css={{
             fontSize: '12px',
-            color: isSelected ? '#e8e8ed' : '#85858f',
+            color: isSelected ? '#ececec' : '#b4b4b4',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
