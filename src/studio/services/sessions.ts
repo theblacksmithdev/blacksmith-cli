@@ -1,99 +1,164 @@
-import fs from 'node:fs'
-import path from 'node:path'
 import crypto from 'node:crypto'
-import type { Session, SessionSummary, StoredMessage } from '../types.js'
+import { eq, desc } from 'drizzle-orm'
+import { getDatabase } from '../db/index.js'
+import { sessions, messages, toolCalls } from '../db/schema.js'
+import type { Session, SessionSummary, StoredMessage, ToolCall } from '../types.js'
 
 export class SessionManager {
-  private sessionsDir: string
+  private projectRoot: string
 
   constructor(projectRoot: string) {
-    this.sessionsDir = path.join(projectRoot, '.blacksmith-studio', 'sessions')
-    fs.mkdirSync(this.sessionsDir, { recursive: true })
+    this.projectRoot = projectRoot
+    // Ensure DB is initialized
+    getDatabase(projectRoot)
+  }
+
+  private get db() {
+    return getDatabase(this.projectRoot)
   }
 
   createSession(name?: string): Session {
     const id = crypto.randomUUID()
     const now = new Date().toISOString()
-    const session: Session = {
+    const sessionName = name || `Session ${new Date().toLocaleDateString()}`
+
+    this.db.insert(sessions).values({
       id,
-      name: name || `Session ${new Date().toLocaleDateString()}`,
+      name: sessionName,
       createdAt: now,
       updatedAt: now,
-      messages: [],
-    }
-    this.saveSession(session)
-    return session
+    }).run()
+
+    return { id, name: sessionName, createdAt: now, updatedAt: now, messages: [] }
   }
 
   getSession(id: string): Session | null {
-    const filePath = path.join(this.sessionsDir, `${id}.json`)
-    if (!fs.existsSync(filePath)) return null
-    try {
-      return JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-    } catch {
-      return null
+    const row = this.db.select().from(sessions).where(eq(sessions.id, id)).get()
+    if (!row) return null
+
+    const msgs = this.db
+      .select()
+      .from(messages)
+      .where(eq(messages.sessionId, id))
+      .orderBy(messages.timestamp)
+      .all()
+
+    const sessionMessages: StoredMessage[] = msgs.map((msg) => {
+      const tcs = this.db
+        .select()
+        .from(toolCalls)
+        .where(eq(toolCalls.messageId, msg.id))
+        .all()
+
+      const mappedToolCalls: ToolCall[] | undefined = tcs.length > 0
+        ? tcs.map((tc) => ({
+            toolId: tc.toolId,
+            toolName: tc.toolName,
+            input: JSON.parse(tc.input),
+            output: tc.output ?? undefined,
+          }))
+        : undefined
+
+      return {
+        id: msg.id,
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+        toolCalls: mappedToolCalls,
+        timestamp: msg.timestamp,
+      }
+    })
+
+    return {
+      id: row.id,
+      name: row.name,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      messages: sessionMessages,
     }
   }
 
   listSessions(): SessionSummary[] {
-    let entries: string[]
-    try {
-      entries = fs.readdirSync(this.sessionsDir).filter((f) => f.endsWith('.json'))
-    } catch {
-      return []
-    }
+    const rows = this.db
+      .select()
+      .from(sessions)
+      .orderBy(desc(sessions.updatedAt))
+      .all()
 
-    const summaries: SessionSummary[] = []
-    for (const entry of entries) {
-      try {
-        const data = JSON.parse(
-          fs.readFileSync(path.join(this.sessionsDir, entry), 'utf-8'),
-        ) as Session
-        const userMessages = data.messages.filter((m) => m.role === 'user')
-        summaries.push({
-          id: data.id,
-          name: data.name,
-          createdAt: data.createdAt,
-          updatedAt: data.updatedAt,
-          messageCount: data.messages.length,
-          lastPrompt: userMessages[userMessages.length - 1]?.content,
-        })
-      } catch {
-        // Skip corrupted files
+    return rows.map((row) => {
+      const msgCount = this.db
+        .select()
+        .from(messages)
+        .where(eq(messages.sessionId, row.id))
+        .all()
+        .length
+
+      const lastUserMsg = this.db
+        .select()
+        .from(messages)
+        .where(eq(messages.sessionId, row.id))
+        .orderBy(desc(messages.timestamp))
+        .all()
+        .find((m) => m.role === 'user')
+
+      return {
+        id: row.id,
+        name: row.name,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        messageCount: msgCount,
+        lastPrompt: lastUserMsg?.content,
       }
-    }
-
-    return summaries.sort(
-      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-    )
+    })
   }
 
   addMessage(sessionId: string, message: StoredMessage): void {
-    const session = this.getSession(sessionId)
-    if (!session) return
-    session.messages.push(message)
-    session.updatedAt = new Date().toISOString()
-    this.saveSession(session)
+    // Insert message
+    this.db.insert(messages).values({
+      id: message.id,
+      sessionId,
+      role: message.role,
+      content: message.content,
+      timestamp: message.timestamp,
+    }).run()
+
+    // Insert tool calls
+    if (message.toolCalls) {
+      for (const tc of message.toolCalls) {
+        this.db.insert(toolCalls).values({
+          messageId: message.id,
+          toolId: tc.toolId,
+          toolName: tc.toolName,
+          input: JSON.stringify(tc.input),
+          output: tc.output ?? null,
+        }).run()
+      }
+    }
+
+    // Update session timestamp
+    this.db.update(sessions)
+      .set({ updatedAt: new Date().toISOString() })
+      .where(eq(sessions.id, sessionId))
+      .run()
   }
 
   renameSession(id: string, name: string): Session | null {
-    const session = this.getSession(id)
-    if (!session) return null
-    session.name = name
-    session.updatedAt = new Date().toISOString()
-    this.saveSession(session)
-    return session
+    const existing = this.db.select().from(sessions).where(eq(sessions.id, id)).get()
+    if (!existing) return null
+
+    this.db.update(sessions)
+      .set({ name, updatedAt: new Date().toISOString() })
+      .where(eq(sessions.id, id))
+      .run()
+
+    return this.getSession(id)
   }
 
   deleteSession(id: string): boolean {
-    const filePath = path.join(this.sessionsDir, `${id}.json`)
-    if (!fs.existsSync(filePath)) return false
-    fs.unlinkSync(filePath)
-    return true
-  }
+    const existing = this.db.select().from(sessions).where(eq(sessions.id, id)).get()
+    if (!existing) return false
 
-  private saveSession(session: Session): void {
-    const filePath = path.join(this.sessionsDir, `${session.id}.json`)
-    fs.writeFileSync(filePath, JSON.stringify(session, null, 2) + '\n', 'utf-8')
+    // Cascade deletes messages and tool_calls via foreign keys
+    this.db.delete(sessions).where(eq(sessions.id, id)).run()
+    return true
   }
 }

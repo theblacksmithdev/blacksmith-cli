@@ -8,6 +8,7 @@ import { createStaticRouter } from './routes/static.js'
 import { setupSocketHandlers } from './ws/handler.js'
 import { ClaudeManager } from './services/claude/index.js'
 import { SessionManager } from './services/sessions.js'
+import { closeDatabase } from './db/index.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -57,6 +58,12 @@ export async function createStudioServer({ projectRoot, port }: StudioOptions): 
   const clientDir = getStudioClientDir()
   console.log(`[studio] Serving client from: ${clientDir}`)
   app.use(createStaticRouter(clientDir))
+
+  // Close DB on server close
+  server.on('close', () => {
+    closeDatabase()
+    console.log('[studio] Database connection closed')
+  })
 
   return new Promise((resolve, reject) => {
     server.listen(port, () => {

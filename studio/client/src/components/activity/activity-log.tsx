@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/shared/empty-state'
 import { PageContainer } from '@/components/shared/page-container'
 import { useSessions } from '@/hooks/use-sessions'
 import { useSessionStore } from '@/stores/session-store'
-import { Path } from '@/router/paths'
+import { chatPath } from '@/router/paths'
 
 export function ActivityLog() {
   const { fetchSessions, loadSession, deleteSession } = useSessions()
@@ -21,7 +21,7 @@ export function ActivityLog() {
 
   const handleSelect = async (id: string) => {
     await loadSession(id)
-    navigate(Path.Chat)
+    navigate(chatPath(id))
   }
 
   if (sessions.length === 0) {

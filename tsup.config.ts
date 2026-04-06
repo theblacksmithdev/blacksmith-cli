@@ -10,5 +10,5 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   shims: true,
-  external: ['express', 'socket.io', 'open'],
+  external: ['express', 'socket.io', 'open', 'better-sqlite3', 'drizzle-orm'],
 })

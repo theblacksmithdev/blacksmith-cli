@@ -18,9 +18,10 @@ import {
 } from 'lucide-react'
 import { useUiStore } from '@/stores/ui-store'
 import { useSessionStore } from '@/stores/session-store'
+import { useChatStore } from '@/stores/chat-store'
 import { useSessions } from '@/hooks/use-sessions'
 import { useThemeMode } from '@/hooks/use-theme-mode'
-import { Path } from '@/router/paths'
+import { Path, chatPath } from '@/router/paths'
 import { truncate } from '@/lib/format'
 
 const navItems = [
@@ -85,14 +86,15 @@ export function Sidebar() {
     fetchSessions()
   }, [fetchSessions])
 
-  const handleNewChat = async () => {
-    await createSession()
-    navigate(Path.Chat)
+  const handleNewChat = () => {
+    useChatStore.getState().clearMessages()
+    useSessionStore.getState().setActiveSession(null)
+    navigate(Path.NewChat)
   }
 
   const handleSelectSession = async (id: string) => {
     await loadSession(id)
-    navigate(Path.Chat)
+    navigate(chatPath(id))
   }
 
   const recentSessions = sessions.slice(0, 8)
@@ -192,7 +194,7 @@ export function Sidebar() {
           }}
         >
           <Tooltip content="Chat">
-            <Box as="button" onClick={() => navigate(Path.Chat)} css={iconBtn(location.pathname === Path.Chat)}>
+            <Box as="button" onClick={() => navigate(Path.Home)} css={iconBtn(location.pathname.startsWith('/chat'))}>
               <MessageSquare size={17} />
             </Box>
           </Tooltip>
@@ -275,7 +277,7 @@ export function Sidebar() {
       {/* 1. Header — logo + brand + collapse */}
       <Box css={{ padding: '12px 12px 8px', flexShrink: 0 }}>
         <HStack gap={0} justify="space-between" css={{ marginBottom: '12px', padding: '0 4px' }}>
-          <HStack gap={3} as="button" onClick={() => navigate(Path.Chat)} css={{ border: 'none', background: 'none', cursor: 'pointer' }}>
+          <HStack gap={3} as="button" onClick={() => navigate(Path.Home)} css={{ border: 'none', background: 'none', cursor: 'pointer' }}>
             <Box
               css={{
                 width: '28px',
@@ -369,7 +371,7 @@ export function Sidebar() {
             </Text>
             <VStack gap={0} align="stretch">
               {recentSessions.map((session) => {
-                const isActive = session.id === activeSessionId && location.pathname === Path.Chat
+                const isActive = session.id === activeSessionId && location.pathname.startsWith('/chat')
                 return (
                   <Box
                     key={session.id}

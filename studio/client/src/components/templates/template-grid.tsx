@@ -7,7 +7,7 @@ import { PageContainer } from '@/components/shared/page-container'
 import { useClaude } from '@/hooks/use-claude'
 import { useSessions } from '@/hooks/use-sessions'
 import { useSessionStore } from '@/stores/session-store'
-import { Path } from '@/router/paths'
+import { chatPath } from '@/router/paths'
 import type { PromptTemplate } from '@/types'
 
 export function TemplateGrid() {
@@ -38,7 +38,7 @@ export function TemplateGrid() {
       sessionId = session.id
     }
     sendPrompt(prompt, sessionId!)
-    navigate(Path.Chat)
+    navigate(chatPath(sessionId!))
   }
 
   return (
