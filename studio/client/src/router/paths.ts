@@ -4,6 +4,7 @@ export const Path = {
   Chat: '/chat/:sessionId',
   Templates: '/templates',
   Code: '/code',
+  Run: '/run',
   Activity: '/activity',
   Settings: '/settings',
 } as const

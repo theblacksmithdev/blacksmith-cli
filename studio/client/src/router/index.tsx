@@ -7,6 +7,7 @@ import NewChatPage from '@/pages/chat/new'
 import ChatPage from '@/pages/chat'
 import TemplatesPage from '@/pages/templates'
 import FilesPage from '@/pages/files'
+import RunPage from '@/pages/run'
 import ActivityPage from '@/pages/activity'
 import SettingsPage from '@/pages/settings'
 
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
       { path: Path.Chat, element: <ChatPage /> },
       { path: Path.Templates, element: <TemplatesPage /> },
       { path: Path.Code, element: <FilesPage /> },
+      { path: Path.Run, element: <RunPage /> },
       { path: Path.Activity, element: <ActivityPage /> },
       { path: Path.Settings, element: <SettingsPage /> },
     ],

@@ -9,6 +9,7 @@ import { setupSocketHandlers } from './ws/handler.js'
 import { ClaudeManager } from './services/claude/index.js'
 import { SessionManager } from './services/sessions.js'
 import { SettingsManager } from './services/settings.js'
+import { RunnerManager } from './services/runner/index.js'
 import { closeDatabase } from './db/index.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -41,6 +42,7 @@ export async function createStudioServer({ projectRoot, port }: StudioOptions): 
   const claudeManager = new ClaudeManager(projectRoot)
   const sessionManager = new SessionManager(projectRoot)
   const settingsManager = new SettingsManager(projectRoot)
+  const runnerManager = new RunnerManager(projectRoot)
 
   // Check Claude availability
   const claudeStatus = await claudeManager.checkInstalled()
@@ -51,10 +53,10 @@ export async function createStudioServer({ projectRoot, port }: StudioOptions): 
   }
 
   // Routes
-  app.use(createApiRouter(projectRoot, sessionManager, claudeManager, settingsManager))
+  app.use(createApiRouter(projectRoot, sessionManager, claudeManager, settingsManager, runnerManager))
 
   // WebSocket
-  setupSocketHandlers(io, claudeManager, sessionManager, settingsManager)
+  setupSocketHandlers(io, claudeManager, sessionManager, settingsManager, runnerManager)
 
   // Static files (React SPA) — must come after API routes
   const clientDir = getStudioClientDir()
@@ -63,8 +65,9 @@ export async function createStudioServer({ projectRoot, port }: StudioOptions): 
 
   // Close DB on server close
   server.on('close', () => {
+    runnerManager.stopAll()
     closeDatabase()
-    console.log('[studio] Database connection closed')
+    console.log('[studio] Runner processes stopped, database closed')
   })
 
   return new Promise((resolve, reject) => {

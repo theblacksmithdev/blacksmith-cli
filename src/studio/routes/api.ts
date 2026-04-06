@@ -2,6 +2,7 @@ import { Router } from 'express'
 import type { SessionManager } from '../services/sessions.js'
 import type { ClaudeManager } from '../services/claude/index.js'
 import type { SettingsManager } from '../services/settings.js'
+import type { RunnerManager } from '../services/runner/index.js'
 import { buildFileTree, readFileContent } from '../services/files.js'
 import { getTemplates, interpolateTemplate } from '../services/templates.js'
 
@@ -10,6 +11,7 @@ export function createApiRouter(
   sessionManager: SessionManager,
   claudeManager: ClaudeManager,
   settingsManager: SettingsManager,
+  runnerManager: RunnerManager,
 ): Router {
   const router = Router()
 
@@ -95,6 +97,11 @@ export function createApiRouter(
     }
     settingsManager.setMany(pairs)
     res.json(settingsManager.getAll())
+  })
+
+  // Runner
+  router.get('/api/runner/status', (_req, res) => {
+    res.json(runnerManager.getStatus())
   })
 
   return router
