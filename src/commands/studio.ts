@@ -56,7 +56,7 @@ export async function studio(options: StudioOptions) {
   log.blank()
 
   try {
-    const { createStudioServer } = await import('../studio/server.js')
+    const { createStudioServer } = await import('@blacksmith/studio')
     const { server } = await createStudioServer({ projectRoot: root, port })
 
     const url = `http://localhost:${port}`

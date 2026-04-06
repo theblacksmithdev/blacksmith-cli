@@ -174,11 +174,19 @@ export function createApiRouter(
     console.log(`[projects] Creating project: blacksmith ${args.join(' ')} in ${absParent}`)
 
     // Use node to run the CLI directly to avoid PATH issues
-    const binPath = path.resolve(__dirname, '..', '..', 'bin', 'blacksmith.js')
-    const useDirectBin = fs.existsSync(binPath)
+    // Resolve blacksmith CLI binary — try node_modules first, then PATH
+    let binPath: string | null = null
+    try {
+      // Look for blacksmith-cli in node_modules
+      const { createRequire } = await import('node:module')
+      const req = createRequire(import.meta.url)
+      binPath = req.resolve('blacksmith-cli/bin/blacksmith.js')
+    } catch {
+      // Not installed as dependency — will try PATH
+    }
 
-    const cmd = useDirectBin ? process.execPath : 'blacksmith'
-    const fullArgs = useDirectBin ? [binPath, ...args] : args
+    const cmd = binPath ? process.execPath : 'blacksmith'
+    const fullArgs = binPath ? [binPath, ...args] : args
 
     const proc = spawn(cmd, fullArgs, {
       cwd: absParent,

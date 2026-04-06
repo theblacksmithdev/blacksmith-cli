@@ -1,14 +1,15 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['server/index.ts'],
   format: ['esm'],
-  target: 'node18',
+  target: 'node20',
   platform: 'node',
+  outDir: 'dist/server',
   dts: false,
   clean: true,
   splitting: false,
   sourcemap: true,
   shims: true,
-  external: ['@blacksmith/studio'],
+  external: ['express', 'socket.io', 'open', 'better-sqlite3', 'drizzle-orm'],
 })

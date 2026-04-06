@@ -17,8 +17,10 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 function getStudioClientDir(): string {
+  // In production: dist/server/index.js → dist/client/
+  // In dev via tsx: server/index.ts → dist/client/ (may not exist)
   const packageRoot = path.resolve(__dirname, '..')
-  return path.join(packageRoot, 'studio', 'dist', 'client')
+  return path.join(packageRoot, 'dist', 'client')
 }
 
 export interface StudioOptions {

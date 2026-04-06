@@ -1,39 +1,57 @@
 {
-  "name": "blacksmith-studio",
-  "private": true,
-  "version": "0.0.1",
+  "name": "@blacksmith/studio",
+  "version": "0.1.0",
+  "description": "Blacksmith Studio — Web UI for AI-powered development",
   "type": "module",
+  "main": "./dist/server/index.js",
+  "bin": {
+    "blacksmith-studio": "./bin/studio.js"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "dev": "concurrently -n api,ui -c blue,green \"npx tsx dev-server.ts\" \"vite\"",
-    "dev:ui": "vite",
     "dev:api": "npx tsx dev-server.ts",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "dev:ui": "vite",
+    "build:client": "vite build",
+    "build:server": "tsup",
+    "build": "npm run build:client && npm run build:server"
   },
   "dependencies": {
     "better-sqlite3": "^12.8.0",
     "drizzle-orm": "^0.45.2",
+    "express": "^5.2.1",
+    "open": "^11.0.0",
+    "socket.io": "^4.8.3",
     "@chakra-ui/react": "^3.34.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^5.0.0",
     "@monaco-editor/react": "^4.7.0",
+    "@tanstack/react-query": "^5.90.0",
     "lucide-react": "^0.400.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-hook-form": "^7.55.0",
     "react-markdown": "^9.0.0",
     "react-router-dom": "^7.6.0",
     "rehype-highlight": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "socket.io-client": "^4.8.0",
+    "zod": "^3.24.0",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.0",
-    "drizzle-kit": "^0.31.10",
+    "@types/express": "^5.0.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.1.2",
+    "drizzle-kit": "^0.31.10",
+    "tsup": "^8.4.0",
     "typescript": "~5.8.0",
     "vite": "^6.3.0"
   }
