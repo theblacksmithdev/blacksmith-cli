@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/api/client'
 import { queryKeys } from '@/api/query-keys'
 import { useProjectStore, type Project } from '@/stores/project-store'
+import { resetProjectStores } from '@/stores/reset'
 
 export function useProjects() {
   const queryClient = useQueryClient()
@@ -25,6 +26,7 @@ export function useProjects() {
     mutationFn: (data: { path: string; name?: string }) =>
       api.post<Project>('/projects', data),
     onSuccess: (project) => {
+      resetProjectStores()
       queryClient.invalidateQueries({ queryKey: queryKeys.projects })
       queryClient.invalidateQueries({ queryKey: queryKeys.activeProject })
       setActiveProject(project)
@@ -36,6 +38,7 @@ export function useProjects() {
     mutationFn: (id: string) =>
       api.post<Project>(`/projects/${id}/activate`),
     onSuccess: (project) => {
+      resetProjectStores()
       queryClient.invalidateQueries({ queryKey: queryKeys.activeProject })
       setActiveProject(project)
       invalidateProjectScoped()
@@ -50,7 +53,6 @@ export function useProjects() {
     },
   })
 
-  // When project changes, refetch all project-scoped data
   function invalidateProjectScoped() {
     queryClient.invalidateQueries({ queryKey: queryKeys.sessions })
     queryClient.invalidateQueries({ queryKey: queryKeys.files })

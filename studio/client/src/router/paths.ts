@@ -1,11 +1,12 @@
-// Global routes (no project context)
+// ─── Global routes (no project) ───
 export const Path = {
   Home: '/',
   Projects: '/projects',
   AddProject: '/projects/add',
   Settings: '/settings',
 
-  // Project-scoped routes (with :projectId param)
+  // ─── Project-scoped routes ───
+  Project: '/:projectId',
   NewChat: '/:projectId/chat/new',
   Chat: '/:projectId/chat/:sessionId',
   Code: '/:projectId/code',
@@ -14,17 +15,18 @@ export const Path = {
   Activity: '/:projectId/activity',
 } as const
 
-// Helper to build project-scoped paths
-export function projectPath(projectId: string, subpath: string) {
-  return `/${projectId}${subpath}`
-}
+// ─── Path builders ───
 
-export function chatPath(projectId: string, sessionId: string) {
-  return `/${projectId}/chat/${sessionId}`
+export function projectHome(projectId: string) {
+  return `/${projectId}`
 }
 
 export function newChatPath(projectId: string) {
   return `/${projectId}/chat/new`
+}
+
+export function chatPath(projectId: string, sessionId: string) {
+  return `/${projectId}/chat/${sessionId}`
 }
 
 export function codePath(projectId: string) {

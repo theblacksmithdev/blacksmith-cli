@@ -7,7 +7,7 @@ import { QuickActions } from '@/components/dashboard/quick-actions'
 import { useProjects } from '@/hooks/use-projects'
 import { useSessions } from '@/hooks/use-sessions'
 import { useProjectStore } from '@/stores/project-store'
-import { Path, chatPath, activityPath } from '@/router/paths'
+import { Path, chatPath, activityPath, projectHome } from '@/router/paths'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
@@ -145,7 +145,7 @@ export default function DashboardPage() {
                   key={project.id}
                   project={project}
                   isActive={project.id === activeProject?.id}
-                  onSelect={() => activate(project.id)}
+                  onSelect={async () => { await activate(project.id); navigate(projectHome(project.id)) }}
                 />
               ))}
             </VStack>

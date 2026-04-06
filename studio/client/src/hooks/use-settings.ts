@@ -1,14 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/api/client'
 import { queryKeys } from '@/api/query-keys'
+import { useProjectStore } from '@/stores/project-store'
 import { useCallback } from 'react'
 
 export function useSettings() {
   const queryClient = useQueryClient()
+  const activeProject = useProjectStore((s) => s.activeProject)
 
   const { data: settings = {} } = useQuery({
     queryKey: queryKeys.settings,
     queryFn: () => api.get<Record<string, any>>('/settings'),
+    enabled: !!activeProject,
   })
 
   const mutation = useMutation({

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Box, Text, VStack, HStack } from '@chakra-ui/react'
-import { FolderOpen, Plus, Trash2, Check, FolderPlus } from 'lucide-react'
+import { FolderOpen, Trash2, Check, FolderPlus } from 'lucide-react'
 import { PageContainer } from '@/components/shared/page-container'
 import { EmptyState } from '@/components/shared/empty-state'
 import { Tooltip } from '@/components/shared/tooltip'

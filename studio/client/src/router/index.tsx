@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { StudioLayout } from '@/components/layout/studio-layout'
 import { ProjectLayout } from '@/components/layout/project-layout'
 import { Path } from './paths'
@@ -18,18 +18,22 @@ export const router = createBrowserRouter([
   // Full-screen routes (no nav rail)
   { path: Path.AddProject, element: <AddProjectPage /> },
 
-  // Studio layout routes
+  // Studio layout
   {
     element: <StudioLayout />,
     children: [
+      // Global routes
       { path: Path.Home, element: <DashboardPage /> },
       { path: Path.Projects, element: <ProjectsPage /> },
       { path: Path.Settings, element: <SettingsPage /> },
 
+      // Project-scoped routes
       {
         path: '/:projectId',
         element: <ProjectLayout />,
         children: [
+          // Default: redirect /:projectId → /:projectId/chat/new
+          { index: true, element: <NewChatPage /> },
           { path: 'chat/new', element: <NewChatPage /> },
           { path: 'chat/:sessionId', element: <ChatPage /> },
           { path: 'code', element: <FilesPage /> },

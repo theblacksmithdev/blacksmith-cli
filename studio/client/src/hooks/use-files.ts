@@ -7,6 +7,11 @@ import type { FileNode } from '@/types'
 // In-memory content cache to avoid re-fetching files
 const contentCache = new Map<string, { content: string; language: string }>()
 
+/** Clear the file content cache. Call when switching projects. */
+export function clearFileContentCache() {
+  contentCache.clear()
+}
+
 export function useFiles() {
   const { openFile, setTabContent } = useFileStore()
 

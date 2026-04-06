@@ -1,4 +1,4 @@
-import { Box, VStack } from '@chakra-ui/react'
+import { Box, Text, VStack, HStack } from '@chakra-ui/react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   MessageSquare,
@@ -10,7 +10,7 @@ import {
   Anvil,
   Sun,
   Moon,
-  LayoutDashboard,
+  LogOut,
 } from 'lucide-react'
 import { Tooltip } from '@/components/shared/tooltip'
 import { useUiStore } from '@/stores/ui-store'
@@ -51,22 +51,11 @@ export function NavRail() {
   const activeProject = useProjectStore((s) => s.activeProject)
   const { mode, toggle: toggleTheme } = useThemeMode()
 
-  useProjects() // Load projects on mount
+  useProjects()
 
   const pid = activeProject?.id
   const pathname = location.pathname
-
-  // Project-scoped nav items — only render when a project is active
-  const projectNav = pid ? [
-    { path: newChatPath(pid), match: pathname.includes('/chat'), icon: MessageSquare, label: 'Chat' },
-    { path: codePath(pid), match: pathname.endsWith('/code'), icon: FolderTree, label: 'Code' },
-    { path: runPath(pid), match: pathname.endsWith('/run'), icon: Play, label: 'Run' },
-    { path: templatesPath(pid), match: pathname.endsWith('/templates'), icon: Sparkles, label: 'Templates' },
-  ] : []
-
-  const projectBottomNav = pid ? [
-    { path: activityPath(pid), match: pathname.endsWith('/activity'), icon: History, label: 'History' },
-  ] : []
+  const isInsideProject = pid && pathname.startsWith(`/${pid}`)
 
   return (
     <Box
@@ -84,7 +73,7 @@ export function NavRail() {
         paddingBottom: '10px',
       }}
     >
-      {/* Logo — dashboard */}
+      {/* Logo — always goes to dashboard */}
       <Tooltip content="Dashboard">
         <Box
           as="button"
@@ -99,7 +88,7 @@ export function NavRail() {
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            marginBottom: '16px',
+            marginBottom: isInsideProject ? '8px' : '16px',
             transition: 'opacity 0.15s ease',
             '&:hover': { opacity: 0.85 },
           }}
@@ -108,18 +97,71 @@ export function NavRail() {
         </Box>
       </Tooltip>
 
-      {/* Project tools — only when project is active */}
-      <VStack gap={1} flex={1}>
-        {projectNav.map(({ path, match, icon: Icon, label }) => (
-          <Tooltip key={path} content={label}>
-            <Box as="button" onClick={() => navigate(path)} css={railBtn(match)}>
-              <Icon size={18} />
+      {/* Exit project button — only inside a project */}
+      {isInsideProject && (
+        <Tooltip content="Exit project">
+          <Box
+            as="button"
+            onClick={() => {
+              useProjectStore.getState().setActiveProject(null)
+              navigate(Path.Home)
+            }}
+            css={{
+              width: '36px',
+              height: '24px',
+              borderRadius: '6px',
+              border: 'none',
+              background: 'transparent',
+              color: 'var(--studio-text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              marginBottom: '12px',
+              transition: 'all 0.12s ease',
+              '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
+            }}
+          >
+            <LogOut size={14} />
+          </Box>
+        </Tooltip>
+      )}
+
+      {/* Project tools — only inside a project */}
+      {isInsideProject && pid ? (
+        <VStack gap={1} flex={1}>
+          <Tooltip content="Chat">
+            <Box as="button" onClick={() => navigate(newChatPath(pid))} css={railBtn(pathname.includes('/chat'))}>
+              <MessageSquare size={18} />
             </Box>
           </Tooltip>
-        ))}
-      </VStack>
+          <Tooltip content="Code">
+            <Box as="button" onClick={() => navigate(codePath(pid))} css={railBtn(pathname.endsWith('/code'))}>
+              <FolderTree size={18} />
+            </Box>
+          </Tooltip>
+          <Tooltip content="Run">
+            <Box as="button" onClick={() => navigate(runPath(pid))} css={railBtn(pathname.endsWith('/run'))}>
+              <Play size={18} />
+            </Box>
+          </Tooltip>
+          <Tooltip content="Templates">
+            <Box as="button" onClick={() => navigate(templatesPath(pid))} css={railBtn(pathname.endsWith('/templates'))}>
+              <Sparkles size={18} />
+            </Box>
+          </Tooltip>
+          <Box css={{ flex: 1 }} />
+          <Tooltip content="History">
+            <Box as="button" onClick={() => navigate(activityPath(pid))} css={railBtn(pathname.endsWith('/activity'))}>
+              <History size={18} />
+            </Box>
+          </Tooltip>
+        </VStack>
+      ) : (
+        <Box css={{ flex: 1 }} />
+      )}
 
-      {/* Bottom */}
+      {/* Bottom — always visible */}
       <VStack
         gap={1}
         css={{
@@ -129,21 +171,12 @@ export function NavRail() {
           flexShrink: 0,
         }}
       >
-        {projectBottomNav.map(({ path, match, icon: Icon, label }) => (
-          <Tooltip key={path} content={label}>
-            <Box as="button" onClick={() => navigate(path)} css={railBtn(match)}>
-              <Icon size={18} />
-            </Box>
-          </Tooltip>
-        ))}
-
         <Tooltip content="Settings">
           <Box as="button" onClick={() => navigate(Path.Settings)} css={railBtn(pathname === '/settings')}>
             <Settings size={17} />
           </Box>
         </Tooltip>
 
-        {/* Theme toggle */}
         <Tooltip content={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
           <Box
             as="button"
@@ -172,7 +205,6 @@ export function NavRail() {
           </Box>
         </Tooltip>
 
-        {/* Connection dot */}
         <Box
           css={{
             width: '6px',

@@ -44,7 +44,7 @@ export function ImportExisting() {
     setRegistering(true)
     try {
       const project = await register(selectedPath, projectName || validation.name)
-      navigate(`/${project.id}/chat/new`)
+      navigate(`/${project.id}`)
     } catch {
       setRegistering(false)
     }

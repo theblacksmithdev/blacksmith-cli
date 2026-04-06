@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { Outlet, useParams, useNavigate } from 'react-router-dom'
 import { useProjects } from '@/hooks/use-projects'
 import { useProjectStore } from '@/stores/project-store'
+import { resetProjectStores } from '@/stores/reset'
 
 /**
  * Wrapper layout for project-scoped routes.
  * Reads :projectId from URL and activates that project.
+ * Resets all project-scoped stores when switching projects.
  */
 export function ProjectLayout() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -15,8 +17,8 @@ export function ProjectLayout() {
 
   useEffect(() => {
     if (projectId && projectId !== activeProject?.id) {
+      resetProjectStores()
       activate(projectId).catch(() => {
-        // Project not found — redirect to dashboard
         navigate('/', { replace: true })
       })
     }

@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 import path from 'node:path'
 import fs from 'node:fs'
-import type { ProcessInfo, RunnerTarget, OutputCallback } from './types.js'
+import type { ProcessInfo, RunnerTarget } from './types.js'
 import { findAvailablePort } from './port-utils.js'
 import { loadProjectConfig } from './config.js'
 

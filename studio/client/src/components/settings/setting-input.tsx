@@ -1,5 +1,3 @@
-import { Box } from '@chakra-ui/react'
-
 interface SettingInputProps {
   value: string | number
   type?: 'text' | 'number'

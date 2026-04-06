@@ -46,7 +46,7 @@ export const useChatStore = create<ChatState>((set) => ({
           id: crypto.randomUUID(),
           role: 'assistant',
           content: text,
-          toolCalls: toolCalls || s.currentToolCalls.length > 0 ? [...s.currentToolCalls] : undefined,
+          toolCalls: toolCalls || (s.currentToolCalls.length > 0 ? [...s.currentToolCalls] : undefined),
           timestamp: new Date().toISOString(),
         },
       ],

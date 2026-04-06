@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/api/client'
 import { queryKeys } from '@/api/query-keys'
 import { useSessionStore } from '@/stores/session-store'
+import { useProjectStore } from '@/stores/project-store'
 import { useChatStore } from '@/stores/chat-store'
 import type { Session, SessionSummary } from '@/types'
 
@@ -9,10 +10,12 @@ export function useSessions() {
   const queryClient = useQueryClient()
   const { setActiveSession } = useSessionStore()
   const { loadMessages, clearMessages } = useChatStore()
+  const activeProject = useProjectStore((s) => s.activeProject)
 
   const sessionsQuery = useQuery({
     queryKey: queryKeys.sessions,
     queryFn: () => api.get<SessionSummary[]>('/sessions'),
+    enabled: !!activeProject,
   })
 
   const createMutation = useMutation({
