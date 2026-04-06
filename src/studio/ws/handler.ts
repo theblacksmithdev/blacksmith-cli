@@ -1,7 +1,7 @@
 import type { Server as SocketServer } from 'socket.io'
 import crypto from 'node:crypto'
 import { PROMPT_SEND, PROMPT_CANCEL, CLAUDE_MESSAGE, CLAUDE_TOOL_USE, CLAUDE_DONE, CLAUDE_ERROR } from './events.js'
-import type { ClaudeManager } from '../services/claude.js'
+import type { ClaudeManager } from '../services/claude/index.js'
 import type { SessionManager } from '../services/sessions.js'
 
 export function setupSocketHandlers(

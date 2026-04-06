@@ -6,7 +6,7 @@ import { Server as SocketServer } from 'socket.io'
 import { createApiRouter } from './routes/api.js'
 import { createStaticRouter } from './routes/static.js'
 import { setupSocketHandlers } from './ws/handler.js'
-import { ClaudeManager } from './services/claude.js'
+import { ClaudeManager } from './services/claude/index.js'
 import { SessionManager } from './services/sessions.js'
 
 const __filename = fileURLToPath(import.meta.url)
