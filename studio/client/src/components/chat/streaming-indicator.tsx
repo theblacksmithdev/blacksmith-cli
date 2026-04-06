@@ -51,10 +51,6 @@ export function StreamingIndicator({ partialMessage }: StreamingIndicatorProps) 
                   borderRadius: '50%',
                   background: 'var(--studio-text-secondary)',
                   animation: `dotPulse 1.4s ease-in-out ${i * 0.16}s infinite`,
-                  '@keyframes dotPulse': {
-                    '0%, 100%': { opacity: 0.2, transform: 'scale(0.8)' },
-                    '50%': { opacity: 1, transform: 'scale(1)' },
-                  },
                 }}
               />
             ))}

@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/shared/empty-state'
 import { PageContainer } from '@/components/shared/page-container'
 import { useSessions } from '@/hooks/use-sessions'
 import { useSessionStore } from '@/stores/session-store'
+import { useProjectStore } from '@/stores/project-store'
 import { chatPath } from '@/router/paths'
 
 function groupSessionsByDate(sessions: any[]) {
@@ -35,11 +36,13 @@ function groupSessionsByDate(sessions: any[]) {
 export function ActivityLog() {
   const { sessions, loadSession, deleteSession } = useSessions()
   const activeSessionId = useSessionStore((s) => s.activeSessionId)
+  const activeProject = useProjectStore((s) => s.activeProject)
   const navigate = useNavigate()
 
   const handleSelect = async (id: string) => {
+    if (!activeProject) return
     await loadSession(id)
-    navigate(chatPath(id))
+    navigate(chatPath(activeProject.id, id))
   }
 
   if (sessions.length === 0) {

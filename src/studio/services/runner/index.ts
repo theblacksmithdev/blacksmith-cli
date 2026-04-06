@@ -5,23 +5,26 @@ import { spawnFrontend } from './spawn-frontend.js'
 export type { RunnerTarget, RunnerStatus, OutputCallback }
 
 export class RunnerManager {
-  private projectRoot: string
   private processes = new Map<RunnerTarget, ProcessInfo>()
   private listeners: OutputCallback[] = []
-
-  constructor(projectRoot: string) {
-    this.projectRoot = projectRoot
-  }
+  private statusListeners: (() => void)[] = []
 
   onOutput(callback: OutputCallback) {
     this.listeners.push(callback)
-    return () => {
-      this.listeners = this.listeners.filter((cb) => cb !== callback)
-    }
+    return () => { this.listeners = this.listeners.filter((cb) => cb !== callback) }
+  }
+
+  onStatusChange(callback: () => void) {
+    this.statusListeners.push(callback)
+    return () => { this.statusListeners = this.statusListeners.filter((cb) => cb !== callback) }
   }
 
   private emit(source: RunnerTarget, line: string) {
     for (const cb of this.listeners) cb(source, line)
+  }
+
+  private emitStatus() {
+    for (const cb of this.statusListeners) cb()
   }
 
   getStatus() {
@@ -33,59 +36,40 @@ export class RunnerManager {
     }
   }
 
-  async startBackend(): Promise<void> {
+  async startBackend(projectRoot: string): Promise<void> {
     await spawnBackend(
-      this.projectRoot,
+      projectRoot,
       this.processes,
       (source, line) => this.emit(source, line),
       () => this.emitStatus(),
     )
   }
 
-  async startFrontend(): Promise<void> {
+  async startFrontend(projectRoot: string): Promise<void> {
     await spawnFrontend(
-      this.projectRoot,
+      projectRoot,
       this.processes,
       (source, line) => this.emit(source, line),
       () => this.emitStatus(),
     )
   }
 
-  async startAll(): Promise<void> {
-    await Promise.all([this.startBackend(), this.startFrontend()])
+  async startAll(projectRoot: string): Promise<void> {
+    await Promise.all([this.startBackend(projectRoot), this.startFrontend(projectRoot)])
   }
 
   stopBackend(): void {
     const info = this.processes.get('backend')
-    if (info) {
-      this.emit('backend', '[studio] Stopping Django...')
-      info.process.kill('SIGTERM')
-    }
+    if (info) { this.emit('backend', '[studio] Stopping Django...'); info.process.kill('SIGTERM') }
   }
 
   stopFrontend(): void {
     const info = this.processes.get('frontend')
-    if (info) {
-      this.emit('frontend', '[studio] Stopping Vite...')
-      info.process.kill('SIGTERM')
-    }
+    if (info) { this.emit('frontend', '[studio] Stopping Vite...'); info.process.kill('SIGTERM') }
   }
 
   stopAll(): void {
     this.stopBackend()
     this.stopFrontend()
-  }
-
-  private statusListeners: (() => void)[] = []
-
-  onStatusChange(callback: () => void) {
-    this.statusListeners.push(callback)
-    return () => {
-      this.statusListeners = this.statusListeners.filter((cb) => cb !== callback)
-    }
-  }
-
-  private emitStatus() {
-    for (const cb of this.statusListeners) cb()
   }
 }

@@ -10,19 +10,19 @@ import { ClaudeManager } from './services/claude/index.js'
 import { SessionManager } from './services/sessions.js'
 import { SettingsManager } from './services/settings.js'
 import { RunnerManager } from './services/runner/index.js'
+import { ProjectManager } from './services/projects.js'
 import { closeDatabase } from './db/index.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 function getStudioClientDir(): string {
-  // Walk up from dist/ to package root, then into studio/dist/client
   const packageRoot = path.resolve(__dirname, '..')
   return path.join(packageRoot, 'studio', 'dist', 'client')
 }
 
 export interface StudioOptions {
-  projectRoot: string
+  projectRoot?: string
   port: number
 }
 
@@ -34,15 +34,20 @@ export async function createStudioServer({ projectRoot, port }: StudioOptions): 
   app.use(express.json())
 
   const server = http.createServer(app)
-  const io = new SocketServer(server, {
-    cors: { origin: '*' },
-  })
+  const io = new SocketServer(server, { cors: { origin: '*' } })
 
-  // Services
-  const claudeManager = new ClaudeManager(projectRoot)
-  const sessionManager = new SessionManager(projectRoot)
-  const settingsManager = new SettingsManager(projectRoot)
-  const runnerManager = new RunnerManager(projectRoot)
+  // Services — no longer tied to a single projectRoot
+  const projectManager = new ProjectManager()
+  const claudeManager = new ClaudeManager()
+  const sessionManager = new SessionManager()
+  const settingsManager = new SettingsManager()
+  const runnerManager = new RunnerManager()
+
+  // Register initial project if provided
+  if (projectRoot) {
+    const project = projectManager.register(projectRoot)
+    console.log(`[studio] Registered project: ${project.name} (${project.path})`)
+  }
 
   // Check Claude availability
   const claudeStatus = await claudeManager.checkInstalled()
@@ -53,17 +58,16 @@ export async function createStudioServer({ projectRoot, port }: StudioOptions): 
   }
 
   // Routes
-  app.use(createApiRouter(projectRoot, sessionManager, claudeManager, settingsManager, runnerManager))
+  app.use(createApiRouter(projectManager, sessionManager, claudeManager, settingsManager, runnerManager))
 
   // WebSocket
-  setupSocketHandlers(io, claudeManager, sessionManager, settingsManager, runnerManager)
+  setupSocketHandlers(io, projectManager, claudeManager, sessionManager, settingsManager, runnerManager)
 
-  // Static files (React SPA) — must come after API routes
+  // Static files
   const clientDir = getStudioClientDir()
   console.log(`[studio] Serving client from: ${clientDir}`)
   app.use(createStaticRouter(clientDir))
 
-  // Close DB on server close
   server.on('close', () => {
     runnerManager.stopAll()
     closeDatabase()
@@ -73,7 +77,6 @@ export async function createStudioServer({ projectRoot, port }: StudioOptions): 
   return new Promise((resolve, reject) => {
     server.listen(port, () => {
       console.log(`[studio] Server listening on port ${port}`)
-      console.log(`[studio] Project root: ${projectRoot}`)
       resolve({ server, port })
     })
     server.on('error', reject)

@@ -8,6 +8,7 @@ export type { ClaudeInstallStatus, ChunkCallback } from './types.js'
 export interface SendPromptOptions {
   sessionId: string
   prompt: string
+  projectRoot: string
   model?: string
   maxBudget?: number | null
   permissionMode?: string
@@ -16,14 +17,9 @@ export interface SendPromptOptions {
 
 export class ClaudeManager {
   private processes = new Map<string, ChildProcess>()
-  private projectRoot: string
 
-  constructor(projectRoot: string) {
-    this.projectRoot = projectRoot
-  }
-
-  checkInstalled(): Promise<ClaudeInstallStatus> {
-    return checkClaudeInstalled(this.projectRoot)
+  async checkInstalled(cwd?: string): Promise<ClaudeInstallStatus> {
+    return checkClaudeInstalled(cwd || process.cwd())
   }
 
   async sendPrompt(
@@ -31,7 +27,7 @@ export class ClaudeManager {
     onChunk: ChunkCallback,
   ): Promise<void> {
     const { promise, process } = spawnClaudePrompt(
-      { ...options, projectRoot: this.projectRoot },
+      options,
       onChunk,
     )
 

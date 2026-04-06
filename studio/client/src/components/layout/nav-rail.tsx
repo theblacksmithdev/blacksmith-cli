@@ -10,11 +10,21 @@ import {
   Anvil,
   Sun,
   Moon,
+  LayoutDashboard,
 } from 'lucide-react'
 import { Tooltip } from '@/components/shared/tooltip'
 import { useUiStore } from '@/stores/ui-store'
+import { useProjectStore } from '@/stores/project-store'
 import { useThemeMode } from '@/hooks/use-theme-mode'
-import { Path } from '@/router/paths'
+import { useProjects } from '@/hooks/use-projects'
+import {
+  Path,
+  newChatPath,
+  codePath,
+  runPath,
+  templatesPath,
+  activityPath,
+} from '@/router/paths'
 
 const railBtn = (active = false) => ({
   width: '36px',
@@ -34,23 +44,29 @@ const railBtn = (active = false) => ({
   },
 })
 
-const topNav = [
-  { path: Path.Home, match: (p: string) => p === '/' || p.startsWith('/chat'), icon: MessageSquare, label: 'Chat' },
-  { path: Path.Code, match: (p: string) => p === '/code', icon: FolderTree, label: 'Code' },
-  { path: Path.Run, match: (p: string) => p === '/run', icon: Play, label: 'Run' },
-  { path: Path.Templates, match: (p: string) => p === '/templates', icon: Sparkles, label: 'Templates' },
-] as const
-
-const bottomNav = [
-  { path: Path.Activity, match: (p: string) => p === '/activity', icon: History, label: 'History' },
-  { path: Path.Settings, match: (p: string) => p === '/settings', icon: Settings, label: 'Settings' },
-] as const
-
 export function NavRail() {
   const navigate = useNavigate()
   const location = useLocation()
   const connectionStatus = useUiStore((s) => s.connectionStatus)
+  const activeProject = useProjectStore((s) => s.activeProject)
   const { mode, toggle: toggleTheme } = useThemeMode()
+
+  useProjects() // Load projects on mount
+
+  const pid = activeProject?.id
+  const pathname = location.pathname
+
+  // Project-scoped nav items — only render when a project is active
+  const projectNav = pid ? [
+    { path: newChatPath(pid), match: pathname.includes('/chat'), icon: MessageSquare, label: 'Chat' },
+    { path: codePath(pid), match: pathname.endsWith('/code'), icon: FolderTree, label: 'Code' },
+    { path: runPath(pid), match: pathname.endsWith('/run'), icon: Play, label: 'Run' },
+    { path: templatesPath(pid), match: pathname.endsWith('/templates'), icon: Sparkles, label: 'Templates' },
+  ] : []
+
+  const projectBottomNav = pid ? [
+    { path: activityPath(pid), match: pathname.endsWith('/activity'), icon: History, label: 'History' },
+  ] : []
 
   return (
     <Box
@@ -68,11 +84,11 @@ export function NavRail() {
         paddingBottom: '10px',
       }}
     >
-      {/* Logo — new chat */}
-      <Tooltip content="New chat">
+      {/* Logo — dashboard */}
+      <Tooltip content="Dashboard">
         <Box
           as="button"
-          onClick={() => navigate(Path.NewChat)}
+          onClick={() => navigate(Path.Home)}
           css={{
             width: '32px',
             height: '32px',
@@ -92,18 +108,18 @@ export function NavRail() {
         </Box>
       </Tooltip>
 
-      {/* Top nav */}
+      {/* Project tools — only when project is active */}
       <VStack gap={1} flex={1}>
-        {topNav.map(({ path, match, icon: Icon, label }) => (
+        {projectNav.map(({ path, match, icon: Icon, label }) => (
           <Tooltip key={path} content={label}>
-            <Box as="button" onClick={() => navigate(path)} css={railBtn(match(location.pathname))}>
+            <Box as="button" onClick={() => navigate(path)} css={railBtn(match)}>
               <Icon size={18} />
             </Box>
           </Tooltip>
         ))}
       </VStack>
 
-      {/* Bottom nav */}
+      {/* Bottom */}
       <VStack
         gap={1}
         css={{
@@ -113,13 +129,19 @@ export function NavRail() {
           flexShrink: 0,
         }}
       >
-        {bottomNav.map(({ path, match, icon: Icon, label }) => (
+        {projectBottomNav.map(({ path, match, icon: Icon, label }) => (
           <Tooltip key={path} content={label}>
-            <Box as="button" onClick={() => navigate(path)} css={railBtn(match(location.pathname))}>
+            <Box as="button" onClick={() => navigate(path)} css={railBtn(match)}>
               <Icon size={18} />
             </Box>
           </Tooltip>
         ))}
+
+        <Tooltip content="Settings">
+          <Box as="button" onClick={() => navigate(Path.Settings)} css={railBtn(pathname === '/settings')}>
+            <Settings size={17} />
+          </Box>
+        </Tooltip>
 
         {/* Theme toggle */}
         <Tooltip content={mode === 'dark' ? 'Light mode' : 'Dark mode'}>

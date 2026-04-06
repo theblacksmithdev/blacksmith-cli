@@ -1,28 +1,43 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { StudioLayout } from '@/components/layout/studio-layout'
+import { ProjectLayout } from '@/components/layout/project-layout'
 import { Path } from './paths'
 
-import HomePage from '@/pages/chat/home'
+import DashboardPage from '@/pages/dashboard'
+import ProjectsPage from '@/pages/projects'
+import AddProjectPage from '@/pages/projects/add'
+import SettingsPage from '@/pages/settings'
 import NewChatPage from '@/pages/chat/new'
 import ChatPage from '@/pages/chat'
 import FilesPage from '@/pages/files'
 import RunPage from '@/pages/run'
 import TemplatesPage from '@/pages/templates'
 import ActivityPage from '@/pages/activity'
-import SettingsPage from '@/pages/settings'
 
 export const router = createBrowserRouter([
+  // Full-screen routes (no nav rail)
+  { path: Path.AddProject, element: <AddProjectPage /> },
+
+  // Studio layout routes
   {
     element: <StudioLayout />,
     children: [
-      { path: Path.Home, element: <HomePage /> },
-      { path: Path.NewChat, element: <NewChatPage /> },
-      { path: Path.Chat, element: <ChatPage /> },
-      { path: Path.Code, element: <FilesPage /> },
-      { path: Path.Run, element: <RunPage /> },
-      { path: Path.Templates, element: <TemplatesPage /> },
-      { path: Path.Activity, element: <ActivityPage /> },
+      { path: Path.Home, element: <DashboardPage /> },
+      { path: Path.Projects, element: <ProjectsPage /> },
       { path: Path.Settings, element: <SettingsPage /> },
+
+      {
+        path: '/:projectId',
+        element: <ProjectLayout />,
+        children: [
+          { path: 'chat/new', element: <NewChatPage /> },
+          { path: 'chat/:sessionId', element: <ChatPage /> },
+          { path: 'code', element: <FilesPage /> },
+          { path: 'run', element: <RunPage /> },
+          { path: 'templates', element: <TemplatesPage /> },
+          { path: 'activity', element: <ActivityPage /> },
+        ],
+      },
     ],
   },
 ])

@@ -10,6 +10,7 @@ import { queryKeys } from '@/api/query-keys'
 import { useClaude } from '@/hooks/use-claude'
 import { useSessions } from '@/hooks/use-sessions'
 import { useSessionStore } from '@/stores/session-store'
+import { useProjectStore } from '@/stores/project-store'
 import { chatPath } from '@/router/paths'
 import type { PromptTemplate } from '@/types'
 
@@ -30,14 +31,17 @@ export function TemplateGrid() {
     onOpen()
   }
 
+  const activeProject = useProjectStore((s) => s.activeProject)
+
   const handleSubmit = async (prompt: string) => {
+    if (!activeProject) return
     let sessionId = activeSessionId
     if (!sessionId) {
       const session = await createSession()
       sessionId = session.id
     }
     sendPrompt(prompt, sessionId!)
-    navigate(chatPath(sessionId!))
+    navigate(chatPath(activeProject.id, sessionId!))
   }
 
   return (

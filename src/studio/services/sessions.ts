@@ -1,29 +1,26 @@
 import crypto from 'node:crypto'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and } from 'drizzle-orm'
 import { getDatabase } from '../db/index.js'
 import { sessions, messages, toolCalls } from '../db/schema.js'
 import type { Session, SessionSummary, StoredMessage, ToolCall } from '../types.js'
 
 export class SessionManager {
-  private projectRoot: string
-
-  constructor(projectRoot: string) {
-    this.projectRoot = projectRoot
-    // Ensure DB is initialized
-    getDatabase(projectRoot)
+  constructor() {
+    getDatabase()
   }
 
   private get db() {
-    return getDatabase(this.projectRoot)
+    return getDatabase()
   }
 
-  createSession(name?: string): Session {
+  createSession(projectId: string, name?: string): Session {
     const id = crypto.randomUUID()
     const now = new Date().toISOString()
     const sessionName = name || `Session ${new Date().toLocaleDateString()}`
 
     this.db.insert(sessions).values({
       id,
+      projectId,
       name: sessionName,
       createdAt: now,
       updatedAt: now,
@@ -77,10 +74,11 @@ export class SessionManager {
     }
   }
 
-  listSessions(): SessionSummary[] {
+  listSessions(projectId: string): SessionSummary[] {
     const rows = this.db
       .select()
       .from(sessions)
+      .where(eq(sessions.projectId, projectId))
       .orderBy(desc(sessions.updatedAt))
       .all()
 
@@ -112,7 +110,6 @@ export class SessionManager {
   }
 
   addMessage(sessionId: string, message: StoredMessage): void {
-    // Insert message
     this.db.insert(messages).values({
       id: message.id,
       sessionId,
@@ -121,7 +118,6 @@ export class SessionManager {
       timestamp: message.timestamp,
     }).run()
 
-    // Insert tool calls
     if (message.toolCalls) {
       for (const tc of message.toolCalls) {
         this.db.insert(toolCalls).values({
@@ -134,7 +130,6 @@ export class SessionManager {
       }
     }
 
-    // Update session timestamp
     this.db.update(sessions)
       .set({ updatedAt: new Date().toISOString() })
       .where(eq(sessions.id, sessionId))
@@ -144,20 +139,16 @@ export class SessionManager {
   renameSession(id: string, name: string): Session | null {
     const existing = this.db.select().from(sessions).where(eq(sessions.id, id)).get()
     if (!existing) return null
-
     this.db.update(sessions)
       .set({ name, updatedAt: new Date().toISOString() })
       .where(eq(sessions.id, id))
       .run()
-
     return this.getSession(id)
   }
 
   deleteSession(id: string): boolean {
     const existing = this.db.select().from(sessions).where(eq(sessions.id, id)).get()
     if (!existing) return false
-
-    // Cascade deletes messages and tool_calls via foreign keys
     this.db.delete(sessions).where(eq(sessions.id, id)).run()
     return true
   }

@@ -5,6 +5,7 @@ import { PageContainer } from '@/components/shared/page-container'
 import { useClaude } from '@/hooks/use-claude'
 import { useSessions } from '@/hooks/use-sessions'
 import { useChatStore } from '@/stores/chat-store'
+import { useProjectStore } from '@/stores/project-store'
 import { chatPath } from '@/router/paths'
 import { HomeHero } from './home-hero'
 import { QuickActions } from './quick-actions'
@@ -15,10 +16,13 @@ export function HomeView() {
   const { isStreaming } = useChatStore()
   const navigate = useNavigate()
 
+  const activeProject = useProjectStore((s) => s.activeProject)
+
   const handleSend = async (text: string) => {
+    if (!activeProject) return
     const session = await createSession()
     sendPrompt(text, session.id)
-    navigate(chatPath(session.id))
+    navigate(chatPath(activeProject.id, session.id))
   }
 
   return (

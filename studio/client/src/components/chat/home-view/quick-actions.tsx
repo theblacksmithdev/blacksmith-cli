@@ -9,7 +9,8 @@ import {
   Bug,
   Sparkles,
 } from 'lucide-react'
-import { Path } from '@/router/paths'
+import { useProjectStore } from '@/stores/project-store'
+import { templatesPath } from '@/router/paths'
 
 const quickActions = [
   {
@@ -56,6 +57,7 @@ interface QuickActionsProps {
 }
 
 export function QuickActions({ onSend, onNavigate }: QuickActionsProps) {
+  const activeProject = useProjectStore((s) => s.activeProject)
   return (
     <Box css={{ width: '100%' }}>
       <Text
@@ -157,7 +159,7 @@ export function QuickActions({ onSend, onNavigate }: QuickActionsProps) {
 
       <Box
         as="button"
-        onClick={() => onNavigate(Path.Templates)}
+        onClick={() => activeProject && onNavigate(templatesPath(activeProject.id))}
         css={{
           display: 'flex',
           alignItems: 'center',

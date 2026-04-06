@@ -95,6 +95,15 @@ const config = defineConfig({
     '*::-webkit-scrollbar-thumb': { background: 'var(--studio-scrollbar)', borderRadius: '3px' },
     '*::-webkit-scrollbar-thumb:hover': { background: 'var(--studio-scrollbar-hover)' },
     '::selection': { background: 'var(--studio-selection)', color: 'var(--studio-text-primary)' },
+
+    '@keyframes pickerFadeIn': { from: { opacity: 0 }, to: { opacity: 1 } },
+    '@keyframes pickerSlideUp': {
+      from: { opacity: 0, transform: 'translate(-50%, -47%)' },
+      to: { opacity: 1, transform: 'translate(-50%, -50%)' },
+    },
+    '@keyframes shimmer': { '0%,100%': { opacity: 0.3 }, '50%': { opacity: 0.6 } },
+    '@keyframes fadeIn': { from: { opacity: 0 }, to: { opacity: 1 } },
+    '@keyframes dotPulse': { '0%,100%': { opacity: 0.3, transform: 'scale(0.8)' }, '50%': { opacity: 1, transform: 'scale(1)' } },
   },
 })
 

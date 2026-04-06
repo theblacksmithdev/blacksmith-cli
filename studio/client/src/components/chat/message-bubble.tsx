@@ -17,10 +17,6 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         justifyContent: isUser ? 'flex-end' : 'flex-start',
         padding: '4px 0',
         animation: 'fadeIn 0.3s ease',
-        '@keyframes fadeIn': {
-          from: { opacity: 0, transform: 'translateY(4px)' },
-          to: { opacity: 1, transform: 'translateY(0)' },
-        },
       }}
     >
       <Box

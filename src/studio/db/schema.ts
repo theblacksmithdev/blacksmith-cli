@@ -1,10 +1,24 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 
 /**
- * Sessions — a conversation thread.
+ * Projects — registered project directories.
+ */
+export const projects = sqliteTable('projects', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  path: text('path').notNull().unique(),
+  createdAt: text('created_at').notNull(),
+  lastOpenedAt: text('last_opened_at').notNull(),
+})
+
+/**
+ * Sessions — a conversation thread, scoped to a project.
  */
 export const sessions = sqliteTable('sessions', {
   id: text('id').primaryKey(),
+  projectId: text('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
@@ -33,14 +47,17 @@ export const toolCalls = sqliteTable('tool_calls', {
     .references(() => messages.id, { onDelete: 'cascade' }),
   toolId: text('tool_id').notNull(),
   toolName: text('tool_name').notNull(),
-  input: text('input').notNull(), // JSON stringified
+  input: text('input').notNull(),
   output: text('output'),
 })
 
 /**
- * Settings — key-value store for user preferences.
+ * Settings — key-value store, scoped to a project.
  */
 export const settings = sqliteTable('settings', {
-  key: text('key').primaryKey(),
+  projectId: text('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
+  key: text('key').notNull(),
   value: text('value').notNull(),
 })
