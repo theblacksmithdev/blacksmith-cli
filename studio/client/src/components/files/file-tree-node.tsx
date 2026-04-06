@@ -16,6 +16,7 @@ const extColorMap: Record<string, string> = {
   md: '#b4b4b4',
   yml: '#b4b4b4',
   yaml: '#b4b4b4',
+  hbs: '#f97316',
 }
 
 function getFileColor(name: string): string {
@@ -29,13 +30,34 @@ interface FileTreeNodeProps {
   selectedFile: string | null
   changedFiles: Set<string>
   onSelectFile: (path: string) => void
+  searchQuery?: string
 }
 
-export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelectFile }: FileTreeNodeProps) {
-  const [expanded, setExpanded] = useState(depth < 2)
+export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelectFile, searchQuery = '' }: FileTreeNodeProps) {
+  const [expanded, setExpanded] = useState(depth < 1 || (!!searchQuery && depth < 4))
   const isDir = node.type === 'directory'
   const isSelected = node.path === selectedFile
   const isChanged = changedFiles.has(node.path)
+
+  // Filter children when searching
+  const visibleChildren = isDir && node.children
+    ? searchQuery
+      ? node.children.filter((child) => {
+          const q = searchQuery.toLowerCase()
+          if (child.name.toLowerCase().includes(q)) return true
+          if (child.type === 'directory' && child.children) {
+            return child.children.some(function match(n: FileNode): boolean {
+              if (n.name.toLowerCase().includes(q)) return true
+              return n.children?.some(match) ?? false
+            })
+          }
+          return false
+        })
+      : node.children
+    : []
+
+  // Auto-expand when searching
+  const isExpanded = searchQuery ? true : expanded
 
   return (
     <Box>
@@ -48,53 +70,34 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
         css={{
           display: 'flex',
           alignItems: 'center',
-          gap: '4px',
+          gap: '3px',
           width: '100%',
-          paddingLeft: `${depth * 16 + 8}px`,
-          paddingRight: '8px',
-          paddingTop: '3px',
-          paddingBottom: '3px',
+          height: '28px',
+          paddingLeft: `${depth * 14 + 10}px`,
+          paddingRight: '10px',
           cursor: 'pointer',
           background: isSelected ? 'var(--studio-bg-hover)' : 'transparent',
-          transition: 'all 0.15s ease',
+          transition: 'background 0.1s ease',
           border: 'none',
-          borderLeftStyle: 'solid',
-          borderLeftWidth: '2px',
-          borderLeftColor: isSelected ? 'var(--studio-text-primary)' : 'transparent',
-          position: 'relative',
+          borderLeft: isSelected ? '2px solid var(--studio-text-primary)' : '2px solid transparent',
           textAlign: 'left',
           '&:hover': {
-            background: isSelected ? 'var(--studio-bg-hover)' : 'rgba(255,255,255,0.03)',
+            background: isSelected ? 'var(--studio-bg-hover)' : 'var(--studio-bg-surface)',
           },
         }}
       >
-        {/* Indent guide lines */}
-        {depth > 0 && Array.from({ length: depth }).map((_, i) => (
-          <Box
-            key={i}
-            css={{
-              position: 'absolute',
-              left: `${i * 16 + 14}px`,
-              top: 0,
-              bottom: 0,
-              width: '1px',
-              background: 'var(--studio-border)',
-            }}
-          />
-        ))}
-
         {isDir ? (
           <>
-            <Box css={{ color: 'var(--studio-text-tertiary)', flexShrink: 0, display: 'flex' }}>
-              {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            <Box css={{ color: 'var(--studio-text-muted)', flexShrink: 0, display: 'flex', width: '14px', justifyContent: 'center' }}>
+              {isExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
             </Box>
             <Box css={{ color: '#f59e0b', flexShrink: 0, display: 'flex' }}>
-              {expanded ? <FolderOpen size={14} /> : <Folder size={14} />}
+              {isExpanded ? <FolderOpen size={14} /> : <Folder size={14} />}
             </Box>
           </>
         ) : (
           <>
-            <Box css={{ width: '12px', flexShrink: 0 }} />
+            <Box css={{ width: '14px', flexShrink: 0 }} />
             <Box css={{ color: getFileColor(node.name), flexShrink: 0, display: 'flex' }}>
               <File size={14} />
             </Box>
@@ -109,26 +112,19 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             flex: 1,
-            lineHeight: '20px',
+            marginLeft: '4px',
+            fontWeight: isSelected ? 500 : 400,
           }}
         >
           {node.name}
         </Text>
 
         {isChanged && (
-          <Box
-            css={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: 'var(--studio-warning)',
-              flexShrink: 0,
-            }}
-          />
+          <Box css={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--studio-warning)', flexShrink: 0 }} />
         )}
       </Box>
 
-      {isDir && expanded && node.children?.map((child) => (
+      {isDir && isExpanded && visibleChildren.map((child) => (
         <FileTreeNode
           key={child.path}
           node={child}
@@ -136,6 +132,7 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
           selectedFile={selectedFile}
           changedFiles={changedFiles}
           onSelectFile={onSelectFile}
+          searchQuery={searchQuery}
         />
       ))}
     </Box>

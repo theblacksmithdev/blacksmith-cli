@@ -25,7 +25,7 @@ import { truncate } from '@/lib/format'
 
 const navItems = [
   { path: Path.Templates, icon: Sparkles, label: 'Templates' },
-  { path: Path.Files, icon: FolderTree, label: 'Files' },
+  { path: Path.Code, icon: FolderTree, label: 'Code' },
   { path: Path.Activity, icon: History, label: 'Activity' },
   { path: Path.Settings, icon: Settings, label: 'Settings' },
 ] as const

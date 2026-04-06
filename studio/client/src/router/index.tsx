@@ -14,7 +14,7 @@ export const router = createBrowserRouter([
     children: [
       { path: Path.Chat, element: <ChatPage /> },
       { path: Path.Templates, element: <TemplatesPage /> },
-      { path: Path.Files, element: <FilesPage /> },
+      { path: Path.Code, element: <FilesPage /> },
       { path: Path.Activity, element: <ActivityPage /> },
       { path: Path.Settings, element: <SettingsPage /> },
     ],

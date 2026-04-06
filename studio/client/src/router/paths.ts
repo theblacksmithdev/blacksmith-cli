@@ -1,7 +1,7 @@
 export const Path = {
   Chat: '/',
   Templates: '/templates',
-  Files: '/files',
+  Code: '/code',
   Activity: '/activity',
   Settings: '/settings',
 } as const

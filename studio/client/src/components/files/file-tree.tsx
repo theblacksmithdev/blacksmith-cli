@@ -7,12 +7,25 @@ interface FileTreeProps {
   selectedFile: string | null
   changedFiles: Set<string>
   onSelectFile: (path: string) => void
+  searchQuery?: string
 }
 
-export function FileTree({ tree, selectedFile, changedFiles, onSelectFile }: FileTreeProps) {
+function matchesSearch(node: FileNode, query: string): boolean {
+  if (!query) return true
+  const q = query.toLowerCase()
+  if (node.name.toLowerCase().includes(q)) return true
+  if (node.children) {
+    return node.children.some((child) => matchesSearch(child, q))
+  }
+  return false
+}
+
+export function FileTree({ tree, selectedFile, changedFiles, onSelectFile, searchQuery = '' }: FileTreeProps) {
+  const filteredChildren = tree.children?.filter((child) => matchesSearch(child, searchQuery))
+
   return (
-    <Box overflowY="auto" py={1}>
-      {tree.children?.map((child) => (
+    <Box css={{ paddingTop: '2px' }}>
+      {filteredChildren?.map((child) => (
         <FileTreeNode
           key={child.path}
           node={child}
@@ -20,6 +33,7 @@ export function FileTree({ tree, selectedFile, changedFiles, onSelectFile }: Fil
           selectedFile={selectedFile}
           changedFiles={changedFiles}
           onSelectFile={onSelectFile}
+          searchQuery={searchQuery}
         />
       ))}
     </Box>
