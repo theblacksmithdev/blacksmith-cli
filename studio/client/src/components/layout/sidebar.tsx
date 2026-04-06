@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Box, Text, VStack, HStack } from '@chakra-ui/react'
 import { Tooltip } from '@/components/shared/tooltip'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -77,14 +76,9 @@ export function Sidebar() {
   const connectionStatus = useUiStore((s) => s.connectionStatus)
   const collapsed = useUiStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useUiStore((s) => s.toggleSidebar)
-  const sessions = useSessionStore((s) => s.sessions)
   const activeSessionId = useSessionStore((s) => s.activeSessionId)
-  const { fetchSessions, createSession, loadSession, deleteSession } = useSessions()
+  const { sessions, createSession, loadSession, deleteSession } = useSessions()
   const { mode, toggle: toggleTheme } = useThemeMode()
-
-  useEffect(() => {
-    fetchSessions()
-  }, [fetchSessions])
 
   const handleNewChat = () => {
     useChatStore.getState().clearMessages()

@@ -1,5 +1,5 @@
-import { Box, Text, IconButton } from '@chakra-ui/react'
-import { MessageSquare, Trash2 } from 'lucide-react'
+import { Box, Text, HStack } from '@chakra-ui/react'
+import { MessageSquare, Trash2, ArrowRight } from 'lucide-react'
 import { Tooltip } from '@/components/shared/tooltip'
 import { formatDate, truncate } from '@/lib/format'
 import type { SessionSummary } from '@/types'
@@ -20,108 +20,98 @@ export function SessionCard({ session, isActive, onSelect, onDelete }: SessionCa
         display: 'flex',
         alignItems: 'center',
         width: '100%',
-        padding: '14px 16px',
+        padding: '12px 14px',
         background: isActive ? 'var(--studio-bg-hover)' : 'transparent',
         cursor: 'pointer',
-        transition: 'all 0.15s ease',
+        transition: 'all 0.12s ease',
         textAlign: 'left',
-        position: 'relative',
         gap: '12px',
         border: 'none',
-        borderBottomStyle: 'solid',
-        borderBottomWidth: '1px',
-        borderBottomColor: 'var(--studio-border)',
-        borderLeftStyle: 'solid',
-        borderLeftWidth: '2px',
-        borderLeftColor: isActive ? 'var(--studio-text-primary)' : 'transparent',
+        borderBottom: '1px solid var(--studio-border)',
+        '&:last-child': { borderBottom: 'none' },
         '&:hover': {
-          background: 'var(--studio-bg-surface)',
-        },
-        '&:hover .delete-btn': {
-          opacity: 1,
+          background: 'var(--studio-bg-hover)',
+          '& .session-actions': { opacity: 1 },
+          '& .session-arrow': { opacity: 1, transform: 'translateX(0)' },
         },
       }}
     >
+      {/* Icon */}
+      <Box
+        css={{
+          width: '32px',
+          height: '32px',
+          borderRadius: '8px',
+          background: isActive ? 'var(--studio-bg-hover-strong)' : 'var(--studio-bg-surface)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--studio-text-tertiary)',
+          flexShrink: 0,
+        }}
+      >
+        <MessageSquare size={15} />
+      </Box>
+
+      {/* Content */}
       <Box css={{ flex: 1, minWidth: 0 }}>
         <Text
           css={{
-            fontSize: '14px',
+            fontSize: '13px',
             fontWeight: 500,
             color: 'var(--studio-text-primary)',
-            marginBottom: '4px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            letterSpacing: '-0.01em',
+            marginBottom: '2px',
           }}
         >
-          {session.name}
+          {session.lastPrompt ? truncate(session.lastPrompt, 50) : session.name}
         </Text>
-        {session.lastPrompt && (
-          <Text
-            css={{
-              fontSize: '12px',
-              color: 'var(--studio-text-tertiary)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              marginBottom: '4px',
-            }}
-          >
-            {truncate(session.lastPrompt, 60)}
+        <HStack gap={2}>
+          <Text css={{ fontSize: '11px', color: 'var(--studio-text-muted)' }}>
+            {session.messageCount} message{session.messageCount !== 1 ? 's' : ''}
           </Text>
-        )}
-        <Box
-          css={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            fontSize: '11px',
-            color: 'var(--studio-text-tertiary)',
-          }}
-        >
-          <Box css={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <MessageSquare size={10} />
-            <Text css={{ fontSize: '11px', color: 'var(--studio-text-tertiary)' }}>{session.messageCount}</Text>
-          </Box>
-        </Box>
+          <Text css={{ fontSize: '11px', color: 'var(--studio-text-muted)' }}>
+            {formatDate(session.updatedAt)}
+          </Text>
+        </HStack>
       </Box>
 
-      {/* Date on the right */}
-      <Text
-        css={{
-          fontSize: '11px',
-          color: 'var(--studio-text-tertiary)',
-          flexShrink: 0,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {formatDate(session.updatedAt)}
-      </Text>
-
-      {/* Delete button - only shows on hover */}
-      <Tooltip content="Delete session">
-        <IconButton
-          className="delete-btn"
-          aria-label="Delete"
-          variant="ghost"
-          size="xs"
-          onClick={(e) => { e.stopPropagation(); onDelete() }}
+      {/* Actions — hover only */}
+      <HStack gap={1} className="session-actions" css={{ opacity: 0, transition: 'opacity 0.12s ease', flexShrink: 0 }}>
+        <Tooltip content="Delete">
+          <Box
+            as="span"
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); onDelete() }}
+            css={{
+              width: '26px',
+              height: '26px',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--studio-text-muted)',
+              cursor: 'pointer',
+              transition: 'all 0.12s ease',
+              '&:hover': { color: 'var(--studio-error)', background: 'rgba(239,68,68,0.1)' },
+            }}
+          >
+            <Trash2 size={13} />
+          </Box>
+        </Tooltip>
+        <Box
+          className="session-arrow"
           css={{
             opacity: 0,
-            transition: 'all 0.15s ease',
-            color: 'var(--studio-text-tertiary)',
-            borderRadius: '6px',
-            flexShrink: 0,
-            '&:hover': {
-              color: 'var(--studio-error)',
-              background: 'rgba(239,68,68,0.1)',
-            },
+            transform: 'translateX(-4px)',
+            transition: 'all 0.12s ease',
+            color: 'var(--studio-text-muted)',
           }}
         >
-          <Trash2 size={13} />
-        </IconButton>
-      </Tooltip>
+          <ArrowRight size={14} />
+        </Box>
+      </HStack>
     </Box>
   )
 }
