@@ -8,9 +8,10 @@ interface FileViewerProps {
   content: string | null
   language: string
   isChanged: boolean
+  onClose: () => void
 }
 
-export function FileViewer({ filePath, content, language, isChanged }: FileViewerProps) {
+export function FileViewer({ filePath, content, language, isChanged, onClose }: FileViewerProps) {
   const lineCount = (content || '').split('\n').length
 
   return (
@@ -20,6 +21,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
         language={language}
         isChanged={isChanged}
         content={content}
+        onClose={onClose}
       />
 
       {content !== null ? (

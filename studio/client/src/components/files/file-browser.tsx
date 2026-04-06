@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Box, Text, HStack, VStack } from '@chakra-ui/react'
 import { RefreshCw, Search, Code2, FolderTree } from 'lucide-react'
 import { FileTree } from './file-tree'
@@ -8,13 +8,9 @@ import { useFileStore } from '@/stores/file-store'
 import { Tooltip } from '@/components/shared/tooltip'
 
 export function FileBrowser() {
-  const { fetchFileTree, fetchFileContent } = useFiles()
-  const { tree, selectedFile, fileContent, fileLanguage, changedFiles } = useFileStore()
+  const { tree, fetchFileTree, fetchFileContent } = useFiles()
+  const { selectedFile, fileContent, fileLanguage, changedFiles, selectFile } = useFileStore()
   const [searchQuery, setSearchQuery] = useState('')
-
-  useEffect(() => {
-    fetchFileTree()
-  }, [fetchFileTree])
 
   return (
     <Box css={{ height: '100%', display: 'flex', overflow: 'hidden' }}>
@@ -153,6 +149,7 @@ export function FileBrowser() {
             content={fileContent}
             language={fileLanguage}
             isChanged={changedFiles.has(selectedFile)}
+            onClose={() => selectFile(null)}
           />
         ) : (
           <Box

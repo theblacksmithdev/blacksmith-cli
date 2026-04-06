@@ -1,5 +1,5 @@
 import { Box, Text, HStack } from '@chakra-ui/react'
-import { Copy, Check, FileCode, Circle } from 'lucide-react'
+import { Copy, Check, FileCode, Circle, X } from 'lucide-react'
 import { useState } from 'react'
 import { Tooltip } from '@/components/shared/tooltip'
 
@@ -8,9 +8,10 @@ interface TabBarProps {
   language: string
   isChanged: boolean
   content: string | null
+  onClose: () => void
 }
 
-export function TabBar({ filePath, language, isChanged, content }: TabBarProps) {
+export function TabBar({ filePath, language, isChanged, content, onClose }: TabBarProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -53,6 +54,27 @@ export function TabBar({ filePath, language, isChanged, content }: TabBarProps) 
         {isChanged && (
           <Circle size={7} fill="var(--studio-warning)" style={{ color: 'var(--studio-warning)' }} />
         )}
+        <Box
+          as="button"
+          onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClose() }}
+          css={{
+            width: '18px',
+            height: '18px',
+            borderRadius: '4px',
+            border: 'none',
+            background: 'transparent',
+            color: 'var(--studio-text-muted)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            marginLeft: '2px',
+            transition: 'all 0.12s ease',
+            '&:hover': { background: 'var(--studio-bg-hover)', color: 'var(--studio-text-primary)' },
+          }}
+        >
+          <X size={12} />
+        </Box>
       </Box>
 
       <Box css={{ flex: 1 }} />
