@@ -9,7 +9,7 @@ import { Tooltip } from '@/components/shared/tooltip'
 
 export function FileBrowser() {
   const { tree, fetchFileTree, fetchFileContent } = useFiles()
-  const { selectedFile, fileContent, fileLanguage, changedFiles, selectFile } = useFileStore()
+  const { activeTab, openTabs, changedFiles } = useFileStore()
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
@@ -113,7 +113,7 @@ export function FileBrowser() {
           {tree && (
             <FileTree
               tree={tree}
-              selectedFile={selectedFile}
+              selectedFile={activeTab}
               changedFiles={changedFiles}
               onSelectFile={fetchFileContent}
               searchQuery={searchQuery}
@@ -143,14 +143,8 @@ export function FileBrowser() {
 
       {/* Viewer panel */}
       <Box css={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        {selectedFile ? (
-          <FileViewer
-            filePath={selectedFile}
-            content={fileContent}
-            language={fileLanguage}
-            isChanged={changedFiles.has(selectedFile)}
-            onClose={() => selectFile(null)}
-          />
+        {openTabs.length > 0 && activeTab ? (
+          <FileViewer />
         ) : (
           <Box
             css={{

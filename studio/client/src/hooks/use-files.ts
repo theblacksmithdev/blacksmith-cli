@@ -5,7 +5,7 @@ import { useFileStore } from '@/stores/file-store'
 import type { FileNode } from '@/types'
 
 export function useFiles() {
-  const { selectFile, setFileContent } = useFileStore()
+  const { openFile, setTabContent } = useFileStore()
 
   const treeQuery = useQuery({
     queryKey: queryKeys.files,
@@ -13,12 +13,17 @@ export function useFiles() {
   })
 
   const fetchFileContent = async (filePath: string) => {
-    selectFile(filePath)
+    openFile(filePath)
+
+    // Check if content is already cached in the tab
+    const tab = useFileStore.getState().openTabs.find((t) => t.path === filePath)
+    if (tab?.content !== null) return
+
     try {
       const data = await api.get<{ content: string; language: string; size: number }>(
         `/files/content?path=${encodeURIComponent(filePath)}`,
       )
-      setFileContent(data.content, data.language)
+      setTabContent(filePath, data.content, data.language)
     } catch {
       // Ignore errors
     }

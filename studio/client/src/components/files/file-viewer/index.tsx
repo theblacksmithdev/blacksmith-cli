@@ -2,30 +2,30 @@ import { Box, Text } from '@chakra-ui/react'
 import { TabBar } from './tab-bar'
 import { CodeEditor } from './code-editor'
 import { StatusBar } from './status-bar'
+import { useFileStore } from '@/stores/file-store'
 
-interface FileViewerProps {
-  filePath: string
-  content: string | null
-  language: string
-  isChanged: boolean
-  onClose: () => void
-}
+export function FileViewer() {
+  const { openTabs, activeTab, changedFiles } = useFileStore()
 
-export function FileViewer({ filePath, content, language, isChanged, onClose }: FileViewerProps) {
-  const lineCount = (content || '').split('\n').length
+  const currentTab = openTabs.find((t) => t.path === activeTab)
+
+  if (!currentTab || !activeTab) {
+    return null
+  }
+
+  const lineCount = (currentTab.content || '').split('\n').length
+  const isChanged = changedFiles.has(activeTab)
 
   return (
     <Box css={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--studio-bg-main)' }}>
       <TabBar
-        filePath={filePath}
-        language={language}
-        isChanged={isChanged}
-        content={content}
-        onClose={onClose}
+        activeFilePath={activeTab}
+        language={currentTab.language}
+        content={currentTab.content}
       />
 
-      {content !== null ? (
-        <CodeEditor content={content} language={language} />
+      {currentTab.content !== null ? (
+        <CodeEditor content={currentTab.content} language={currentTab.language} />
       ) : (
         <Box css={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Text css={{ fontSize: '13px', color: 'var(--studio-text-muted)' }}>Loading...</Text>
@@ -34,7 +34,7 @@ export function FileViewer({ filePath, content, language, isChanged, onClose }: 
 
       <StatusBar
         lineCount={lineCount}
-        language={language}
+        language={currentTab.language}
         isChanged={isChanged}
       />
     </Box>

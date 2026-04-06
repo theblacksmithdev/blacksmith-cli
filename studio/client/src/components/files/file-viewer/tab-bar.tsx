@@ -2,16 +2,78 @@ import { Box, Text, HStack } from '@chakra-ui/react'
 import { Copy, Check, FileCode, Circle, X } from 'lucide-react'
 import { useState } from 'react'
 import { Tooltip } from '@/components/shared/tooltip'
+import { useFileStore, type OpenTab } from '@/stores/file-store'
 
-interface TabBarProps {
-  filePath: string
-  language: string
-  isChanged: boolean
-  content: string | null
-  onClose: () => void
+function getFileName(path: string) {
+  return path.split('/').pop() || path
 }
 
-export function TabBar({ filePath, language, isChanged, content, onClose }: TabBarProps) {
+function TabItem({ tab, isActive }: { tab: OpenTab; isActive: boolean }) {
+  const { selectTab, closeTab, changedFiles } = useFileStore()
+  const isChanged = changedFiles.has(tab.path)
+
+  return (
+    <Box
+      as="button"
+      onClick={() => selectTab(tab.path)}
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+        padding: '6px 10px',
+        border: 'none',
+        borderBottom: isActive ? '2px solid var(--studio-text-primary)' : '2px solid transparent',
+        marginBottom: '-1px',
+        background: isActive ? 'var(--studio-bg-main)' : 'transparent',
+        color: isActive ? 'var(--studio-text-primary)' : 'var(--studio-text-tertiary)',
+        cursor: 'pointer',
+        transition: 'all 0.1s ease',
+        whiteSpace: 'nowrap',
+        '&:hover': {
+          color: 'var(--studio-text-secondary)',
+          background: isActive ? 'var(--studio-bg-main)' : 'var(--studio-bg-surface)',
+          '& .tab-close': { opacity: 1 },
+        },
+      }}
+    >
+      <FileCode size={12} />
+      <Text css={{ fontSize: '12px', fontWeight: isActive ? 500 : 400 }}>
+        {getFileName(tab.path)}
+      </Text>
+      {isChanged && (
+        <Circle size={6} fill="var(--studio-warning)" style={{ color: 'var(--studio-warning)' }} />
+      )}
+      <Box
+        as="span"
+        className="tab-close"
+        onClick={(e: React.MouseEvent) => { e.stopPropagation(); closeTab(tab.path) }}
+        css={{
+          width: '16px',
+          height: '16px',
+          borderRadius: '3px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: isActive ? 1 : 0,
+          color: 'var(--studio-text-muted)',
+          transition: 'all 0.1s ease',
+          '&:hover': { background: 'var(--studio-bg-hover)', color: 'var(--studio-text-primary)' },
+        }}
+      >
+        <X size={11} />
+      </Box>
+    </Box>
+  )
+}
+
+interface TabBarProps {
+  activeFilePath: string
+  language: string
+  content: string | null
+}
+
+export function TabBar({ activeFilePath, language, content }: TabBarProps) {
+  const { openTabs, activeTab } = useFileStore()
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -22,8 +84,7 @@ export function TabBar({ filePath, language, isChanged, content, onClose }: TabB
     }
   }
 
-  const pathParts = filePath.split('/')
-  const fileName = pathParts[pathParts.length - 1]
+  const pathParts = activeFilePath.split('/')
 
   return (
     <Box
@@ -35,53 +96,25 @@ export function TabBar({ filePath, language, isChanged, content, onClose }: TabB
         flexShrink: 0,
       }}
     >
-      {/* Active tab */}
+      {/* Tabs */}
       <Box
         css={{
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
-          padding: '8px 14px',
-          borderBottom: '2px solid var(--studio-text-primary)',
-          marginBottom: '-1px',
-          background: 'var(--studio-bg-main)',
+          flex: 1,
+          overflow: 'hidden',
+          overflowX: 'auto',
+          '&::-webkit-scrollbar': { height: '0px' },
         }}
       >
-        <FileCode size={13} style={{ color: 'var(--studio-text-tertiary)' }} />
-        <Text css={{ fontSize: '12px', fontWeight: 500, color: 'var(--studio-text-primary)' }}>
-          {fileName}
-        </Text>
-        {isChanged && (
-          <Circle size={7} fill="var(--studio-warning)" style={{ color: 'var(--studio-warning)' }} />
-        )}
-        <Box
-          as="button"
-          onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClose() }}
-          css={{
-            width: '18px',
-            height: '18px',
-            borderRadius: '4px',
-            border: 'none',
-            background: 'transparent',
-            color: 'var(--studio-text-muted)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginLeft: '2px',
-            transition: 'all 0.12s ease',
-            '&:hover': { background: 'var(--studio-bg-hover)', color: 'var(--studio-text-primary)' },
-          }}
-        >
-          <X size={12} />
-        </Box>
+        {openTabs.map((tab) => (
+          <TabItem key={tab.path} tab={tab} isActive={tab.path === activeTab} />
+        ))}
       </Box>
 
-      <Box css={{ flex: 1 }} />
-
       {/* Actions */}
-      <HStack gap={1} css={{ paddingRight: '10px' }}>
-        <Text css={{ fontSize: '11px', color: 'var(--studio-text-muted)', marginRight: '8px' }}>
+      <HStack gap={1} css={{ paddingRight: '10px', paddingLeft: '8px', flexShrink: 0 }}>
+        <Text css={{ fontSize: '11px', color: 'var(--studio-text-muted)', marginRight: '4px' }}>
           {pathParts.slice(0, -1).join(' / ')}
         </Text>
 
