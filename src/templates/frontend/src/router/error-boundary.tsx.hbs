@@ -2,11 +2,13 @@ import { useRouteError, isRouteErrorResponse, useNavigate } from 'react-router-d
 import {
   Button,
   Alert,
+  AlertIcon,
   AlertTitle,
   AlertDescription,
   Card,
-  CardContent,
-} from '@blacksmith-ui/react'
+  CardBody,
+  Box,
+} from '@chakra-ui/react'
 import { ArrowLeft, RefreshCw, AlertTriangle } from 'lucide-react'
 
 export function RouteErrorBoundary() {
@@ -38,15 +40,17 @@ export function RouteErrorBoundary() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background px-4">
       <Card className="w-full max-w-md">
-        <CardContent className="pt-6 space-y-4">
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Something went wrong</AlertTitle>
-            <AlertDescription>
-              {error instanceof Error
-                ? error.message
-                : 'An unexpected error occurred.'}
-            </AlertDescription>
+        <CardBody className="pt-6 space-y-4">
+          <Alert status="error" borderRadius="md">
+            <AlertIcon />
+            <Box>
+              <AlertTitle>Something went wrong</AlertTitle>
+              <AlertDescription>
+                {error instanceof Error
+                  ? error.message
+                  : 'An unexpected error occurred.'}
+              </AlertDescription>
+            </Box>
           </Alert>
           <div className="flex justify-center">
             <Button onClick={() => window.location.reload()}>
@@ -54,7 +58,7 @@ export function RouteErrorBoundary() {
               Reload Page
             </Button>
           </div>
-        </CardContent>
+        </CardBody>
       </Card>
     </div>
   )

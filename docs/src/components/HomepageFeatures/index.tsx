@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
 
-const BLACKSMITH_UI_URL = 'https://oluwatobimaxwell.github.io/libraries-project/';
+const CHAKRA_UI_URL = 'https://chakra-ui.com/';
 
 type Capability = {
   title: string;
@@ -13,7 +13,7 @@ const capabilities: Capability[] = [
     description: (
       <>
         Stop rebuilding buttons, forms, and modals from scratch. {' '}
-        <a href={BLACKSMITH_UI_URL} target="_blank" rel="noopener noreferrer">blacksmith-ui</a> gives
+        <a href={CHAKRA_UI_URL} target="_blank" rel="noopener noreferrer">Chakra UI</a> gives
         you a complete, themed component library that saves hundreds of hours across a project's lifetime.
       </>
     ),
@@ -23,8 +23,8 @@ const capabilities: Capability[] = [
     description: (
       <>
         Common patterns like data fetching, form validation, auth state, and pagination are
-        already solved in{' '}
-        <a href={BLACKSMITH_UI_URL} target="_blank" rel="noopener noreferrer">blacksmith-ui/hooks</a>.
+        already solved with{' '}
+        <a href={CHAKRA_UI_URL} target="_blank" rel="noopener noreferrer">Chakra UI hooks</a> and custom utilities.
         Less reinventing, more building.
       </>
     ),

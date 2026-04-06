@@ -31,21 +31,21 @@ describe('setupSkills', () => {
     expect(aiMocks.setupAiDev).toHaveBeenCalledWith({
       projectDir: '/project',
       projectName: 'my-project',
-      includeBlacksmithUiSkill: true,
+      includeChakraUiSkill: true,
     })
     expect(log.success).toHaveBeenCalled()
   })
 
-  it('should respect blacksmithUiSkill option', async () => {
+  it('should respect chakraUiSkill option', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.loadConfig.mockReturnValue({ name: 'my-project' })
     aiMocks.setupAiDev.mockResolvedValue(undefined)
 
-    await setupSkills({ blacksmithUiSkill: false })
+    await setupSkills({ chakraUiSkill: false })
 
     expect(aiMocks.setupAiDev).toHaveBeenCalledWith(
       expect.objectContaining({
-        includeBlacksmithUiSkill: false,
+        includeChakraUiSkill: false,
       })
     )
   })

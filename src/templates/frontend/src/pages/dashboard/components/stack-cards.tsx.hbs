@@ -1,13 +1,13 @@
 import {
   Card,
   CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
+  CardBody,
   Badge,
   Button,
-  Flex,
-} from '@blacksmith-ui/react'
+  HStack,
+  Heading,
+  Text,
+} from '@chakra-ui/react'
 import { Database, Layout } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Path } from '@/router/paths'
@@ -17,27 +17,27 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 export function BackendCard() {
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <Flex align="center" justify="between">
-          <CardTitle className="text-base">Backend</CardTitle>
+      <CardHeader pb={3}>
+        <HStack justify="space-between">
+          <Heading size="sm">Backend</Heading>
           <Badge variant="outline">
-            <Database className="mr-1 h-3 w-3" />
-            Django
+            <HStack spacing={1}>
+              <Database className="h-3 w-3" />
+              <span>Django</span>
+            </HStack>
           </Badge>
-        </Flex>
+        </HStack>
       </CardHeader>
-      <CardContent>
-        <CardDescription>
+      <CardBody>
+        <Text fontSize="sm" color="gray.500">
           Django REST API with JWT auth, serializers, and auto-generated OpenAPI docs.
-        </CardDescription>
+        </Text>
         <div className="mt-4">
-          <Button variant="outline" size="sm" asChild>
-            <a href={`${API_URL}/api/docs/`} target="_blank" rel="noopener noreferrer">
-              View API Docs
-            </a>
+          <Button variant="outline" size="sm" as="a" href={`${API_URL}/api/docs/`} target="_blank" rel="noopener noreferrer">
+            View API Docs
           </Button>
         </div>
-      </CardContent>
+      </CardBody>
     </Card>
   )
 }
@@ -45,25 +45,27 @@ export function BackendCard() {
 export function FrontendCard() {
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <Flex align="center" justify="between">
-          <CardTitle className="text-base">Frontend</CardTitle>
+      <CardHeader pb={3}>
+        <HStack justify="space-between">
+          <Heading size="sm">Frontend</Heading>
           <Badge variant="outline">
-            <Layout className="mr-1 h-3 w-3" />
-            React
+            <HStack spacing={1}>
+              <Layout className="h-3 w-3" />
+              <span>React</span>
+            </HStack>
           </Badge>
-        </Flex>
+        </HStack>
       </CardHeader>
-      <CardContent>
-        <CardDescription>
+      <CardBody>
+        <Text fontSize="sm" color="gray.500">
           React + TypeScript with TanStack Query, React Router, and Tailwind CSS.
-        </CardDescription>
+        </Text>
         <div className="mt-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link to={Path.Home}>Home Page</Link>
+          <Button variant="outline" size="sm" as={Link} to={Path.Home}>
+            Home Page
           </Button>
         </div>
-      </CardContent>
+      </CardBody>
     </Card>
   )
 }

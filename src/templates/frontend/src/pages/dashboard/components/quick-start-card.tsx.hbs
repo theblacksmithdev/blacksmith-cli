@@ -1,36 +1,37 @@
 import {
   Card,
   CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
+  CardBody,
   Badge,
-  Flex,
+  HStack,
   Text,
-} from '@blacksmith-ui/react'
+  Heading,
+} from '@chakra-ui/react'
 import { Rocket, Terminal } from 'lucide-react'
 
 export function QuickStartCard() {
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <Flex align="center" justify="between">
-          <CardTitle className="text-base">Quick Start</CardTitle>
+      <CardHeader pb={3}>
+        <HStack justify="space-between">
+          <Heading size="sm">Quick Start</Heading>
           <Badge variant="outline">
-            <Rocket className="mr-1 h-3 w-3" />
-            Guide
+            <HStack spacing={1}>
+              <Rocket className="h-3 w-3" />
+              <span>Guide</span>
+            </HStack>
           </Badge>
-        </Flex>
+        </HStack>
       </CardHeader>
-      <CardContent>
-        <CardDescription>
+      <CardBody>
+        <Text fontSize="sm" color="gray.500">
           Scaffold a new resource with models, API, and pages in one command.
-        </CardDescription>
-        <Flex align="center" gap={2} className="mt-4 rounded-lg bg-muted px-3 py-2">
+        </Text>
+        <HStack spacing={2} className="mt-4 rounded-lg bg-muted px-3 py-2">
           <Terminal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-          <Text as="code" size="sm" className="font-mono">blacksmith make:resource Post</Text>
-        </Flex>
-      </CardContent>
+          <code className="font-mono text-sm">blacksmith make:resource Post</code>
+        </HStack>
+      </CardBody>
     </Card>
   )
 }

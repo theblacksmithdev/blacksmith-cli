@@ -14,7 +14,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeBlacksmithUiSkill: true,
+      includeChakraUiSkill: true,
     })
 
     const claudeMd = path.join(getTmpDir(), 'CLAUDE.md')
@@ -29,7 +29,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeBlacksmithUiSkill: true,
+      includeChakraUiSkill: true,
     })
 
     const skillsDir = path.join(getTmpDir(), '.claude', 'skills')
@@ -47,37 +47,37 @@ describe('setupAiDev', () => {
     }
   })
 
-  it('should include blacksmith-ui skills when enabled', async () => {
+  it('should include Chakra UI skills when enabled', async () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeBlacksmithUiSkill: true,
+      includeChakraUiSkill: true,
     })
 
     const skillsDir = path.join(getTmpDir(), '.claude', 'skills')
     const entries = fs.readdirSync(skillsDir)
-    expect(entries).toContain('blacksmith-ui-react')
+    expect(entries).toContain('chakra-ui-react')
   })
 
-  it('should exclude blacksmith-ui skills when disabled', async () => {
+  it('should exclude Chakra UI skills when disabled', async () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeBlacksmithUiSkill: false,
+      includeChakraUiSkill: false,
     })
 
     const skillsDir = path.join(getTmpDir(), '.claude', 'skills')
     const entries = fs.readdirSync(skillsDir)
-    expect(entries).not.toContain('blacksmith-ui-react')
-    expect(entries).not.toContain('blacksmith-ui-forms')
-    expect(entries).not.toContain('blacksmith-ui-auth')
+    expect(entries).not.toContain('chakra-ui-react')
+    expect(entries).not.toContain('chakra-ui-forms')
+    expect(entries).not.toContain('chakra-ui-auth')
   })
 
   it('should clean existing skill directories on regeneration', async () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeBlacksmithUiSkill: true,
+      includeChakraUiSkill: true,
     })
 
     const rogueDir = path.join(getTmpDir(), '.claude', 'skills', 'old-skill')
@@ -87,7 +87,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeBlacksmithUiSkill: true,
+      includeChakraUiSkill: true,
     })
 
     expect(fs.existsSync(rogueDir)).toBe(false)
@@ -97,7 +97,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeBlacksmithUiSkill: true,
+      includeChakraUiSkill: true,
     })
 
     const content = fs.readFileSync(path.join(getTmpDir(), 'CLAUDE.md'), 'utf-8')

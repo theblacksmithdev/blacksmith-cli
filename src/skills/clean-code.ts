@@ -35,7 +35,7 @@ Write code that is easy to read, easy to change, and easy to delete. Treat clari
 - Props interfaces should be explicit and narrow — accept only what the component needs, not entire objects
 - Avoid prop drilling beyond 2 levels — use context or restructure the component tree
 - Destructure props in the function signature for clarity
-- Use \`@blacksmith-ui/react\` layout components (\`Stack\`, \`Flex\`, \`Grid\`) — never raw \`<div>\` with flex/grid classes
+- Use \`@chakra-ui/react\` layout components (\`VStack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\`) — never raw \`<div>\` with flex/grid classes
 
 ### File Organization
 - Keep files short. If a file exceeds 200 lines, it is likely doing too much — split it

@@ -1,4 +1,4 @@
-import { Stack, Divider, Grid } from '@blacksmith-ui/react'
+import { VStack, Divider, SimpleGrid } from '@chakra-ui/react'
 import { useAuth } from '@/features/auth/hooks/use-auth'
 import { WelcomeHeader } from './components/welcome-header'
 import { QuickStartCard } from './components/quick-start-card'
@@ -8,14 +8,14 @@ export default function DashboardPage() {
   const { user } = useAuth()
 
   return (
-    <Stack gap={8}>
+    <VStack spacing={8} align="stretch">
       <WelcomeHeader displayName={user?.displayName || user?.email || 'there'} />
       <Divider />
-      <Grid columns=\{{ base: 1, sm: 2, lg: 3 }} gap={4}>
+      <SimpleGrid columns=\{{ base: 1, sm: 2, lg: 3 }} spacing={4}>
         <QuickStartCard />
         <BackendCard />
         <FrontendCard />
-      </Grid>
-    </Stack>
+      </SimpleGrid>
+    </VStack>
   )
 }

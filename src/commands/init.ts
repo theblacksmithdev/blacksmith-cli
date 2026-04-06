@@ -20,7 +20,7 @@ const THEME_PRESETS = ['default', 'blue', 'green', 'violet', 'red', 'neutral']
 
 interface InitOptions {
   ai?: boolean
-  blacksmithUiSkill?: boolean
+  chakraUiSkill?: boolean
   backendPort?: string
   frontendPort?: string
   themeColor?: string
@@ -273,7 +273,7 @@ export async function init(name: string | undefined, options: InitOptions) {
     await setupAiDev({
       projectDir,
       projectName: name,
-      includeBlacksmithUiSkill: options.blacksmithUiSkill !== false,
+      includeChakraUiSkill: options.chakraUiSkill !== false,
     })
   }
 

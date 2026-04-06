@@ -14,7 +14,8 @@ export const reactSkill: Skill = {
 - TanStack React Query for server state management
 - React Router v7 for client-side routing
 - React Hook Form + Zod for forms and validation
-- Tailwind CSS for styling
+- Chakra UI v2 for component library and theming
+- Tailwind CSS for additional styling
 - \`@hey-api/openapi-ts\` for auto-generating API client from Django's OpenAPI schema
 - \`lucide-react\` for icons
 
@@ -43,11 +44,11 @@ export const reactSkill: Skill = {
 - **Pages must be thin orchestrators** — break into child components in \`components/\`, extract logic into \`hooks/\`. See the \`page-structure\` skill for the full pattern
 
 ### UI Components
-- **All UI must use \`@blacksmith-ui/react\` components** — see the \`blacksmith-ui-react\` skill for the full component list
-- Use \`Stack\`, \`Flex\`, \`Grid\`, \`Box\` for layout — never raw \`<div>\` with flex/grid classes
-- Use \`Typography\` and \`Text\` for headings and text — never raw \`<h1>\`–\`<h6>\` or \`<p>\`
-- Use \`Divider\` instead of \`<Separator>\` or \`<hr>\`
-- Use \`StatCard\`, \`EmptyState\`, \`Skeleton\` instead of building custom equivalents
+- **All UI must use \`@chakra-ui/react\` components** — see the \`chakra-ui-react\` skill for the full component list
+- Use \`VStack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\`, \`Box\` for layout — never raw \`<div>\` with flex/grid classes
+- Use \`Heading\` and \`Text\` for headings and text — never raw \`<h1>\`–\`<h6>\` or \`<p>\`
+- Use \`Divider\` instead of \`<hr>\`
+- Use \`Stat\`, \`Skeleton\` instead of building custom equivalents
 
 ### Route Paths
 - All route paths live in the \`Path\` enum at \`src/router/paths.ts\` — **never hardcode path strings**
@@ -55,12 +56,12 @@ export const reactSkill: Skill = {
 - Use \`buildPath()\` for dynamic segments — see the \`page-structure\` skill for details
 
 ### Styling
-- Use Tailwind CSS utility classes for all styling
-- Use the \`cn()\` helper (from \`clsx\` + \`tailwind-merge\`) for conditional and merged classes
-- Theming via HSL CSS variables defined in \`frontend/src/styles/globals.css\`
-- Dark mode is supported via the \`class\` strategy on \`<html>\`
-- Use responsive prefixes (\`sm:\`, \`md:\`, \`lg:\`) for responsive layouts
-- Avoid inline \`style\` attributes — use Tailwind classes instead
+- Use Chakra UI style props as the primary styling approach
+- Use Tailwind CSS utility classes for additional styling needs
+- Theming via Chakra UI \`extendTheme()\` and design tokens
+- Color mode is supported via Chakra UI \`useColorMode()\` hook
+- Use responsive props (\`{{ base: ..., md: ..., lg: ... }}\`) for responsive layouts
+- Avoid inline \`style\` attributes — use Chakra style props or Tailwind classes instead
 
 ### Path Aliases
 - \`@/\` maps to \`frontend/src/\`
@@ -70,7 +71,7 @@ export const reactSkill: Skill = {
 ### Error Handling
 - Use React Error Boundary (\`frontend/src/router/error-boundary.tsx\`) for render errors
 - API errors are handled by \`useApiQuery\` / \`useApiMutation\` — see the \`react-query\` skill for error display patterns
-- Display user-facing errors using the project's feedback components (Alert, Toast)
+- Display user-facing errors using the project's feedback components (Alert, useToast)
 
 ### Testing
 - See the \`frontend-testing\` skill for full conventions on test placement, utilities, mocking, and what to test

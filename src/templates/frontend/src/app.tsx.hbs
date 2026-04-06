@@ -8,7 +8,8 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router-dom'
-import { ThemeProvider } from '@blacksmith-ui/react'
+import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
+import theme from '@/theme'
 import { queryClient } from '@/api/query-client'
 import { AuthProvider } from '@/features/auth/components/auth-provider'
 import { router } from '@/router'
@@ -18,13 +19,16 @@ import '@/api/client'
 
 export function App() {
   return (
-    <ThemeProvider defaultMode="system" storageKey="{{projectName}}-theme">
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <RouterProvider router={router} />
-        </AuthProvider>
-        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
-      </QueryClientProvider>
-    </ThemeProvider>
+    <>
+      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+      <ChakraProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
+          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        </QueryClientProvider>
+      </ChakraProvider>
+    </>
   )
 }

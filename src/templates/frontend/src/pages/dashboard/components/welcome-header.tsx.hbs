@@ -1,4 +1,4 @@
-import { Stack, Typography, Text } from '@blacksmith-ui/react'
+import { VStack, Heading, Text } from '@chakra-ui/react'
 
 interface WelcomeHeaderProps {
   displayName: string
@@ -6,9 +6,9 @@ interface WelcomeHeaderProps {
 
 export function WelcomeHeader({ displayName }: WelcomeHeaderProps) {
   return (
-    <Stack gap={1}>
-      <Typography variant="h2">Dashboard</Typography>
-      <Text color="muted">Welcome back, {displayName}.</Text>
-    </Stack>
+    <VStack spacing={1} align="stretch">
+      <Heading size="lg">Dashboard</Heading>
+      <Text color="gray.500">Welcome back, {displayName}.</Text>
+    </VStack>
   )
 }

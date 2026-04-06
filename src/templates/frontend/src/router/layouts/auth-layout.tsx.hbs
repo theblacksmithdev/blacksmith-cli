@@ -1,5 +1,5 @@
 import { Outlet, Link } from 'react-router-dom'
-import { Separator, Button } from '@blacksmith-ui/react'
+import { Divider, Button } from '@chakra-ui/react'
 import { Anvil } from 'lucide-react'
 import { Path } from '@/router/paths'
 
@@ -35,8 +35,8 @@ export function AuthLayoutWrapper() {
             <span className="font-semibold">{{projectName}}</span>
           </div>
           <div className="lg:ml-auto">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to={Path.Home}>Back to Home</Link>
+            <Button variant="ghost" size="sm" as={Link} to={Path.Home}>
+              Back to Home
             </Button>
           </div>
         </div>
@@ -47,19 +47,19 @@ export function AuthLayoutWrapper() {
           </div>
         </div>
 
-        <Separator />
+        <Divider />
 
         <div className="flex items-center justify-center gap-4 p-6">
-          <Button variant="link" size="sm" className="text-muted-foreground" asChild>
-            <Link to="/terms">Terms</Link>
+          <Button variant="link" size="sm" className="text-muted-foreground" as={Link} to="/terms">
+            Terms
           </Button>
-          <Separator orientation="vertical" className="h-4" />
-          <Button variant="link" size="sm" className="text-muted-foreground" asChild>
-            <Link to="/privacy">Privacy</Link>
+          <Divider orientation="vertical" h={4} />
+          <Button variant="link" size="sm" className="text-muted-foreground" as={Link} to="/privacy">
+            Privacy
           </Button>
-          <Separator orientation="vertical" className="h-4" />
-          <Button variant="link" size="sm" className="text-muted-foreground" asChild>
-            <Link to="/support">Support</Link>
+          <Divider orientation="vertical" h={4} />
+          <Button variant="link" size="sm" className="text-muted-foreground" as={Link} to="/support">
+            Support
           </Button>
         </div>
       </div>

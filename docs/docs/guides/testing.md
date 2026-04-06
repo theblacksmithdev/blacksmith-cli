@@ -289,23 +289,24 @@ vi.mock('react-router-dom', async () => {
 })
 ```
 
-### Mock External UI Libraries
+### Mock Auth Hooks
 
-For components from `@blacksmith-ui/auth` that are complex to render in tests:
+For components that depend on the auth system, mock the `useAuth` hook:
 
 ```tsx
-vi.mock('@blacksmith-ui/auth', () => ({
-  LoginForm: ({ onSubmit, error, loading }: any) => (
-    <form onSubmit={(e: any) => {
-      e.preventDefault()
-      onSubmit({ email: 'test@example.com', password: 'password' })
-    }}>
-      {error && <div data-testid="error">{error.message}</div>}
-      {loading && <div>Loading...</div>}
-      <button type="submit">Sign In</button>
-    </form>
-  ),
-}))
+vi.mock('@/features/auth/hooks/use-auth')
+
+import { useAuth } from '@/features/auth/hooks/use-auth'
+
+const mockLogin = vi.fn().mockResolvedValue({ success: true })
+
+beforeEach(() => {
+  vi.mocked(useAuth).mockReturnValue({
+    login: mockLogin,
+    error: null,
+    isLoading: false,
+  } as any)
+})
 ```
 
 ## Best Practices

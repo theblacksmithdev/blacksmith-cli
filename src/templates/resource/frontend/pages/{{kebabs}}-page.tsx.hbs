@@ -7,7 +7,7 @@
 
 import { use{{Names}} } from '@/api/hooks/{{kebabs}}'
 import { {{Name}}List } from '../components/{{kebab}}-list'
-import { Alert, AlertDescription } from '@blacksmith-ui/react'
+import { Alert, AlertIcon, AlertDescription } from '@chakra-ui/react'
 
 export default function {{Names}}Page() {
   const { data, isLoading, errorMessage } = use{{Names}}()
@@ -19,7 +19,8 @@ export default function {{Names}}Page() {
       </div>
 
       {errorMessage && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert status="error" borderRadius="md" className="mb-4">
+          <AlertIcon />
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}

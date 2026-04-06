@@ -9,7 +9,7 @@
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, AlertDescription } from '@blacksmith-ui/react'
+import { Alert, AlertIcon, AlertDescription } from '@chakra-ui/react'
 
 const {{name}}Schema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
@@ -55,7 +55,8 @@ export function {{Name}}Form({
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       {errorMessage && (
-        <Alert variant="destructive">
+        <Alert status="error" borderRadius="md">
+          <AlertIcon />
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}

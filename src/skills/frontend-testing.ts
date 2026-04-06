@@ -75,7 +75,7 @@ router/
 
 > **RULE: Never import \`render\` from \`@testing-library/react\` directly. Always use \`renderWithProviders\` from \`@/__tests__/test-utils\`.**
 
-\`renderWithProviders\` wraps components with all app providers (ThemeProvider, QueryClientProvider, MemoryRouter) so tests match the real app environment.
+\`renderWithProviders\` wraps components with all app providers (ChakraProvider, QueryClientProvider, MemoryRouter) so tests match the real app environment.
 
 \`\`\`tsx
 import { screen } from '@/__tests__/test-utils'
@@ -163,15 +163,17 @@ beforeEach(() => {
 })
 \`\`\`
 
-**Mock external UI libraries (for auth page tests):**
+**Mock auth hook (for auth page tests):**
 \`\`\`tsx
-vi.mock('@blacksmith-ui/auth', () => ({
-  LoginForm: ({ onSubmit, error, loading }: any) => (
-    <form onSubmit={(e: any) => { e.preventDefault(); onSubmit({ email: 'test@test.com', password: 'pass' }) }}>
-      {error && <div data-testid="error">{error.message}</div>}
-      <button type="submit">Sign In</button>
-    </form>
-  ),
+vi.mock('@/features/auth/hooks/use-auth', () => ({
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    error: null,
+    isAuthenticated: false,
+    signInWithEmail: vi.fn(),
+    signOut: vi.fn(),
+  }),
 }))
 \`\`\`
 

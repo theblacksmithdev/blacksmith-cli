@@ -10,9 +10,9 @@ import { apiDocumentationSkill } from '../skills/api-documentation.js'
 import { reactSkill } from '../skills/react.js'
 import { reactQuerySkill } from '../skills/react-query.js'
 import { pageStructureSkill } from '../skills/page-structure.js'
-import { blacksmithUiReactSkill } from '../skills/blacksmith-ui-react.js'
-import { blacksmithUiFormsSkill } from '../skills/blacksmith-ui-forms.js'
-import { blacksmithUiAuthSkill } from '../skills/blacksmith-ui-auth.js'
+import { chakraUiReactSkill } from '../skills/chakra-ui-react.js'
+import { chakraUiFormsSkill } from '../skills/chakra-ui-forms.js'
+import { chakraUiAuthSkill } from '../skills/chakra-ui-auth.js'
 import { blacksmithHooksSkill } from '../skills/blacksmith-hooks.js'
 import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
 import { uiDesignSkill } from '../skills/ui-design.js'
@@ -24,10 +24,10 @@ import { aiGuidelinesSkill } from '../skills/ai-guidelines.js'
 interface AiSetupOptions {
   projectDir: string
   projectName: string
-  includeBlacksmithUiSkill: boolean
+  includeChakraUiSkill: boolean
 }
 
-export async function setupAiDev({ projectDir, projectName, includeBlacksmithUiSkill }: AiSetupOptions) {
+export async function setupAiDev({ projectDir, projectName, includeChakraUiSkill }: AiSetupOptions) {
   const aiSpinner = spinner('Setting up AI development environment...')
 
   try {
@@ -42,10 +42,10 @@ export async function setupAiDev({ projectDir, projectName, includeBlacksmithUiS
       pageStructureSkill,
     ]
 
-    if (includeBlacksmithUiSkill) {
-      skills.push(blacksmithUiReactSkill)
-      skills.push(blacksmithUiFormsSkill)
-      skills.push(blacksmithUiAuthSkill)
+    if (includeChakraUiSkill) {
+      skills.push(chakraUiReactSkill)
+      skills.push(chakraUiFormsSkill)
+      skills.push(chakraUiAuthSkill)
       skills.push(blacksmithHooksSkill)
       skills.push(uiDesignSkill)
     }

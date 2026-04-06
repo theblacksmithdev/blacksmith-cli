@@ -92,7 +92,7 @@ blacksmith init my-app -b 9000 -f 3000 --ai
 | \`-b, --backend-port <port>\` | Django port (default: 8000) |
 | \`-f, --frontend-port <port>\` | Vite port (default: 5173) |
 | \`--ai\` | Generate CLAUDE.md with project skills |
-| \`--no-blacksmith-ui-skill\` | Exclude blacksmith-ui skill from CLAUDE.md |
+| \`--no-chakra-ui-skill\` | Exclude Chakra UI skill from CLAUDE.md |
 `
   },
 }

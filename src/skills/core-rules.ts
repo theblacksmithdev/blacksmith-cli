@@ -15,12 +15,12 @@ export const coreRulesSkill: Skill = {
 
 > **These rules are mandatory. Violating them produces broken, inconsistent code.**
 
-### 1. Use \`@blacksmith-ui/react\` for ALL UI
-- **Layout**: Use \`Stack\`, \`Flex\`, \`Grid\`, \`Box\`, \`Container\` — NEVER \`<div className="flex ...">\` or \`<div className="grid ...">\`
-- **Typography**: Use \`Typography\` and \`Text\` — NEVER raw \`<h1>\`–\`<h6>\`, \`<p>\`, or \`<span>\` with text classes
-- **Separators**: Use \`Divider\` — NEVER \`<hr>\` or \`<Separator>\`
-- **Everything else**: \`Button\`, \`Card\`, \`Badge\`, \`Input\`, \`Table\`, \`Dialog\`, \`Alert\`, \`Skeleton\`, \`EmptyState\`, \`StatCard\`, etc.
-- See the \`blacksmith-ui-react\` skill for the full 60+ component list
+### 1. Use \`@chakra-ui/react\` for ALL UI
+- **Layout**: Use \`VStack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\`, \`Box\`, \`Container\` — NEVER \`<div className="flex ...">\` or \`<div className="grid ...">\`
+- **Typography**: Use \`Heading\` and \`Text\` — NEVER raw \`<h1>\`–\`<h6>\`, \`<p>\`, or \`<span>\` with text classes
+- **Separators**: Use \`Divider\` — NEVER \`<hr>\`
+- **Everything else**: \`Button\`, \`Card\`, \`Badge\`, \`Input\`, \`Table\`, \`Modal\`, \`Alert\`, \`Skeleton\`, \`Stat\`, etc.
+- See the \`chakra-ui-react\` skill for the full component list
 
 ### 2. Pages Are Thin Orchestrators
 - A page file should be ~20-30 lines: import components, call hooks, compose JSX

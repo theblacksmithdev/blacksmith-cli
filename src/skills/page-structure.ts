@@ -174,8 +174,8 @@ pages/dashboard/
 \`\`\`
 
 \`\`\`tsx
-// dashboard.tsx — thin orchestrator using @blacksmith-ui/react layout
-import { Stack, Grid, Divider } from '@blacksmith-ui/react'
+// dashboard.tsx — thin orchestrator using @chakra-ui/react layout
+import { VStack, SimpleGrid, Divider } from '@chakra-ui/react'
 import { StatsCards } from './components/stats-cards'
 import { RecentActivity } from './components/recent-activity'
 import { QuickActions } from './components/quick-actions'
@@ -185,14 +185,14 @@ export default function DashboardPage() {
   const { stats, activity, isLoading } = useDashboardData()
 
   return (
-    <Stack gap={6}>
+    <VStack spacing={6} align="stretch">
       <StatsCards stats={stats} isLoading={isLoading} />
       <Divider />
-      <Grid columns={{ base: 1, lg: 3 }} gap={6}>
-        <RecentActivity items={activity} isLoading={isLoading} className="lg:col-span-2" />
+      <SimpleGrid columns={{ base: 1, lg: 3 }} spacing={6}>
+        <RecentActivity items={activity} isLoading={isLoading} gridColumn={{ lg: 'span 2' }} />
         <QuickActions />
-      </Grid>
-    </Stack>
+      </SimpleGrid>
+    </VStack>
   )
 }
 \`\`\`
@@ -252,7 +252,7 @@ export function useOrdersPage() {
 }
 
 // orders-page.tsx
-import { Stack } from '@blacksmith-ui/react'
+import { VStack } from '@chakra-ui/react'
 import { useOrdersPage } from './hooks/use-orders-page'
 import { OrdersTable } from './components/orders-table'
 import { OrdersToolbar } from './components/orders-toolbar'
@@ -261,10 +261,10 @@ export default function OrdersPage() {
   const { orders, total, isLoading, page, setPage, search, setSearch, deleteOrder } = useOrdersPage()
 
   return (
-    <Stack gap={4}>
+    <VStack spacing={4} align="stretch">
       <OrdersToolbar search={search} onSearchChange={setSearch} />
       <OrdersTable orders={orders} isLoading={isLoading} onDelete={(id) => deleteOrder.mutate({ path: { id } })} />
-    </Stack>
+    </VStack>
   )
 }
 \`\`\`

@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
 
-const BLACKSMITH_UI_URL = 'https://oluwatobimaxwell.github.io/libraries-project/';
+const CHAKRA_UI_URL = 'https://chakra-ui.com/';
 
 type Stat = {
   value: string;
@@ -18,14 +18,14 @@ const stats: Stat[] = [
   {
     value: '60+',
     label: 'UI components',
-    desc: 'production-ready from blacksmith-ui',
-    href: BLACKSMITH_UI_URL,
+    desc: 'production-ready from Chakra UI',
+    href: CHAKRA_UI_URL,
   },
   {
     value: '75+',
     label: 'React hooks',
     desc: 'data, forms, auth, and more',
-    href: BLACKSMITH_UI_URL,
+    href: CHAKRA_UI_URL,
   },
   {
     value: '10x',

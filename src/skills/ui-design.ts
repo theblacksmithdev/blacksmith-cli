@@ -3,13 +3,13 @@ import type { Skill, SkillContext } from './types.js'
 export const uiDesignSkill: Skill = {
   id: 'ui-design',
   name: 'UI/UX Design System',
-  description: 'Modern flat design principles, spacing, typography, color, layout patterns, and interaction guidelines aligned with the BlacksmithUI design language.',
+  description: 'Modern flat design principles, spacing, typography, color, layout patterns, and interaction guidelines aligned with the Chakra UI design language.',
 
   render(_ctx: SkillContext): string {
     return `## UI/UX Design System — Modern Flat Design
 
 > **Design philosophy: Clean, flat, content-first.**
-> BlacksmithUI follows the same design language as Anthropic, Apple, Linear, Vercel, and OpenAI — minimal chrome, generous whitespace, subtle depth, and purposeful motion. Every UI you build must conform to this standard.
+> Chakra UI follows a clean design language similar to Anthropic, Apple, Linear, Vercel, and OpenAI — minimal chrome, generous whitespace, subtle depth, and purposeful motion. Every UI you build must conform to this standard.
 
 ### Core Principles
 
@@ -21,7 +21,7 @@ export const uiDesignSkill: Skill = {
 
 ### Spacing System
 
-Use Tailwind's spacing scale consistently. Do NOT use arbitrary values (\`p-[13px]\`) — stick to the system.
+Use Chakra UI's spacing scale consistently. Chakra uses a numeric spacing scale (1 = 4px, 2 = 8px, etc.).
 
 | Scale | Value | Use for |
 |-------|-------|---------|
@@ -33,57 +33,51 @@ Use Tailwind's spacing scale consistently. Do NOT use arbitrary values (\`p-[13p
 | \`16\`–\`20\` | 64–80px | Page-level vertical padding (hero, landing sections) |
 
 **Rules:**
-- Use \`gap\` (via \`Flex\`, \`Stack\`, \`Grid\`) for spacing between siblings — not margin on individual items
-- Use \`Stack gap={...}\` for vertical rhythm within a section
-- Page content padding: \`px-4 sm:px-6 lg:px-8\` (use \`Container\` which handles this)
-- Card body padding: \`p-6\` standard, \`p-4\` for compact cards
-- Never mix spacing approaches in the same context — pick gap OR margin, not both
+- Use \`spacing\` (via \`VStack\`, \`HStack\`, \`SimpleGrid\`) for spacing between siblings — not margin on individual items
+- Use \`VStack spacing={...}\` for vertical rhythm within a section
+- Page content padding: use \`Container\` which handles responsive horizontal padding
+- Card body padding: \`p={6}\` standard, \`p={4}\` for compact cards
+- Never mix spacing approaches in the same context — pick spacing OR margin, not both
 
 ### Typography
 
-Use \`Typography\` and \`Text\` components from \`@blacksmith-ui/react\`. Do NOT style raw HTML headings.
+Use \`Heading\` and \`Text\` components from \`@chakra-ui/react\`. Do NOT style raw HTML headings.
 
 **Hierarchy:**
 | Level | Component | Use for |
 |-------|-----------|---------|
-| Page title | \`<Typography variant="h1">\` | One per page. The main heading. |
-| Section title | \`<Typography variant="h2">\` | Major sections within a page |
-| Sub-section | \`<Typography variant="h3">\` | Groups within a section |
-| Card title | \`<Typography variant="h4">\` or \`CardTitle\` | Card headings |
+| Page title | \`<Heading as="h1" size="2xl">\` | One per page. The main heading. |
+| Section title | \`<Heading as="h2" size="xl">\` | Major sections within a page |
+| Sub-section | \`<Heading as="h3" size="lg">\` | Groups within a section |
+| Card title | \`<Heading as="h4" size="md">\` | Card headings |
 | Body | \`<Text>\` | Paragraphs, descriptions |
-| Caption/label | \`<Text size="sm" color="muted">\` | Secondary info, metadata, timestamps |
-| Overline | \`<Text size="xs" weight="medium" className="uppercase tracking-wide">\` | Category labels, section overlines |
+| Caption/label | \`<Text fontSize="sm" color="gray.500">\` | Secondary info, metadata, timestamps |
+| Overline | \`<Text fontSize="xs" fontWeight="medium" textTransform="uppercase" letterSpacing="wide">\` | Category labels, section overlines |
 
 **Rules:**
 - One \`h1\` per page — it's the page title
-- Headings should never skip levels (h1 → h3 without h2)
-- Body text: \`text-sm\` (14px) for dense UIs (tables, sidebars), \`text-base\` (16px) for reading content
-- Line height: use Tailwind defaults (\`leading-relaxed\` for body copy, \`leading-tight\` for headings)
-- Max reading width: \`max-w-prose\` (~65ch) for long-form text. Never let paragraphs stretch full-width
-- Use \`text-muted-foreground\` for secondary text, never gray hardcoded values
-- Font weight: \`font-medium\` (500) for labels and emphasis, \`font-semibold\` (600) for headings, \`font-bold\` (700) sparingly
+- Headings should never skip levels (h1 -> h3 without h2)
+- Body text: \`fontSize="sm"\` (14px) for dense UIs (tables, sidebars), \`fontSize="md"\` (16px) for reading content
+- Max reading width: \`maxW="prose"\` (~65ch) for long-form text. Never let paragraphs stretch full-width
+- Use \`color="gray.500"\` or theme-aware \`useColorModeValue('gray.600', 'gray.400')\` for secondary text
+- Font weight: \`fontWeight="medium"\` (500) for labels, \`fontWeight="semibold"\` (600) for headings, \`fontWeight="bold"\` (700) sparingly
 
 ### Color
 
-Use design tokens (CSS variables), never hardcoded colors.
+Use Chakra UI's theme-aware color tokens, never hardcoded colors.
 
-**Semantic palette:**
+**Semantic palette (via colorScheme and theme tokens):**
 | Token | Usage |
 |-------|-------|
-| \`primary\` | Primary actions (buttons, links, active states) |
-| \`secondary\` | Secondary actions, subtle backgrounds |
-| \`destructive\` | Delete, error, danger states |
-| \`muted\` | Backgrounds for subtle sections, disabled states |
-| \`accent\` | Highlights, hover states, focus rings |
-| \`foreground\` | Primary text |
-| \`muted-foreground\` | Secondary/helper text |
-| \`border\` | Borders, dividers |
-| \`card\` | Card backgrounds |
-| \`background\` | Page background |
+| \`blue\` (colorScheme) | Primary actions (buttons, links, active states) |
+| \`gray\` (colorScheme) | Secondary actions, subtle backgrounds |
+| \`red\` (colorScheme) | Delete, error, danger states |
+| \`green\` (colorScheme) | Success states |
+| \`yellow\` / \`orange\` | Warning states |
 
 **Rules:**
-- NEVER use Tailwind color literals (\`text-gray-500\`, \`bg-blue-600\`, \`border-slate-200\`, \`bg-white\`, \`bg-black\`). Always use semantic tokens (\`text-muted-foreground\`, \`bg-primary\`, \`border-border\`, \`bg-background\`). This is non-negotiable — hardcoded colors break dark mode.
-- Status colors: use \`Badge\` variants (\`default\`, \`secondary\`, \`destructive\`, \`outline\`) — don't hand-roll colored pills.
+- Use \`useColorModeValue()\` for any colors that need to adapt between light and dark mode
+- Status colors: use \`Badge\` with \`colorScheme\` (\`green\`, \`red\`, \`blue\`, \`gray\`) — don't hand-roll colored pills.
 - Maximum 2–3 colors visible at any time (primary + foreground + muted). Colorful UIs feel noisy.
 - Every UI must render correctly in both light and dark mode. See the Dark Mode section below for the full rules.
 
@@ -92,66 +86,66 @@ Use design tokens (CSS variables), never hardcoded colors.
 **Page layout:**
 \`\`\`tsx
 <Box as="main">
-  <Container>
-    <Stack gap={8}>
+  <Container maxW="container.xl">
+    <VStack spacing={8} align="stretch">
       {/* Page header */}
-      <Flex align="center" justify="between">
-        <Stack gap={1}>
-          <Typography variant="h1">Page Title</Typography>
-          <Text color="muted">Brief description of this page</Text>
-        </Stack>
-        <Button>Primary Action</Button>
+      <Flex align="center" justify="space-between">
+        <VStack spacing={1} align="start">
+          <Heading as="h1" size="2xl">Page Title</Heading>
+          <Text color="gray.500">Brief description of this page</Text>
+        </VStack>
+        <Button colorScheme="blue">Primary Action</Button>
       </Flex>
 
       {/* Page content sections */}
-      <Stack gap={6}>
+      <VStack spacing={6} align="stretch">
         {/* ... */}
-      </Stack>
-    </Stack>
+      </VStack>
+    </VStack>
   </Container>
 </Box>
 \`\`\`
 
 **Card-based content:**
 \`\`\`tsx
-<Grid columns={{ base: 1, md: 2, lg: 3 }} gap={6}>
+<SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
   {items.map((item) => (
     <Card key={item.id}>
       <CardHeader>
-        <CardTitle>{item.title}</CardTitle>
-        <CardDescription>{item.description}</CardDescription>
+        <Heading size="md">{item.title}</Heading>
+        <Text fontSize="sm" color="gray.500">{item.description}</Text>
       </CardHeader>
-      <CardContent>
+      <CardBody>
         {/* Content */}
-      </CardContent>
+      </CardBody>
     </Card>
   ))}
-</Grid>
+</SimpleGrid>
 \`\`\`
 
 **Sidebar + main content:**
 \`\`\`tsx
-<Flex className="min-h-screen">
-  <Sidebar>{/* Nav items */}</Sidebar>
-  <Box as="main" className="flex-1">
-    <Container>{/* Page content */}</Container>
+<Flex minH="100vh">
+  <Box as="aside" w="250px">{/* Nav items */}</Box>
+  <Box as="main" flex={1}>
+    <Container maxW="container.xl">{/* Page content */}</Container>
   </Box>
 </Flex>
 \`\`\`
 
 **Section with centered content (landing pages):**
 \`\`\`tsx
-<Box as="section" className="py-16 sm:py-20">
-  <Container>
-    <Stack gap={4} align="center" className="text-center">
-      <Typography variant="h2">Section Title</Typography>
-      <Text color="muted" className="max-w-2xl">
+<Box as="section" py={{ base: 16, sm: 20 }}>
+  <Container maxW="container.xl">
+    <VStack spacing={4} align="center" textAlign="center">
+      <Heading as="h2" size="xl">Section Title</Heading>
+      <Text color="gray.500" maxW="2xl">
         A concise description that explains the value proposition.
       </Text>
-    </Stack>
-    <Grid columns={{ base: 1, md: 3 }} gap={8} className="mt-12">
+    </VStack>
+    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} mt={12}>
       {/* Feature cards or content */}
-    </Grid>
+    </SimpleGrid>
   </Container>
 </Box>
 \`\`\`
@@ -160,15 +154,15 @@ Use design tokens (CSS variables), never hardcoded colors.
 
 **Empty states:**
 \`\`\`tsx
-// GOOD — uses EmptyState component
-<EmptyState
-  icon={Inbox}
-  title="No messages yet"
-  description="Messages from your team will appear here."
-  action={<Button>Send a message</Button>}
-/>
+// GOOD — uses a well-structured empty state with Chakra components
+<VStack spacing={4} align="center" py={12} textAlign="center">
+  <Icon as={Inbox} boxSize={12} color="gray.400" />
+  <Heading size="md">No messages yet</Heading>
+  <Text color="gray.500">Messages from your team will appear here.</Text>
+  <Button colorScheme="blue">Send a message</Button>
+</VStack>
 
-// BAD — hand-rolled empty state
+// BAD — hand-rolled empty state with raw HTML
 <div className="flex flex-col items-center justify-center py-12 text-center">
   <Inbox className="h-12 w-12 text-gray-400 mb-4" />
   <h3 className="text-lg font-medium">No messages yet</h3>
@@ -178,33 +172,33 @@ Use design tokens (CSS variables), never hardcoded colors.
 
 **Stats/metrics:**
 \`\`\`tsx
-// GOOD — uses StatCard
-<Grid columns={{ base: 1, sm: 2, lg: 4 }} gap={4}>
-  <StatCard label="Total Users" value="2,847" trend="+12%" />
-  <StatCard label="Revenue" value="$48,290" trend="+8%" />
-</Grid>
-
-// BAD — hand-rolled stat cards
-<div className="grid grid-cols-4 gap-4">
-  <div className="bg-white rounded-lg p-6 shadow">
-    <p className="text-sm text-gray-500">Total Users</p>
-    <p className="text-2xl font-bold">2,847</p>
-  </div>
-</div>
+// GOOD — uses Chakra Stat component
+<SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={4}>
+  <Stat>
+    <StatLabel>Total Users</StatLabel>
+    <StatNumber>2,847</StatNumber>
+    <StatHelpText><StatArrow type="increase" />12%</StatHelpText>
+  </Stat>
+  <Stat>
+    <StatLabel>Revenue</StatLabel>
+    <StatNumber>$48,290</StatNumber>
+    <StatHelpText><StatArrow type="increase" />8%</StatHelpText>
+  </Stat>
+</SimpleGrid>
 \`\`\`
 
 **Loading states:**
 \`\`\`tsx
 // GOOD — Skeleton matches the layout structure
-<Stack gap={4}>
-  <Skeleton className="h-8 w-48" />       {/* Title */}
-  <Skeleton className="h-4 w-96" />       {/* Description */}
-  <Grid columns={3} gap={4}>
+<VStack spacing={4} align="stretch">
+  <Skeleton h="32px" w="200px" />
+  <SkeletonText noOfLines={2} />
+  <SimpleGrid columns={3} spacing={4}>
     {Array.from({ length: 3 }).map((_, i) => (
-      <Skeleton key={i} className="h-32" />
+      <Skeleton key={i} h="128px" />
     ))}
-  </Grid>
-</Stack>
+  </SimpleGrid>
+</VStack>
 
 // BAD — generic spinner with no layout hint
 <div className="flex justify-center py-12">
@@ -216,82 +210,46 @@ Use design tokens (CSS variables), never hardcoded colors.
 
 > **CRITICAL: Every screen, component, and custom style MUST look correct in both light and dark mode. No exceptions.**
 
-BlacksmithUI uses the \`.dark\` class strategy on \`<html>\`. All semantic CSS variables automatically switch between light and dark values. Your job is to never break this.
+Chakra UI supports color mode via \`useColorMode()\` and \`useColorModeValue()\`. All built-in components automatically adapt.
 
 **Rules:**
-- NEVER hardcode colors. \`text-gray-500\`, \`bg-white\`, \`bg-slate-900\`, \`border-gray-200\` — all of these break in one mode or the other. Use semantic tokens: \`text-muted-foreground\`, \`bg-background\`, \`bg-card\`, \`border-border\`.
-- NEVER use \`bg-white\` or \`bg-black\`. Use \`bg-background\` (page), \`bg-card\` (elevated surfaces), \`bg-muted\` (subtle sections).
-- NEVER use \`text-black\` or \`text-white\`. Use \`text-foreground\` (primary text), \`text-muted-foreground\` (secondary), \`text-primary-foreground\` (text on primary-colored backgrounds).
-- NEVER use hardcoded shadows like \`shadow-[0_2px_8px_rgba(0,0,0,0.1)]\`. Use Tailwind shadow utilities (\`shadow-sm\`, \`shadow-md\`) which respect the theme.
-- NEVER use opacity-based overlays with hardcoded colors (\`bg-black/50\`). Use \`bg-background/80\` or let overlay components (\`Dialog\`, \`Sheet\`) handle it.
-- SVG fills and strokes: use \`currentColor\` or \`fill-foreground\` / \`stroke-border\` — never \`fill-black\` or \`stroke-gray-300\`.
-- Image assets: if you use decorative images or illustrations, ensure they work on both backgrounds or use \`dark:hidden\` / \`hidden dark:block\` to swap variants.
-
-**Safe color tokens (always use these):**
-| Need | Light mode maps to | Dark mode maps to | Use |
-|------|----|----|-----|
-| Page background | white/light gray | near-black | \`bg-background\` |
-| Card/surface | white | dark gray | \`bg-card\` |
-| Subtle background | light gray | darker gray | \`bg-muted\` |
-| Primary text | near-black | near-white | \`text-foreground\` |
-| Secondary text | medium gray | lighter gray | \`text-muted-foreground\` |
-| Borders | light gray | dark gray | \`border-border\` |
-| Input borders | light gray | dark gray | \`border-input\` |
-| Focus ring | brand color | brand color | \`ring-ring\` |
-| Primary action | brand color | brand color | \`bg-primary text-primary-foreground\` |
-| Destructive | red | red | \`bg-destructive text-destructive-foreground\` |
-
-**Testing checklist (mental model):**
-Before considering any UI complete, verify these in your head:
-1. Does every text element use \`foreground\`, \`muted-foreground\`, or \`*-foreground\` tokens?
-2. Does every background use \`background\`, \`card\`, \`muted\`, or \`primary\`/\`secondary\`/\`accent\` tokens?
-3. Does every border use \`border\`, \`input\`, or \`ring\` tokens?
-4. Are there ANY hex values, rgb values, or Tailwind color names (gray, slate, blue, etc.) in the code? If yes, replace them.
-5. Do hover/focus/active states also use semantic tokens? (\`hover:bg-muted\` not \`hover:bg-gray-100\`)
+- Use \`useColorModeValue()\` for any custom colors that need to differ between modes
+- NEVER hardcode colors that only work in one mode. Use theme tokens or \`useColorModeValue()\`.
+- NEVER use \`bg="white"\` or \`bg="black"\`. Use \`bg={useColorModeValue('white', 'gray.800')}\` or Chakra semantic tokens.
+- All Chakra UI components automatically adapt to color mode — leverage this.
 
 ### Interactions & Feedback
 
-- **Hover states**: Subtle background change (\`hover:bg-muted\`) — not color shifts or scale transforms
-- **Focus**: Use focus-visible ring (\`focus-visible:ring-2 ring-ring\`). BlacksmithUI components handle this automatically
-- **Transitions**: \`transition-colors duration-150\` for color changes. No bounces, no springs, no dramatic animations
-- **Click feedback**: Use \`active:scale-[0.98]\` only on buttons and interactive cards, never on text or static elements
-- **Loading feedback**: Show \`Spinner\` on buttons during async actions. Use \`Skeleton\` for content areas. Never leave the user without feedback during loading
+- **Hover states**: Subtle background change — Chakra components handle this automatically
+- **Focus**: Chakra components include accessible focus rings by default
+- **Loading feedback**: Show \`Spinner\` on buttons via \`isLoading\` prop. Use \`Skeleton\` for content areas. Never leave the user without feedback during loading
 - **Success/error feedback**: Use \`useToast()\` for transient confirmations. Use \`Alert\` for persistent messages. Never use \`window.alert()\`
 - **Confirmation before destructive actions**: Always use \`AlertDialog\` for delete/remove actions. Never delete on single click
 
 ### Responsive Design
 
-- **Mobile-first**: Write base styles for mobile, add \`sm:\`/\`md:\`/\`lg:\` for larger screens
-- **Breakpoints**: \`sm\` (640px), \`md\` (768px), \`lg\` (1024px), \`xl\` (1280px)
-- **Grid collapse**: \`Grid columns={{ base: 1, md: 2, lg: 3 }}\` — single column on mobile, expand on larger screens
-- **Hide/show**: Use \`hidden md:block\` / \`md:hidden\` to toggle elements across breakpoints
-- **Touch targets**: Minimum 44×44px for interactive elements on mobile. Use \`Button size="lg"\` and adequate padding
-- **Stack on mobile, row on desktop**: Use \`Flex direction={{ base: 'column', md: 'row' }}\` or \`Stack\` that switches direction
+- **Mobile-first**: Chakra's responsive props use mobile-first breakpoints
+- **Breakpoints**: \`sm\` (480px), \`md\` (768px), \`lg\` (992px), \`xl\` (1280px), \`2xl\` (1536px)
+- **Responsive props**: \`columns={{ base: 1, md: 2, lg: 3 }}\` — single column on mobile, expand on larger screens
+- **Hide/show**: Use Chakra's \`Show\` and \`Hide\` components or \`display={{ base: 'none', md: 'block' }}\`
+- **Touch targets**: Minimum 44x44px for interactive elements on mobile. Use \`Button size="lg"\` and adequate padding
+- **Stack direction**: Use \`Stack direction={{ base: 'column', md: 'row' }}\` for responsive stacking
 - **Container**: Always wrap page content in \`<Container>\` — it handles responsive horizontal padding
 
 ### Anti-Patterns — NEVER Do These
 
 | Anti-pattern | What to do instead |
 |---|---|
-| Hardcoded colors (\`text-gray-500\`, \`bg-blue-600\`) | Use semantic tokens (\`text-muted-foreground\`, \`bg-primary\`) |
-| Heavy box shadows (\`shadow-xl\`, \`shadow-2xl\`) | Use \`shadow-sm\` on cards, \`shadow-md\` on elevated overlays only |
-| Rounded pill shapes (\`rounded-full\`) on cards/containers | Use \`rounded-lg\` or \`rounded-md\` (controlled by \`--radius\`) |
-| Gradient backgrounds on surfaces | Use solid \`bg-card\` or \`bg-background\` |
-| Decorative borders (\`border-l-4 border-blue-500\`) | Use \`Divider\` or \`border-border\` |
-| Custom scrollbars with CSS hacks | Use \`ScrollArea\` |
-| Animated entrances (fade-in, slide-up on mount) | Content should appear instantly. Only animate user-triggered changes |
-| Centering with \`absolute inset-0 flex items-center\` | Use \`Flex align="center" justify="center"\` |
-| Using \`<br />\` for spacing | Use \`Stack gap={...}\` or margin utilities |
-| Multiple font sizes in close proximity | Keep nearby text within 1–2 size steps |
-| Dense walls of text | Break into sections with headings, cards, or spacing |
-| Colored backgrounds on every section | Use \`bg-background\` as default, \`bg-muted\` sparingly for contrast |
-| Over-using badges/tags on everything | Badges are for status and categories, not decoration |
-| Inline styles (\`style={{ ... }}\`) | Use Tailwind classes via \`className\` |
-| \`bg-white\` / \`bg-black\` / \`bg-slate-*\` | Use \`bg-background\`, \`bg-card\`, \`bg-muted\` |
-| \`text-black\` / \`text-white\` / \`text-gray-*\` | Use \`text-foreground\`, \`text-muted-foreground\` |
-| \`border-gray-*\` / \`border-slate-*\` | Use \`border-border\`, \`border-input\` |
-| Hex/rgb values in className or style | Use CSS variable tokens exclusively |
-| UI that only looks right in light mode | Always verify both modes — use semantic tokens throughout |
+| Raw \`<div>\` with flex/grid classes | Use \`Flex\`, \`VStack\`, \`HStack\`, \`SimpleGrid\` |
+| Raw \`<h1>\`-\`<h6>\` tags | Use \`Heading\` with \`as\` and \`size\` props |
+| Raw \`<p>\` tags | Use \`Text\` |
+| Heavy box shadows | Use Chakra's built-in shadow prop: \`shadow="sm"\`, \`shadow="md"\` |
+| Gradient backgrounds on surfaces | Use solid backgrounds |
+| Custom scrollbar CSS hacks | Use Chakra's styling system |
+| Animated entrances (fade-in, slide-up) | Content should appear instantly. Only animate user-triggered changes |
+| Using \`<br />\` for spacing | Use \`VStack spacing={...}\` or Chakra spacing props |
+| Inline styles (\`style={{ ... }}\`) | Use Chakra style props (\`p\`, \`m\`, \`bg\`, \`color\`, etc.) |
+| Hardcoded color values | Use theme tokens and \`useColorModeValue()\` |
 `
   },
 }

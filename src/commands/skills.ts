@@ -8,9 +8,9 @@ import { djangoSkill } from '../skills/django.js'
 import { djangoRestAdvancedSkill } from '../skills/django-rest-advanced.js'
 import { apiDocumentationSkill } from '../skills/api-documentation.js'
 import { reactSkill } from '../skills/react.js'
-import { blacksmithUiReactSkill } from '../skills/blacksmith-ui-react.js'
-import { blacksmithUiFormsSkill } from '../skills/blacksmith-ui-forms.js'
-import { blacksmithUiAuthSkill } from '../skills/blacksmith-ui-auth.js'
+import { chakraUiReactSkill } from '../skills/chakra-ui-react.js'
+import { chakraUiFormsSkill } from '../skills/chakra-ui-forms.js'
+import { chakraUiAuthSkill } from '../skills/chakra-ui-auth.js'
 import { blacksmithHooksSkill } from '../skills/blacksmith-hooks.js'
 import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
 import { frontendTestingSkill } from '../skills/frontend-testing.js'
@@ -24,9 +24,9 @@ const allSkills: Skill[] = [
   djangoRestAdvancedSkill,
   apiDocumentationSkill,
   reactSkill,
-  blacksmithUiReactSkill,
-  blacksmithUiFormsSkill,
-  blacksmithUiAuthSkill,
+  chakraUiReactSkill,
+  chakraUiFormsSkill,
+  chakraUiAuthSkill,
   blacksmithHooksSkill,
   blacksmithCliSkill,
   frontendTestingSkill,
@@ -35,7 +35,7 @@ const allSkills: Skill[] = [
 ]
 
 interface SetupOptions {
-  blacksmithUiSkill?: boolean
+  chakraUiSkill?: boolean
 }
 
 export async function setupSkills(options: SetupOptions) {
@@ -52,7 +52,7 @@ export async function setupSkills(options: SetupOptions) {
   await setupAiDev({
     projectDir: root,
     projectName: config.name,
-    includeBlacksmithUiSkill: options.blacksmithUiSkill !== false,
+    includeChakraUiSkill: options.chakraUiSkill !== false,
   })
 
   log.blank()

@@ -19,7 +19,7 @@ export const aiGuidelinesSkill: Skill = {
 - Use existing patterns in the codebase as reference before inventing new ones
 
 ### Frontend Architecture (Mandatory)
-- **Use \`@blacksmith-ui/react\` for ALL UI** — \`Stack\`, \`Flex\`, \`Grid\` for layout; \`Typography\`, \`Text\` for text; \`Card\`, \`Button\`, \`Badge\`, etc. for all elements. Never use raw HTML (\`<div>\`, \`<h1>\`, \`<p>\`, \`<button>\`) when a Blacksmith-UI component exists
+- **Use \`@chakra-ui/react\` for ALL UI** — \`VStack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\` for layout; \`Heading\`, \`Text\` for text; \`Card\`, \`Button\`, \`Badge\`, etc. for all elements. Never use raw HTML (\`<div>\`, \`<h1>\`, \`<p>\`, \`<button>\`) when a Chakra UI component exists
 - **Pages are thin orchestrators** — compose child components from \`components/\`, extract logic into \`hooks/\`. A page file should be ~20-30 lines, not a monolith
 - **Use the \`Path\` enum** — all route paths come from \`src/router/paths.ts\`. Never hardcode path strings like \`'/login'\` or \`'/dashboard'\`
 - **Add new paths to the enum** — when creating a new page, add its path to the \`Path\` enum before the \`// blacksmith:path\` marker
@@ -37,7 +37,7 @@ export const aiGuidelinesSkill: Skill = {
 3. Frontend builds: \`cd frontend && npm run build\`
 4. API types are in sync: \`blacksmith sync\`
 5. No lint errors in modified files
-6. All UI uses \`@blacksmith-ui/react\` components — no raw \`<div>\` for layout, no raw \`<h1>\`-\`<h6>\` for text
+6. All UI uses \`@chakra-ui/react\` components — no raw \`<div>\` for layout, no raw \`<h1>\`-\`<h6>\` for text
 7. Pages are modular — page file is a thin orchestrator, sections are in \`components/\`, logic in \`hooks/\`
 8. Logic is in hooks — no \`useApiQuery\`, \`useApiMutation\`, \`useEffect\`, or multi-\`useState\` in component bodies
 9. No hardcoded route paths — all paths use the \`Path\` enum from \`@/router/paths\`

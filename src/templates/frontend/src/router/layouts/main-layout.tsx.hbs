@@ -2,20 +2,20 @@ import { Outlet, Link, useNavigate } from 'react-router-dom'
 import { Path } from '@/router/paths'
 import {
   Button,
-  Separator,
+  IconButton,
   Tooltip,
-  DropdownMenuPrimitives,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuDivider,
+  MenuGroup,
   Avatar,
-  AvatarFallback,
-} from '@blacksmith-ui/react'
+  Divider,
+  useColorMode,
+} from '@chakra-ui/react'
 import { LogOut, User, Settings, Sun, Moon, Anvil } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks/use-auth'
-import { useDarkMode } from '@blacksmith-ui/react'
 
 function getInitials(user: any): string {
   if (user?.displayName) {
@@ -29,8 +29,10 @@ function getInitials(user: any): string {
 
 export function MainLayout() {
   const { user, isAuthenticated, logout } = useAuth()
-  const { isDark, toggle } = useDarkMode()
+  const { colorMode, toggleColorMode } = useColorMode()
   const navigate = useNavigate()
+
+  const isDark = colorMode === 'dark'
 
   const handleLogout = () => {
     logout()
@@ -49,57 +51,62 @@ export function MainLayout() {
           <div className="flex-1" />
 
           <div className="flex items-center gap-2">
-            <Tooltip content={isDark ? 'Light mode' : 'Dark mode'}>
-              <Button variant="ghost" size="icon" onClick={toggle}>
-                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
+            <Tooltip label={isDark ? 'Light mode' : 'Dark mode'}>
+              <IconButton
+                aria-label="Toggle color mode"
+                variant="ghost"
+                size="sm"
+                onClick={toggleColorMode}
+                icon={isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              />
             </Tooltip>
 
             {isAuthenticated ? (
-              <DropdownMenuPrimitives.Root>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-xs">
-                        {getInitials(user)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full"
+                  p={0}
+                  minW="auto"
+                >
+                  <Avatar
+                    size="sm"
+                    name={user?.displayName || user?.email || 'U'}
+                    getInitials={() => getInitials(user)}
+                  />
+                </MenuButton>
+                <MenuList>
+                  <MenuGroup>
+                    <div className="px-3 py-2">
                       <p className="text-sm font-medium leading-none">
                         {user?.displayName || 'User'}
                       </p>
-                      <p className="text-xs leading-none text-muted-foreground">
+                      <p className="text-xs leading-none text-muted-foreground mt-1">
                         {user?.email}
                       </p>
                     </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
+                  </MenuGroup>
+                  <MenuDivider />
+                  <MenuItem icon={<User className="h-4 w-4" />}>
                     Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
+                  </MenuItem>
+                  <MenuItem icon={<Settings className="h-4 w-4" />}>
                     Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
+                  </MenuItem>
+                  <MenuDivider />
+                  <MenuItem icon={<LogOut className="h-4 w-4" />} onClick={handleLogout}>
                     Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenuPrimitives.Root>
+                  </MenuItem>
+                </MenuList>
+              </Menu>
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to={Path.Login}>Sign In</Link>
+                <Button variant="ghost" size="sm" as={Link} to={Path.Login}>
+                  Sign In
                 </Button>
-                <Button size="sm" asChild>
-                  <Link to={Path.Register}>Sign Up</Link>
+                <Button size="sm" colorScheme="blue" as={Link} to={Path.Register}>
+                  Sign Up
                 </Button>
               </>
             )}
@@ -118,16 +125,16 @@ export function MainLayout() {
             <span>&copy; {new Date().getFullYear()} {{projectName}}. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="link" size="sm" className="text-muted-foreground h-auto p-0" asChild>
-              <Link to="/terms">Terms</Link>
+            <Button variant="link" size="sm" className="text-muted-foreground h-auto p-0" as={Link} to="/terms">
+              Terms
             </Button>
-            <Separator orientation="vertical" className="h-4" />
-            <Button variant="link" size="sm" className="text-muted-foreground h-auto p-0" asChild>
-              <Link to="/privacy">Privacy</Link>
+            <Divider orientation="vertical" h={4} />
+            <Button variant="link" size="sm" className="text-muted-foreground h-auto p-0" as={Link} to="/privacy">
+              Privacy
             </Button>
-            <Separator orientation="vertical" className="h-4" />
-            <Button variant="link" size="sm" className="text-muted-foreground h-auto p-0" asChild>
-              <Link to="/support">Support</Link>
+            <Divider orientation="vertical" h={4} />
+            <Button variant="link" size="sm" className="text-muted-foreground h-auto p-0" as={Link} to="/support">
+              Support
             </Button>
           </div>
         </div>
