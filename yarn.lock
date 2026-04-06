@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@hookform/resolvers@^5.2.2":
+  "integrity" "sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA=="
+  "resolved" "https://registry.npmjs.org/@hookform/resolvers/-/resolvers-5.2.2.tgz"
+  "version" "5.2.2"
+  dependencies:
+    "@standard-schema/utils" "^0.3.0"
+
 "@jridgewell/gen-mapping@^0.3.2":
   "integrity" "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="
   "resolved" "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz"
@@ -52,6 +59,11 @@
   "integrity" "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="
   "resolved" "https://registry.npmjs.org/@standard-schema/spec/-/spec-1.1.0.tgz"
   "version" "1.1.0"
+
+"@standard-schema/utils@^0.3.0":
+  "integrity" "sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g=="
+  "resolved" "https://registry.npmjs.org/@standard-schema/utils/-/utils-0.3.0.tgz"
+  "version" "0.3.0"
 
 "@tanstack/query-core@5.96.2":
   "integrity" "sha512-hzI6cTVh4KNRk8UtoIBS7Lv9g6BnJPXvBKsvYH1aGWvv0347jT3BnSvztOE+kD76XGvZnRC/t6qdW1CaIfwCeA=="
@@ -1406,7 +1418,12 @@
     "minimist" "^1.2.0"
     "strip-json-comments" "~2.0.1"
 
-"react@^18 || ^19":
+"react-hook-form@^7.55.0", "react-hook-form@^7.72.1":
+  "integrity" "sha512-RhwBoy2ygeVZje+C+bwJ8g0NjTdBmDlJvAUHTxRjTmSUKPYsKfMphkS2sgEMotsY03bP358yEYlnUeZy//D9Ig=="
+  "resolved" "https://registry.npmjs.org/react-hook-form/-/react-hook-form-7.72.1.tgz"
+  "version" "7.72.1"
+
+"react@^16.8.0 || ^17 || ^18 || ^19", "react@^18 || ^19":
   "integrity" "sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ=="
   "resolved" "https://registry.npmjs.org/react/-/react-19.2.4.tgz"
   "version" "19.2.4"
@@ -2082,3 +2099,8 @@
   "integrity" "sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug=="
   "resolved" "https://registry.npmjs.org/yoctocolors/-/yoctocolors-2.1.2.tgz"
   "version" "2.1.2"
+
+"zod@^4.3.6":
+  "integrity" "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="
+  "resolved" "https://registry.npmjs.org/zod/-/zod-4.3.6.tgz"
+  "version" "4.3.6"

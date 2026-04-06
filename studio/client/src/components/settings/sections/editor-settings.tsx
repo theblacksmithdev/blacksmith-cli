@@ -1,4 +1,3 @@
-import { Code2 } from 'lucide-react'
 import { SettingsSection } from '../settings-section'
 import { SettingRow } from '../setting-row'
 import { SettingSelect } from '../setting-select'
@@ -10,8 +9,6 @@ export function EditorSettings() {
 
   return (
     <SettingsSection
-      id="editor"
-      icon={Code2}
       title="Editor"
       description="Configure the built-in code viewer and editor."
     >

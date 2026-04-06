@@ -25,7 +25,6 @@ export const router = createBrowserRouter([
       // Global routes
       { path: Path.Home, element: <DashboardPage /> },
       { path: Path.Projects, element: <ProjectsPage /> },
-      { path: Path.Settings, element: <SettingsPage /> },
 
       // Project-scoped routes
       {
@@ -40,6 +39,7 @@ export const router = createBrowserRouter([
           { path: 'run', element: <RunPage /> },
           { path: 'templates', element: <TemplatesPage /> },
           { path: 'activity', element: <ActivityPage /> },
+          { path: 'settings', element: <SettingsPage /> },
         ],
       },
     ],

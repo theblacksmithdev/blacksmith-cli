@@ -1,4 +1,3 @@
-import { Palette } from 'lucide-react'
 import { SettingsSection } from '../settings-section'
 import { SettingRow } from '../setting-row'
 import { SettingSelect } from '../setting-select'
@@ -11,8 +10,6 @@ export function AppearanceSettings() {
 
   return (
     <SettingsSection
-      id="appearance"
-      icon={Palette}
       title="Appearance"
       description="Customize the look and feel of the interface."
     >

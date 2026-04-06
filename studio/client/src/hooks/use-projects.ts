@@ -46,8 +46,11 @@ export function useProjects() {
   })
 
   const removeMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/projects/${id}`),
+    mutationFn: ({ id, hard }: { id: string; hard?: boolean }) =>
+      api.delete(`/projects/${id}${hard ? '?hard=true' : ''}`),
     onSuccess: () => {
+      resetProjectStores()
+      setActiveProject(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.projects })
       queryClient.invalidateQueries({ queryKey: queryKeys.activeProject })
     },
@@ -65,6 +68,6 @@ export function useProjects() {
     isLoading: projectsQuery.isLoading || activeQuery.isLoading,
     register: (path: string, name?: string) => registerMutation.mutateAsync({ path, name }),
     activate: (id: string) => activateMutation.mutateAsync(id),
-    remove: (id: string) => removeMutation.mutate(id),
+    remove: (id: string, hard?: boolean) => removeMutation.mutateAsync({ id, hard }),
   }
 }

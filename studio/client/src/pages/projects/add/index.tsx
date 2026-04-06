@@ -5,6 +5,7 @@ import { ArrowLeft, FolderOpen, Plus, Anvil } from 'lucide-react'
 import { Path } from '@/router/paths'
 import { ChooseType } from './choose-type'
 import { ImportExisting } from './import-existing'
+import { CreateNew } from './create-new'
 
 type Step = 'choose' | 'import-existing' | 'create-new'
 
@@ -77,9 +78,7 @@ export default function AddProjectPage() {
           <ImportExisting />
         )}
         {step === 'create-new' && (
-          <Box css={{ textAlign: 'center', color: 'var(--studio-text-muted)' }}>
-            <Text css={{ fontSize: '15px' }}>New project creation coming soon.</Text>
-          </Box>
+          <CreateNew />
         )}
       </Box>
     </Box>

@@ -24,6 +24,7 @@ import {
   runPath,
   templatesPath,
   activityPath,
+  settingsPath,
 } from '@/router/paths'
 
 const railBtn = (active = false) => ({
@@ -156,11 +157,13 @@ export function NavRail() {
           </Tooltip>
         )}
 
-        <Tooltip content="Settings">
-          <Box as="button" onClick={() => navigate(Path.Settings)} css={railBtn(pathname === '/settings')}>
-            <Settings size={17} />
-          </Box>
-        </Tooltip>
+        {isInsideProject && pid && (
+          <Tooltip content="Settings">
+            <Box as="button" onClick={() => navigate(settingsPath(pid))} css={railBtn(pathname.endsWith('/settings'))}>
+              <Settings size={17} />
+            </Box>
+          </Tooltip>
+        )}
 
         <Tooltip content={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
           <Box

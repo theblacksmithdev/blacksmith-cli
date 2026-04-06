@@ -1,4 +1,3 @@
-import { Sparkles } from 'lucide-react'
 import { SettingsSection } from '../settings-section'
 import { SettingRow } from '../setting-row'
 import { SettingSelect } from '../setting-select'
@@ -11,8 +10,6 @@ export function AiSettings() {
 
   return (
     <SettingsSection
-      id="ai"
-      icon={Sparkles}
       title="AI & Prompting"
       description="Control how Claude processes your requests and generates code."
     >

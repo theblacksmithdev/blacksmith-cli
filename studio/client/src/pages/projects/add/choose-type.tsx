@@ -30,7 +30,6 @@ export function ChooseType({ onExisting, onNew }: ChooseTypeProps) {
           title="Create new project"
           description="Scaffold a new Blacksmith project with Django backend and React frontend."
           onClick={onNew}
-          disabled
         />
       </VStack>
     </VStack>

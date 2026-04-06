@@ -3,7 +3,6 @@ export const Path = {
   Home: '/',
   Projects: '/projects',
   AddProject: '/projects/add',
-  Settings: '/settings',
 
   // ─── Project-scoped routes ───
   Project: '/:projectId',
@@ -13,6 +12,7 @@ export const Path = {
   Run: '/:projectId/run',
   Templates: '/:projectId/templates',
   Activity: '/:projectId/activity',
+  Settings: '/:projectId/settings',
 } as const
 
 // ─── Path builders ───
@@ -43,4 +43,8 @@ export function templatesPath(projectId: string) {
 
 export function activityPath(projectId: string) {
   return `/${projectId}/activity`
+}
+
+export function settingsPath(projectId: string) {
+  return `/${projectId}/settings`
 }

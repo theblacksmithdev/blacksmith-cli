@@ -2,6 +2,8 @@ import { Router } from 'express'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
+import { spawn } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import type { ProjectManager } from '../services/projects.js'
 import type { SessionManager } from '../services/sessions.js'
 import type { ClaudeManager } from '../services/claude/index.js'
@@ -9,6 +11,9 @@ import type { SettingsManager } from '../services/settings.js'
 import type { RunnerManager } from '../services/runner/index.js'
 import { buildFileTree, readFileContent } from '../services/files.js'
 import { getTemplates, interpolateTemplate } from '../services/templates.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export function createApiRouter(
   projectManager: ProjectManager,
@@ -138,6 +143,101 @@ export function createApiRouter(
     res.status(201).json(project)
   })
 
+  // Create a new project via `blacksmith init`
+  router.post('/api/projects/create', async (req, res) => {
+    const { name, parentPath, backendPort, frontendPort, theme, ai } = req.body
+
+    if (!name || !parentPath) {
+      return res.status(400).json({ error: 'name and parentPath are required' })
+    }
+
+    const absParent = path.resolve(parentPath)
+    if (!fs.existsSync(absParent) || !fs.statSync(absParent).isDirectory()) {
+      return res.status(400).json({ error: 'parentPath is not a valid directory' })
+    }
+
+    const projectDir = path.join(absParent, name)
+    if (fs.existsSync(projectDir)) {
+      return res.status(400).json({ error: `Directory "${name}" already exists in ${absParent}` })
+    }
+
+    // Run blacksmith init as a subprocess
+    // Use npx to ensure blacksmith is found, and pipe stdin to avoid interactive prompts
+    const args = [
+      'init', name,
+      '-b', String(backendPort || 8000),
+      '-f', String(frontendPort || 5173),
+      '-t', theme || 'default',
+    ]
+    if (ai) args.push('--ai')
+
+    console.log(`[projects] Creating project: blacksmith ${args.join(' ')} in ${absParent}`)
+
+    // Use node to run the CLI directly to avoid PATH issues
+    const binPath = path.resolve(__dirname, '..', '..', 'bin', 'blacksmith.js')
+    const useDirectBin = fs.existsSync(binPath)
+
+    const cmd = useDirectBin ? process.execPath : 'blacksmith'
+    const fullArgs = useDirectBin ? [binPath, ...args] : args
+
+    const proc = spawn(cmd, fullArgs, {
+      cwd: absParent,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env: { ...process.env, FORCE_COLOR: '0' },
+    })
+
+    // Close stdin immediately so interactive prompts don't hang
+    proc.stdin.end()
+
+    let stdout = ''
+    let stderr = ''
+
+    proc.stdout.on('data', (chunk: Buffer) => {
+      const text = chunk.toString()
+      stdout += text
+      console.log(`[projects] stdout: ${text.trim()}`)
+    })
+    proc.stderr.on('data', (chunk: Buffer) => {
+      const text = chunk.toString()
+      stderr += text
+      console.log(`[projects] stderr: ${text.trim()}`)
+    })
+
+    // Timeout after 5 minutes
+    const timeout = setTimeout(() => {
+      proc.kill('SIGTERM')
+      if (!res.headersSent) {
+        res.status(504).json({ error: 'Project creation timed out after 5 minutes' })
+      }
+    }, 300000)
+
+    proc.on('close', (code: number) => {
+      clearTimeout(timeout)
+      if (res.headersSent) return
+
+      console.log(`[projects] blacksmith init exited with code ${code}`)
+
+      if (code !== 0) {
+        return res.status(500).json({
+          error: 'Project creation failed',
+          details: stderr || stdout,
+          exitCode: code,
+        })
+      }
+
+      // Register the new project
+      const project = projectManager.register(projectDir, name)
+      res.status(201).json({ project, output: stdout })
+    })
+
+    proc.on('error', (err: Error) => {
+      clearTimeout(timeout)
+      if (!res.headersSent) {
+        res.status(500).json({ error: `Failed to run blacksmith: ${err.message}` })
+      }
+    })
+  })
+
   router.post('/api/projects/:id/activate', (req, res) => {
     const project = projectManager.setActive(req.params.id)
     if (!project) return res.status(404).json({ error: 'Project not found' })
@@ -150,9 +250,31 @@ export function createApiRouter(
     res.json(project)
   })
 
-  router.delete('/api/projects/:id', (req, res) => {
-    const removed = projectManager.remove(req.params.id)
-    if (!removed) return res.status(404).json({ error: 'Project not found' })
+  router.delete('/api/projects/:id', async (req, res) => {
+    const hard = req.query.hard === 'true'
+    const project = projectManager.get(req.params.id)
+    if (!project) return res.status(404).json({ error: 'Project not found' })
+
+    console.log(`[projects] Removing project "${project.name}" (hard=${hard}, path=${project.path})`)
+
+    if (hard && project.path) {
+      const projectPath = path.resolve(project.path)
+      try {
+        if (fs.existsSync(projectPath)) {
+          // Use shell rm -rf for reliable recursive deletion
+          const { execSync } = await import('node:child_process')
+          execSync(`rm -rf ${JSON.stringify(projectPath)}`, { timeout: 30000 })
+          console.log(`[projects] Hard deleted: ${projectPath}`)
+        } else {
+          console.log(`[projects] Path does not exist: ${projectPath}`)
+        }
+      } catch (err: any) {
+        console.error(`[projects] Hard delete failed: ${err.message}`)
+        return res.status(500).json({ error: `Failed to delete project files: ${err.message}` })
+      }
+    }
+
+    projectManager.remove(req.params.id)
     res.status(204).send()
   })
 

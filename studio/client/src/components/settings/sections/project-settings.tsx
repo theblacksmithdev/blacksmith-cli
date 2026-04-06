@@ -1,4 +1,3 @@
-import { FolderTree } from 'lucide-react'
 import { SettingsSection } from '../settings-section'
 import { SettingRow } from '../setting-row'
 import { SettingInput } from '../setting-input'
@@ -10,8 +9,6 @@ export function ProjectSettings() {
 
   return (
     <SettingsSection
-      id="project"
-      icon={FolderTree}
       title="Project"
       description="Project-level preferences and file browser configuration."
     >
