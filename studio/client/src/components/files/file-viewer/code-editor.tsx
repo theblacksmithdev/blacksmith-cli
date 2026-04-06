@@ -17,19 +17,22 @@ export function CodeEditor({ content, language }: CodeEditorProps) {
   const options = useMemo(() => getEditorOptions(lineCount), [lineCount])
 
   return (
-    <Box css={{ flex: 1, overflow: 'hidden' }}>
-      <Editor
-        height="100%"
-        language={monacoLang}
-        value={content}
-        theme={mode === 'dark' ? 'vs-dark' : 'light'}
-        options={options}
-        loading={
-          <Box css={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-            <Text css={{ fontSize: '13px', color: 'var(--studio-text-muted)' }}>Loading editor...</Text>
-          </Box>
-        }
-      />
+    <Box css={{ flex: 1, position: 'relative', minHeight: 0 }}>
+      <Box css={{ position: 'absolute', inset: 0 }}>
+        <Editor
+          height="100%"
+          width="100%"
+          language={monacoLang}
+          value={content}
+          theme={mode === 'dark' ? 'vs-dark' : 'light'}
+          options={options}
+          loading={
+            <Box css={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+              <Text css={{ fontSize: '13px', color: 'var(--studio-text-muted)' }}>Loading editor...</Text>
+            </Box>
+          }
+        />
+      </Box>
     </Box>
   )
 }

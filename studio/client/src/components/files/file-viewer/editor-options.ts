@@ -6,7 +6,7 @@ export function getEditorOptions(lineCount: number) {
     fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace",
     lineHeight: 20,
     padding: { top: 12, bottom: 12 },
-    scrollBeyondLastLine: false,
+    scrollBeyondLastLine: true,
     smoothScrolling: true,
     cursorBlinking: 'solid' as const,
     renderLineHighlight: 'all' as const,
