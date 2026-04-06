@@ -8,6 +8,7 @@ import { createStaticRouter } from './routes/static.js'
 import { setupSocketHandlers } from './ws/handler.js'
 import { ClaudeManager } from './services/claude/index.js'
 import { SessionManager } from './services/sessions.js'
+import { SettingsManager } from './services/settings.js'
 import { closeDatabase } from './db/index.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -39,6 +40,7 @@ export async function createStudioServer({ projectRoot, port }: StudioOptions): 
   // Services
   const claudeManager = new ClaudeManager(projectRoot)
   const sessionManager = new SessionManager(projectRoot)
+  const settingsManager = new SettingsManager(projectRoot)
 
   // Check Claude availability
   const claudeStatus = await claudeManager.checkInstalled()
@@ -49,10 +51,10 @@ export async function createStudioServer({ projectRoot, port }: StudioOptions): 
   }
 
   // Routes
-  app.use(createApiRouter(projectRoot, sessionManager, claudeManager))
+  app.use(createApiRouter(projectRoot, sessionManager, claudeManager, settingsManager))
 
   // WebSocket
-  setupSocketHandlers(io, claudeManager, sessionManager)
+  setupSocketHandlers(io, claudeManager, sessionManager, settingsManager)
 
   // Static files (React SPA) — must come after API routes
   const clientDir = getStudioClientDir()

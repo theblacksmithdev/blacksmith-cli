@@ -3,11 +3,13 @@ import crypto from 'node:crypto'
 import { PROMPT_SEND, PROMPT_CANCEL, CLAUDE_MESSAGE, CLAUDE_TOOL_USE, CLAUDE_DONE, CLAUDE_ERROR } from './events.js'
 import type { ClaudeManager } from '../services/claude/index.js'
 import type { SessionManager } from '../services/sessions.js'
+import type { SettingsManager } from '../services/settings.js'
 
 export function setupSocketHandlers(
   io: SocketServer,
   claudeManager: ClaudeManager,
   sessionManager: SessionManager,
+  settingsManager: SettingsManager,
 ) {
   io.on('connection', (socket) => {
     console.log(`[ws] Client connected: ${socket.id}`)
@@ -24,11 +26,21 @@ export function setupSocketHandlers(
         timestamp: new Date().toISOString(),
       })
 
+      // Read AI settings
+      const allSettings = settingsManager.getAll()
+
       let lastContent = ''
       const toolCalls: any[] = []
 
       try {
-        await claudeManager.sendPrompt(sessionId, prompt, (chunk) => {
+        await claudeManager.sendPrompt({
+          sessionId,
+          prompt,
+          model: allSettings['ai.model'] || undefined,
+          maxBudget: allSettings['ai.maxBudget'] || undefined,
+          permissionMode: allSettings['ai.permissionMode'] || 'bypassPermissions',
+          customInstructions: allSettings['ai.customInstructions'] || undefined,
+        }, (chunk) => {
           if (chunk.type === 'assistant') {
             const textBlocks = (chunk.message?.content || []).filter(
               (b: any) => b.type === 'text',
@@ -60,7 +72,6 @@ export function setupSocketHandlers(
               })
             }
           } else if (chunk.type === 'result') {
-            // Persist assistant message
             if (lastContent) {
               sessionManager.addMessage(sessionId, {
                 id: crypto.randomUUID(),
@@ -81,7 +92,6 @@ export function setupSocketHandlers(
       } catch (error: any) {
         console.error(`[ws] Claude error:`, error.message)
 
-        // Persist error as assistant message
         sessionManager.addMessage(sessionId, {
           id: crypto.randomUUID(),
           role: 'assistant',

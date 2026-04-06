@@ -1,8 +1,14 @@
 import { spawn } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
-import { buildClaudeArgs } from './args.js'
+import { buildClaudeArgs, type ClaudeArgsOptions } from './args.js'
 import { createNdjsonParser } from './ndjson-parser.js'
 import type { ChunkCallback } from './types.js'
+
+export interface SpawnOptions extends Omit<ClaudeArgsOptions, 'sessionId' | 'prompt'> {
+  sessionId: string
+  prompt: string
+  projectRoot: string
+}
 
 /**
  * Spawn a Claude Code subprocess for a single prompt.
@@ -10,17 +16,16 @@ import type { ChunkCallback } from './types.js'
  * The returned ChildProcess can be used to cancel (kill) the prompt.
  */
 export function spawnClaudePrompt(
-  sessionId: string,
-  prompt: string,
-  projectRoot: string,
+  options: SpawnOptions,
   onChunk: ChunkCallback,
 ): { promise: Promise<void>; process: ChildProcess } {
+  const { sessionId, prompt, projectRoot, ...argsOptions } = options
   console.log(`[claude] Spawning for session ${sessionId}, prompt: "${prompt.slice(0, 80)}..."`)
 
-  const args = buildClaudeArgs(sessionId, prompt)
+  const args = buildClaudeArgs({ sessionId, prompt, ...argsOptions })
 
   const proc = spawn('claude', args, {
-    cwd: projectRoot,
+    cwd: options.projectRoot,
     stdio: ['ignore', 'pipe', 'pipe'],
     env: { ...process.env },
   })

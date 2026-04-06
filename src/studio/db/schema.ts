@@ -36,3 +36,11 @@ export const toolCalls = sqliteTable('tool_calls', {
   input: text('input').notNull(), // JSON stringified
   output: text('output'),
 })
+
+/**
+ * Settings — key-value store for user preferences.
+ */
+export const settings = sqliteTable('settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+})

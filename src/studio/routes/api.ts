@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import type { SessionManager } from '../services/sessions.js'
 import type { ClaudeManager } from '../services/claude/index.js'
+import type { SettingsManager } from '../services/settings.js'
 import { buildFileTree, readFileContent } from '../services/files.js'
 import { getTemplates, interpolateTemplate } from '../services/templates.js'
 
@@ -8,6 +9,7 @@ export function createApiRouter(
   projectRoot: string,
   sessionManager: SessionManager,
   claudeManager: ClaudeManager,
+  settingsManager: SettingsManager,
 ): Router {
   const router = Router()
 
@@ -79,6 +81,20 @@ export function createApiRouter(
     if (!template) return res.status(404).json({ error: 'Template not found' })
     const prompt = interpolateTemplate(template, values)
     res.json({ prompt })
+  })
+
+  // Settings
+  router.get('/api/settings', (_req, res) => {
+    res.json(settingsManager.getAll())
+  })
+
+  router.patch('/api/settings', (req, res) => {
+    const pairs = req.body
+    if (!pairs || typeof pairs !== 'object') {
+      return res.status(400).json({ error: 'Body must be a JSON object of key-value pairs' })
+    }
+    settingsManager.setMany(pairs)
+    res.json(settingsManager.getAll())
   })
 
   return router

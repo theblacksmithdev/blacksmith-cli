@@ -5,6 +5,15 @@ import type { ClaudeInstallStatus, ChunkCallback } from './types.js'
 
 export type { ClaudeInstallStatus, ChunkCallback } from './types.js'
 
+export interface SendPromptOptions {
+  sessionId: string
+  prompt: string
+  model?: string
+  maxBudget?: number | null
+  permissionMode?: string
+  customInstructions?: string
+}
+
 export class ClaudeManager {
   private processes = new Map<string, ChildProcess>()
   private projectRoot: string
@@ -18,23 +27,20 @@ export class ClaudeManager {
   }
 
   async sendPrompt(
-    sessionId: string,
-    prompt: string,
+    options: SendPromptOptions,
     onChunk: ChunkCallback,
   ): Promise<void> {
     const { promise, process } = spawnClaudePrompt(
-      sessionId,
-      prompt,
-      this.projectRoot,
+      { ...options, projectRoot: this.projectRoot },
       onChunk,
     )
 
-    this.processes.set(sessionId, process)
+    this.processes.set(options.sessionId, process)
 
     try {
       await promise
     } finally {
-      this.processes.delete(sessionId)
+      this.processes.delete(options.sessionId)
     }
   }
 
