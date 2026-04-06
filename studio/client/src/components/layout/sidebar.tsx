@@ -1,17 +1,21 @@
 import { Box, VStack, IconButton } from '@chakra-ui/react'
 import { Tooltip } from '@/components/shared/tooltip'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { MessageSquare, Sparkles, FolderTree, History, Settings, Anvil } from 'lucide-react'
-import { useUiStore, type ActiveView } from '@/stores/ui-store'
+import { useUiStore } from '@/stores/ui-store'
+import { Path } from '@/router/paths'
 
-const navItems: { view: ActiveView; icon: typeof MessageSquare; label: string }[] = [
-  { view: 'chat', icon: MessageSquare, label: 'Chat' },
-  { view: 'templates', icon: Sparkles, label: 'Prompt Templates' },
-  { view: 'files', icon: FolderTree, label: 'File Browser' },
-  { view: 'activity', icon: History, label: 'Activity Log' },
-]
+const navItems = [
+  { path: Path.Chat, icon: MessageSquare, label: 'Chat' },
+  { path: Path.Templates, icon: Sparkles, label: 'Templates' },
+  { path: Path.Files, icon: FolderTree, label: 'Files' },
+  { path: Path.Activity, icon: History, label: 'Activity' },
+] as const
 
 export function Sidebar() {
-  const { activeView, setActiveView } = useUiStore()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const connectionStatus = useUiStore((s) => s.connectionStatus)
 
   return (
     <Box
@@ -45,15 +49,15 @@ export function Sidebar() {
 
       {/* Nav Items */}
       <VStack gap={1} flex={1}>
-        {navItems.map(({ view, icon: Icon, label }) => {
-          const isActive = activeView === view
+        {navItems.map(({ path, icon: Icon, label }) => {
+          const isActive = location.pathname === path
           return (
-            <Tooltip key={view} content={label}>
+            <Tooltip key={path} content={label}>
               <IconButton
                 aria-label={label}
                 variant="ghost"
                 size="md"
-                onClick={() => setActiveView(view)}
+                onClick={() => navigate(path)}
                 css={{
                   width: '40px',
                   height: '40px',
@@ -75,19 +79,20 @@ export function Sidebar() {
         })}
       </VStack>
 
-      {/* Bottom Settings */}
+      {/* Bottom */}
       <Box css={{ flexShrink: 0 }}>
         <Tooltip content="Settings">
           <IconButton
             aria-label="Settings"
             variant="ghost"
             size="md"
+            onClick={() => navigate(Path.Settings)}
             css={{
               width: '40px',
               height: '40px',
               borderRadius: '10px',
-              color: '#55555f',
-              background: 'transparent',
+              color: location.pathname === Path.Settings ? '#14b8a6' : '#55555f',
+              background: location.pathname === Path.Settings ? 'rgba(13,148,136,0.12)' : 'transparent',
               transition: 'all 0.2s ease',
               '&:hover': {
                 background: '#1c1c20',
@@ -105,8 +110,11 @@ export function Sidebar() {
             width: '8px',
             height: '8px',
             borderRadius: '50%',
-            background: '#10b981',
+            background: connectionStatus === 'connected' ? '#10b981' : '#ef4444',
             margin: '12px auto 0',
+            boxShadow: connectionStatus === 'connected'
+              ? '0 0 6px rgba(16,185,129,0.4)'
+              : '0 0 6px rgba(239,68,68,0.4)',
           }}
         />
       </Box>

@@ -1,17 +1,18 @@
 import { useEffect } from 'react'
 import { Box, Text, VStack } from '@chakra-ui/react'
+import { useNavigate } from 'react-router-dom'
 import { History } from 'lucide-react'
 import { SessionCard } from './session-card'
 import { EmptyState } from '@/components/shared/empty-state'
 import { useSessions } from '@/hooks/use-sessions'
 import { useSessionStore } from '@/stores/session-store'
-import { useUiStore } from '@/stores/ui-store'
+import { Path } from '@/router/paths'
 
 export function ActivityLog() {
   const { fetchSessions, loadSession, deleteSession } = useSessions()
   const sessions = useSessionStore((s) => s.sessions)
   const activeSessionId = useSessionStore((s) => s.activeSessionId)
-  const setActiveView = useUiStore((s) => s.setActiveView)
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchSessions()
@@ -19,7 +20,7 @@ export function ActivityLog() {
 
   const handleSelect = async (id: string) => {
     await loadSession(id)
-    setActiveView('chat')
+    navigate(Path.Chat)
   }
 
   if (sessions.length === 0) {

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Box, Text, useDisclosure } from '@chakra-ui/react'
+import { useNavigate } from 'react-router-dom'
 import { TemplateCard } from './template-card'
 import { TemplateModal } from './template-modal'
 import { useClaude } from '@/hooks/use-claude'
 import { useSessions } from '@/hooks/use-sessions'
 import { useSessionStore } from '@/stores/session-store'
-import { useUiStore } from '@/stores/ui-store'
+import { Path } from '@/router/paths'
 import type { PromptTemplate } from '@/types'
 
 export function TemplateGrid() {
@@ -15,7 +16,7 @@ export function TemplateGrid() {
   const { sendPrompt } = useClaude()
   const { createSession } = useSessions()
   const activeSessionId = useSessionStore((s) => s.activeSessionId)
-  const setActiveView = useUiStore((s) => s.setActiveView)
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetch('/api/templates')
@@ -36,7 +37,7 @@ export function TemplateGrid() {
       sessionId = session.id
     }
     sendPrompt(prompt, sessionId!)
-    setActiveView('chat')
+    navigate(Path.Chat)
   }
 
   return (
