@@ -1,0 +1,20 @@
+{
+  "id": "c210fae2-00a2-4858-b424-270bf5033fdf",
+  "name": "Session 4/6/2026",
+  "createdAt": "2026-04-06T13:23:17.617Z",
+  "updatedAt": "2026-04-06T13:23:20.447Z",
+  "messages": [
+    {
+      "id": "91930333-417b-48ea-b7cd-d5b30e5cb03e",
+      "role": "user",
+      "content": "please list out the directory file",
+      "timestamp": "2026-04-06T13:23:17.648Z"
+    },
+    {
+      "id": "40323c1f-f77a-4cce-9443-eb04d9a0e7b2",
+      "role": "assistant",
+      "content": "Error: Error: When using --print, --output-format=stream-json requires --verbose",
+      "timestamp": "2026-04-06T13:23:20.446Z"
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import { build } from './commands/build.js'
 import { eject } from './commands/eject.js'
 import { setupSkills, listSkills } from './commands/skills.js'
 import { setupMcp } from './commands/mcp-setup.js'
+import { studio } from './commands/studio.js'
 import { backend } from './commands/backend.js'
 import { frontend } from './commands/frontend.js'
 
@@ -68,6 +69,12 @@ program
   .command('setup:mcp')
   .description('Configure MCP servers for Claude Code AI integration')
   .action(setupMcp)
+
+program
+  .command('studio')
+  .description('Launch Blacksmith Studio — web UI for Claude Code')
+  .option('-p, --port <port>', 'Port for the Studio server (default: 3939)')
+  .action(studio)
 
 program
   .command('skills')

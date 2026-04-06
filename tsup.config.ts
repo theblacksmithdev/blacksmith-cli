@@ -10,4 +10,5 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   shims: true,
+  external: ['express', 'socket.io', 'open'],
 })
