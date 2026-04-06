@@ -1,4 +1,4 @@
-import { Box, Text, VStack, HStack } from '@chakra-ui/react'
+import { Box, VStack } from '@chakra-ui/react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   MessageSquare,
@@ -88,7 +88,7 @@ export function NavRail() {
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            marginBottom: isInsideProject ? '8px' : '16px',
+            marginBottom: '16px',
             transition: 'opacity 0.15s ease',
             '&:hover': { opacity: 0.85 },
           }}
@@ -96,36 +96,6 @@ export function NavRail() {
           <Anvil size={15} color="var(--studio-accent-fg)" />
         </Box>
       </Tooltip>
-
-      {/* Exit project button — only inside a project */}
-      {isInsideProject && (
-        <Tooltip content="Exit project">
-          <Box
-            as="button"
-            onClick={() => {
-              useProjectStore.getState().setActiveProject(null)
-              navigate(Path.Home)
-            }}
-            css={{
-              width: '36px',
-              height: '24px',
-              borderRadius: '6px',
-              border: 'none',
-              background: 'transparent',
-              color: 'var(--studio-text-muted)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              marginBottom: '12px',
-              transition: 'all 0.12s ease',
-              '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
-            }}
-          >
-            <LogOut size={14} />
-          </Box>
-        </Tooltip>
-      )}
 
       {/* Project tools — only inside a project */}
       {isInsideProject && pid ? (
@@ -171,6 +141,21 @@ export function NavRail() {
           flexShrink: 0,
         }}
       >
+        {isInsideProject && (
+          <Tooltip content="Exit project">
+            <Box
+              as="button"
+              onClick={() => {
+                useProjectStore.getState().setActiveProject(null)
+                navigate(Path.Home)
+              }}
+              css={railBtn(false)}
+            >
+              <LogOut size={16} />
+            </Box>
+          </Tooltip>
+        )}
+
         <Tooltip content="Settings">
           <Box as="button" onClick={() => navigate(Path.Settings)} css={railBtn(pathname === '/settings')}>
             <Settings size={17} />

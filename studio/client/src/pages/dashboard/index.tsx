@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { Anvil, FolderPlus, ArrowRight } from 'lucide-react'
 import { PageContainer } from '@/components/shared/page-container'
 import { ProjectCard } from '@/components/dashboard/project-card'
-import { QuickActions } from '@/components/dashboard/quick-actions'
 import { useProjects } from '@/hooks/use-projects'
 import { useSessions } from '@/hooks/use-sessions'
 import { useProjectStore } from '@/stores/project-store'
@@ -44,16 +43,6 @@ export default function DashboardPage() {
               : 'Select a project or add one to get started.'}
           </Text>
         </VStack>
-
-        {/* Quick actions */}
-        {activeProject && (
-          <Box css={{ marginBottom: '40px' }}>
-            <Text css={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--studio-text-muted)', marginBottom: '12px' }}>
-              Quick actions
-            </Text>
-            <QuickActions />
-          </Box>
-        )}
 
         {/* Recent sessions */}
         {activeProject && recentSessions.length > 0 && (
