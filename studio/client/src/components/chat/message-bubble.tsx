@@ -1,5 +1,4 @@
-import { Box, HStack, Text, Avatar } from '@chakra-ui/react'
-import { Bot, User } from 'lucide-react'
+import { Box, Text } from '@chakra-ui/react'
 import { MarkdownRenderer } from '@/components/shared/markdown-renderer'
 import { ToolCallCard } from './tool-call-card'
 import type { Message } from '@/types'
@@ -12,27 +11,70 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === 'user'
 
   return (
-    <HStack align="start" gap={3} py={3} px={4}>
-      <Avatar.Root size="sm">
-        <Avatar.Fallback bg={isUser ? 'blue.500' : 'purple.500'}>
-          {isUser ? <User size={16} /> : <Bot size={16} />}
-        </Avatar.Fallback>
-      </Avatar.Root>
-      <Box flex={1} minW={0}>
-        <Text fontSize="xs" fontWeight="bold" color="gray.400" mb={1}>
+    <Box
+      css={{
+        display: 'flex',
+        justifyContent: isUser ? 'flex-end' : 'flex-start',
+        padding: '4px 0',
+        animation: 'fadeIn 0.3s ease',
+        '@keyframes fadeIn': {
+          from: { opacity: 0, transform: 'translateY(4px)' },
+          to: { opacity: 1, transform: 'translateY(0)' },
+        },
+      }}
+    >
+      <Box
+        css={{
+          maxWidth: isUser ? '85%' : '100%',
+          width: isUser ? 'auto' : '100%',
+        }}
+      >
+        {/* Role label */}
+        <Text
+          css={{
+            fontSize: '11px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            color: '#555568',
+            marginBottom: '6px',
+            textAlign: isUser ? 'right' : 'left',
+            paddingLeft: isUser ? '0' : '12px',
+            paddingRight: isUser ? '0' : '0',
+          }}
+        >
           {isUser ? 'You' : 'Claude'}
         </Text>
+
         {isUser ? (
-          <Text fontSize="sm" whiteSpace="pre-wrap">{message.content}</Text>
+          <Box
+            css={{
+              background: '#1a1a26',
+              borderRadius: '14px 14px 4px 14px',
+              padding: '12px 16px',
+              borderLeft: 'none',
+            }}
+          >
+            <Text css={{ fontSize: '14px', whiteSpace: 'pre-wrap', lineHeight: 1.6, color: '#f0f0f5' }}>
+              {message.content}
+            </Text>
+          </Box>
         ) : (
-          <>
+          <Box
+            css={{
+              borderLeft: '2px solid rgba(99,102,241,0.3)',
+              paddingLeft: '16px',
+              paddingTop: '2px',
+              paddingBottom: '2px',
+            }}
+          >
             <MarkdownRenderer content={message.content} />
             {message.toolCalls?.map((tc) => (
               <ToolCallCard key={tc.toolId} toolCall={tc} />
             ))}
-          </>
+          </Box>
         )}
       </Box>
-    </HStack>
+    </Box>
   )
 }

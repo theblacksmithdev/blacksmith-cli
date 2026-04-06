@@ -1,5 +1,4 @@
-import { HStack, Box, Avatar } from '@chakra-ui/react'
-import { Bot } from 'lucide-react'
+import { Box, Text } from '@chakra-ui/react'
 import { MarkdownRenderer } from '@/components/shared/markdown-renderer'
 
 interface StreamingIndicatorProps {
@@ -8,39 +7,60 @@ interface StreamingIndicatorProps {
 
 export function StreamingIndicator({ partialMessage }: StreamingIndicatorProps) {
   return (
-    <HStack align="start" gap={3} py={3} px={4}>
-      <Avatar.Root size="sm">
-        <Avatar.Fallback bg="purple.500">
-          <Bot size={16} />
-        </Avatar.Fallback>
-      </Avatar.Root>
-      <Box flex={1} minW={0}>
-        <Box fontSize="xs" fontWeight="bold" color="gray.400" mb={1}>
-          Claude
-        </Box>
+    <Box>
+      {/* Role label */}
+      <Text
+        css={{
+          fontSize: '11px',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          color: '#555568',
+          marginBottom: '6px',
+          paddingLeft: '12px',
+        }}
+      >
+        Claude
+      </Text>
+
+      <Box
+        css={{
+          borderLeft: '2px solid rgba(99,102,241,0.3)',
+          paddingLeft: '16px',
+          paddingTop: '2px',
+          paddingBottom: '2px',
+        }}
+      >
         {partialMessage ? (
-          <MarkdownRenderer content={partialMessage + ' ▊'} />
+          <MarkdownRenderer content={partialMessage + ' \u258A'} />
         ) : (
-          <HStack gap={1}>
+          <Box
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 0',
+            }}
+          >
             {[0, 1, 2].map((i) => (
               <Box
                 key={i}
-                w="6px"
-                h="6px"
-                borderRadius="full"
-                bg="blue.400"
-                animation={`pulse 1.4s ease-in-out ${i * 0.2}s infinite`}
                 css={{
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 0.3 },
-                    '50%': { opacity: 1 },
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: '#6366f1',
+                  animation: `dotPulse 1.4s ease-in-out ${i * 0.16}s infinite`,
+                  '@keyframes dotPulse': {
+                    '0%, 100%': { opacity: 0.2, transform: 'scale(0.8)' },
+                    '50%': { opacity: 1, transform: 'scale(1)' },
                   },
                 }}
               />
             ))}
-          </HStack>
+          </Box>
         )}
       </Box>
-    </HStack>
+    </Box>
   )
 }

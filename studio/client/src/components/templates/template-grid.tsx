@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, SimpleGrid, Heading, useDisclosure } from '@chakra-ui/react'
+import { Box, Text, useDisclosure } from '@chakra-ui/react'
 import { TemplateCard } from './template-card'
 import { TemplateModal } from './template-modal'
 import { useClaude } from '@/hooks/use-claude'
@@ -40,13 +40,46 @@ export function TemplateGrid() {
   }
 
   return (
-    <Box p={6}>
-      <Heading size="md" mb={4}>Prompt Templates</Heading>
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4}>
+    <Box
+      css={{
+        padding: '32px 24px',
+        maxWidth: '960px',
+        margin: '0 auto',
+      }}
+    >
+      <Box css={{ marginBottom: '28px' }}>
+        <Text
+          css={{
+            fontSize: '24px',
+            fontWeight: 600,
+            letterSpacing: '-0.02em',
+            color: '#f0f0f5',
+            marginBottom: '6px',
+          }}
+        >
+          What do you want to build?
+        </Text>
+        <Text
+          css={{
+            fontSize: '14px',
+            color: '#555568',
+          }}
+        >
+          Choose a template to get started quickly
+        </Text>
+      </Box>
+
+      <Box
+        css={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '12px',
+        }}
+      >
         {templates.map((t) => (
           <TemplateCard key={t.id} template={t} onClick={() => handleSelect(t)} />
         ))}
-      </SimpleGrid>
+      </Box>
 
       {selected && (
         <TemplateModal

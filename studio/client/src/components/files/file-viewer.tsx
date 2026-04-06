@@ -1,6 +1,7 @@
-import { Box, HStack, Text, Badge, Code } from '@chakra-ui/react'
+import { Box, Text } from '@chakra-ui/react'
 import { EmptyState } from '@/components/shared/empty-state'
-import { Eye } from 'lucide-react'
+import { Eye, Copy, Check } from 'lucide-react'
+import { useState } from 'react'
 
 interface FileViewerProps {
   filePath: string | null
@@ -10,11 +11,21 @@ interface FileViewerProps {
 }
 
 export function FileViewer({ filePath, content, language, isChanged }: FileViewerProps) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    if (content) {
+      navigator.clipboard.writeText(content)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   if (!filePath || content === null) {
     return (
       <Box display="flex" alignItems="center" justifyContent="center" h="full">
         <EmptyState
-          icon={<Eye size={32} />}
+          icon={<Eye size={40} />}
           title="Select a file"
           description="Click a file in the tree to view its contents."
         />
@@ -22,24 +33,164 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
     )
   }
 
+  const lines = content.split('\n')
+  const pathParts = filePath.split('/')
+  const fileName = pathParts[pathParts.length - 1]
+
   return (
     <Box h="full" display="flex" flexDir="column">
-      <HStack px={3} py={2} borderBottom="1px solid" borderColor="gray.700" bg="gray.800">
-        <Text fontSize="xs" color="gray.400" flex={1} lineClamp={1}>{filePath}</Text>
-        {isChanged && <Badge colorPalette="orange" fontSize="xs">Modified by Claude</Badge>}
-        <Badge variant="subtle" fontSize="xs">{language}</Badge>
-      </HStack>
-      <Box flex={1} overflowY="auto" p={3} bg="gray.900">
-        <Code
-          display="block"
-          whiteSpace="pre"
-          fontSize="xs"
-          bg="transparent"
-          color="gray.200"
-          overflowX="auto"
+      {/* Header with breadcrumb */}
+      <Box
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '8px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(18,18,26,0.8)',
+          gap: '8px',
+        }}
+      >
+        {/* Breadcrumb path */}
+        <Box
+          css={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            flex: 1,
+            overflow: 'hidden',
+          }}
         >
-          {content}
-        </Code>
+          {pathParts.map((part, i) => (
+            <Box key={i} css={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+              {i > 0 && (
+                <Text css={{ color: '#555568', fontSize: '11px' }}>/</Text>
+              )}
+              <Text
+                css={{
+                  fontSize: '12px',
+                  color: i === pathParts.length - 1 ? '#f0f0f5' : '#555568',
+                  fontWeight: i === pathParts.length - 1 ? 500 : 400,
+                }}
+              >
+                {part}
+              </Text>
+            </Box>
+          ))}
+        </Box>
+
+        {isChanged && (
+          <Box
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '11px',
+              color: '#f59e0b',
+            }}
+          >
+            <Box css={{ width: '5px', height: '5px', borderRadius: '50%', background: '#f59e0b' }} />
+            Modified
+          </Box>
+        )}
+
+        {/* Language pill */}
+        <Box
+          css={{
+            padding: '2px 8px',
+            borderRadius: '4px',
+            background: 'rgba(255,255,255,0.04)',
+            fontSize: '11px',
+            color: '#555568',
+            fontWeight: 500,
+            textTransform: 'uppercase',
+            letterSpacing: '0.03em',
+          }}
+        >
+          {language}
+        </Box>
+
+        {/* Copy button */}
+        <Box
+          as="button"
+          onClick={handleCopy}
+          css={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '6px',
+            background: 'transparent',
+            border: 'none',
+            color: copied ? '#10b981' : '#555568',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              background: '#1a1a26',
+              color: '#8888a0',
+            },
+          }}
+        >
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+        </Box>
+      </Box>
+
+      {/* Code with line numbers */}
+      <Box
+        css={{
+          flex: 1,
+          overflowY: 'auto',
+          background: '#0a0a0f',
+        }}
+      >
+        <Box
+          as="pre"
+          css={{
+            display: 'flex',
+            margin: 0,
+            padding: 0,
+            fontSize: '13px',
+            fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace",
+            lineHeight: '20px',
+          }}
+        >
+          {/* Line numbers gutter */}
+          <Box
+            css={{
+              padding: '12px 0',
+              textAlign: 'right',
+              userSelect: 'none',
+              flexShrink: 0,
+              borderRight: '1px solid rgba(255,255,255,0.04)',
+            }}
+          >
+            {lines.map((_, i) => (
+              <Box
+                key={i}
+                css={{
+                  padding: '0 12px',
+                  color: '#555568',
+                  fontSize: '12px',
+                }}
+              >
+                {i + 1}
+              </Box>
+            ))}
+          </Box>
+
+          {/* Code content */}
+          <Box
+            as="code"
+            css={{
+              padding: '12px 16px',
+              overflowX: 'auto',
+              color: '#f0f0f5',
+              flex: 1,
+            }}
+          >
+            {content}
+          </Box>
+        </Box>
       </Box>
     </Box>
   )

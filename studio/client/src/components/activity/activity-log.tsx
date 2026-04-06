@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Box, VStack, Heading } from '@chakra-ui/react'
+import { Box, Text, VStack } from '@chakra-ui/react'
 import { History } from 'lucide-react'
 import { SessionCard } from './session-card'
 import { EmptyState } from '@/components/shared/empty-state'
@@ -35,9 +35,26 @@ export function ActivityLog() {
   }
 
   return (
-    <Box p={6}>
-      <Heading size="md" mb={4}>Activity Log</Heading>
-      <VStack gap={2} align="stretch">
+    <Box
+      css={{
+        padding: '32px 24px',
+        maxWidth: '720px',
+        margin: '0 auto',
+      }}
+    >
+      <Text
+        css={{
+          fontSize: '24px',
+          fontWeight: 600,
+          letterSpacing: '-0.02em',
+          color: '#f0f0f5',
+          marginBottom: '24px',
+        }}
+      >
+        Recent Sessions
+      </Text>
+
+      <VStack gap={0} align="stretch">
         {sessions.map((session) => (
           <SessionCard
             key={session.id}

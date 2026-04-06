@@ -1,5 +1,6 @@
-import { Box, HStack, Text, Badge, Code } from '@chakra-ui/react'
-import { FileEdit, Terminal, Eye, FileSearch } from 'lucide-react'
+import { useState } from 'react'
+import { Box, Text } from '@chakra-ui/react'
+import { FileEdit, Terminal, Eye, FileSearch, ChevronRight, ChevronDown } from 'lucide-react'
 import type { ToolCall } from '@/types'
 
 const toolIcons: Record<string, typeof FileEdit> = {
@@ -15,6 +16,7 @@ interface ToolCallCardProps {
 }
 
 export function ToolCallCard({ toolCall }: ToolCallCardProps) {
+  const [expanded, setExpanded] = useState(false)
   const Icon = toolIcons[toolCall.toolName] || Terminal
 
   const summary = (() => {
@@ -33,23 +35,91 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
 
   return (
     <Box
-      mt={2}
-      p={2}
-      borderRadius="md"
-      border="1px solid"
-      borderColor="gray.600"
-      bg="gray.800"
-      fontSize="xs"
+      css={{
+        marginTop: '8px',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.06)',
+        background: '#12121a',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          borderColor: 'rgba(255,255,255,0.1)',
+        },
+      }}
     >
-      <HStack gap={2}>
-        <Icon size={14} />
-        <Badge colorPalette="blue" variant="subtle" fontSize="xs">
+      <Box
+        as="button"
+        onClick={() => setExpanded(!expanded)}
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          width: '100%',
+          padding: '8px 12px',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          color: '#8888a0',
+          fontSize: '12px',
+          borderLeft: '2px solid rgba(99,102,241,0.4)',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            color: '#f0f0f5',
+          },
+        }}
+      >
+        <Icon size={13} />
+        <Text
+          css={{
+            fontWeight: 600,
+            fontSize: '11px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+            color: '#6366f1',
+            flexShrink: 0,
+          }}
+        >
           {toolCall.toolName}
-        </Badge>
-        <Code fontSize="xs" bg="transparent" color="gray.300" lineClamp={1}>
+        </Text>
+        <Text
+          css={{
+            fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace",
+            fontSize: '11px',
+            color: '#8888a0',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1,
+            textAlign: 'left',
+          }}
+        >
           {summary}
-        </Code>
-      </HStack>
+        </Text>
+        {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+      </Box>
+
+      {expanded && toolCall.output && (
+        <Box
+          css={{
+            padding: '8px 12px',
+            borderTop: '1px solid rgba(255,255,255,0.04)',
+            maxHeight: '200px',
+            overflowY: 'auto',
+          }}
+        >
+          <Text
+            css={{
+              fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace",
+              fontSize: '11px',
+              color: '#8888a0',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-all',
+            }}
+          >
+            {toolCall.output}
+          </Text>
+        </Box>
+      )}
     </Box>
   )
 }

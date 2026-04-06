@@ -18,12 +18,39 @@ export function MessageList({ messages, isStreaming, partialMessage }: MessageLi
   }, [messages, partialMessage])
 
   return (
-    <Box flex={1} overflowY="auto" py={2}>
-      {messages.map((msg) => (
-        <MessageBubble key={msg.id} message={msg} />
-      ))}
-      {isStreaming && <StreamingIndicator partialMessage={partialMessage} />}
-      <div ref={bottomRef} />
+    <Box
+      flex={1}
+      overflowY="auto"
+      css={{
+        padding: '16px 24px',
+      }}
+    >
+      <Box
+        css={{
+          maxWidth: '720px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+        }}
+      >
+        {messages.map((msg, i) => (
+          <Box key={msg.id}>
+            {i > 0 && msg.role !== messages[i - 1]?.role && (
+              <Box
+                css={{
+                  height: '1px',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)',
+                  margin: '8px 0 16px',
+                }}
+              />
+            )}
+            <MessageBubble message={msg} />
+          </Box>
+        ))}
+        {isStreaming && <StreamingIndicator partialMessage={partialMessage} />}
+        <div ref={bottomRef} />
+      </Box>
     </Box>
   )
 }

@@ -1,43 +1,243 @@
+import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import { Box, Code, Text, Heading, Link } from '@chakra-ui/react'
+import { Copy, Check } from 'lucide-react'
 
 interface MarkdownRendererProps {
   content: string
 }
 
+function CodeBlock({ className, children }: { className?: string; children: React.ReactNode }) {
+  const [copied, setCopied] = useState(false)
+  const language = className?.replace('language-', '') || ''
+  const code = String(children).replace(/\n$/, '')
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <Box
+      css={{
+        borderRadius: '8px',
+        border: '1px solid rgba(255,255,255,0.06)',
+        overflow: 'hidden',
+        marginBottom: '12px',
+        background: '#0a0a0f',
+      }}
+    >
+      {/* Header bar */}
+      <Box
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '6px 12px',
+          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          background: 'rgba(255,255,255,0.02)',
+        }}
+      >
+        <Text
+          css={{
+            fontSize: '11px',
+            color: '#555568',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+            fontWeight: 500,
+          }}
+        >
+          {language || 'code'}
+        </Text>
+        <Box
+          as="button"
+          onClick={handleCopy}
+          css={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            background: 'transparent',
+            border: 'none',
+            color: copied ? '#10b981' : '#555568',
+            fontSize: '11px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              color: '#8888a0',
+              background: 'rgba(255,255,255,0.04)',
+            },
+          }}
+        >
+          {copied ? <Check size={12} /> : <Copy size={12} />}
+          {copied ? 'Copied' : 'Copy'}
+        </Box>
+      </Box>
+
+      {/* Code content */}
+      <Box
+        as="pre"
+        css={{
+          padding: '12px 16px',
+          overflowX: 'auto',
+          margin: 0,
+          fontSize: '13px',
+          lineHeight: '20px',
+          fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace",
+        }}
+      >
+        <code className={className}>{children}</code>
+      </Box>
+    </Box>
+  )
+}
+
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
-    <Box className="markdown-body" fontSize="sm" lineHeight="tall">
+    <Box className="markdown-body" css={{ fontSize: '14px', lineHeight: '1.7', color: '#f0f0f5' }}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
         components={{
-          h1: ({ children }) => <Heading as="h1" size="lg" mt={4} mb={2}>{children}</Heading>,
-          h2: ({ children }) => <Heading as="h2" size="md" mt={3} mb={2}>{children}</Heading>,
-          h3: ({ children }) => <Heading as="h3" size="sm" mt={2} mb={1}>{children}</Heading>,
-          p: ({ children }) => <Text mb={2}>{children}</Text>,
-          a: ({ href, children }) => <Link href={href} color="blue.400" target="_blank" rel="noopener noreferrer">{children}</Link>,
+          h1: ({ children }) => (
+            <Heading
+              as="h1"
+              css={{
+                fontSize: '22px',
+                fontWeight: 600,
+                marginTop: '20px',
+                marginBottom: '10px',
+                letterSpacing: '-0.02em',
+                color: '#f0f0f5',
+              }}
+            >
+              {children}
+            </Heading>
+          ),
+          h2: ({ children }) => (
+            <Heading
+              as="h2"
+              css={{
+                fontSize: '18px',
+                fontWeight: 600,
+                marginTop: '16px',
+                marginBottom: '8px',
+                letterSpacing: '-0.02em',
+                color: '#f0f0f5',
+              }}
+            >
+              {children}
+            </Heading>
+          ),
+          h3: ({ children }) => (
+            <Heading
+              as="h3"
+              css={{
+                fontSize: '15px',
+                fontWeight: 600,
+                marginTop: '12px',
+                marginBottom: '6px',
+                letterSpacing: '-0.01em',
+                color: '#f0f0f5',
+              }}
+            >
+              {children}
+            </Heading>
+          ),
+          p: ({ children }) => (
+            <Text css={{ marginBottom: '10px', color: '#f0f0f5', lineHeight: '1.7' }}>
+              {children}
+            </Text>
+          ),
+          a: ({ href, children }) => (
+            <Link
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              css={{
+                color: '#818cf8',
+                textDecoration: 'none',
+                borderBottom: '1px solid rgba(129,140,248,0.3)',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  borderBottomColor: '#818cf8',
+                },
+              }}
+            >
+              {children}
+            </Link>
+          ),
           code: ({ className, children, ...props }) => {
             const isInline = !className
             if (isInline) {
-              return <Code colorPalette="gray" fontSize="sm" px={1}>{children}</Code>
+              return (
+                <Code
+                  css={{
+                    background: '#1a1a26',
+                    color: '#e879f9',
+                    fontSize: '0.9em',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace",
+                  }}
+                >
+                  {children}
+                </Code>
+              )
             }
-            return (
-              <Box
-                as="pre"
-                bg="gray.900"
-                p={3}
-                borderRadius="md"
-                overflowX="auto"
-                mb={3}
-                fontSize="xs"
-              >
-                <code className={className} {...props}>{children}</code>
-              </Box>
-            )
+            return <CodeBlock className={className}>{children}</CodeBlock>
           },
+          blockquote: ({ children }) => (
+            <Box
+              as="blockquote"
+              css={{
+                borderLeft: '3px solid rgba(99,102,241,0.4)',
+                paddingLeft: '16px',
+                margin: '12px 0',
+                color: '#8888a0',
+                fontStyle: 'italic',
+              }}
+            >
+              {children}
+            </Box>
+          ),
+          ul: ({ children }) => (
+            <Box
+              as="ul"
+              css={{
+                paddingLeft: '20px',
+                marginBottom: '10px',
+                listStyleType: 'disc',
+                '& li': {
+                  marginBottom: '4px',
+                  color: '#f0f0f5',
+                },
+              }}
+            >
+              {children}
+            </Box>
+          ),
+          ol: ({ children }) => (
+            <Box
+              as="ol"
+              css={{
+                paddingLeft: '20px',
+                marginBottom: '10px',
+                listStyleType: 'decimal',
+                '& li': {
+                  marginBottom: '4px',
+                  color: '#f0f0f5',
+                },
+              }}
+            >
+              {children}
+            </Box>
+          ),
         }}
       >
         {content}
