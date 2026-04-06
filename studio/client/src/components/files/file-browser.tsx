@@ -23,15 +23,15 @@ export function FileBrowser() {
           display: 'flex',
           alignItems: 'center',
           padding: '10px 16px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          background: 'rgba(10,10,15,0.6)',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          background: 'rgba(12,12,14,0.6)',
         }}
       >
         <Text
           css={{
             fontSize: '13px',
             fontWeight: 600,
-            color: '#f0f0f5',
+            color: '#e8e8ed',
             letterSpacing: '-0.01em',
             flex: 1,
           }}
@@ -45,11 +45,11 @@ export function FileBrowser() {
             variant="ghost"
             onClick={() => fetchFileTree()}
             css={{
-              color: '#555568',
+              color: '#55555f',
               borderRadius: '6px',
               '&:hover': {
-                color: '#8888a0',
-                background: '#1a1a26',
+                color: '#85858f',
+                background: '#1c1c20',
               },
             }}
           >
@@ -70,8 +70,8 @@ export function FileBrowser() {
         <Box
           css={{
             width: '260px',
-            background: '#0a0a0f',
-            borderRight: '1px solid rgba(255,255,255,0.06)',
+            background: '#0c0c0e',
+            borderRight: '1px solid rgba(255,255,255,0.07)',
             overflowY: 'auto',
             flexShrink: 0,
           }}
@@ -90,7 +90,7 @@ export function FileBrowser() {
         <Box
           css={{
             flex: 1,
-            background: '#12121a',
+            background: '#141416',
             minWidth: 0,
           }}
         >

@@ -18,8 +18,8 @@ export function Sidebar() {
       as="nav"
       w="64px"
       css={{
-        background: '#0a0a0f',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
+        background: '#0c0c0e',
+        borderRight: '1px solid rgba(255,255,255,0.07)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -33,7 +33,6 @@ export function Sidebar() {
           width: '40px',
           height: '40px',
           borderRadius: '12px',
-          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -41,7 +40,7 @@ export function Sidebar() {
           flexShrink: 0,
         }}
       >
-        <Anvil size={20} color="#fff" />
+        <Anvil size={22} color="#14b8a6" />
       </Box>
 
       {/* Nav Items */}
@@ -59,13 +58,13 @@ export function Sidebar() {
                   width: '40px',
                   height: '40px',
                   borderRadius: '10px',
-                  color: isActive ? '#ffffff' : '#555568',
-                  background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-                  boxShadow: isActive ? '0 0 20px rgba(99,102,241,0.15)' : 'none',
+                  color: isActive ? '#14b8a6' : '#55555f',
+                  background: isActive ? 'rgba(13,148,136,0.12)' : 'transparent',
+                  boxShadow: 'none',
                   transition: 'all 0.2s ease',
                   '&:hover': {
-                    background: isActive ? 'rgba(99,102,241,0.2)' : '#1a1a26',
-                    color: isActive ? '#ffffff' : '#8888a0',
+                    background: isActive ? 'rgba(13,148,136,0.15)' : '#1c1c20',
+                    color: isActive ? '#14b8a6' : '#85858f',
                   },
                 }}
               >
@@ -87,12 +86,12 @@ export function Sidebar() {
               width: '40px',
               height: '40px',
               borderRadius: '10px',
-              color: '#555568',
+              color: '#55555f',
               background: 'transparent',
               transition: 'all 0.2s ease',
               '&:hover': {
-                background: '#1a1a26',
-                color: '#8888a0',
+                background: '#1c1c20',
+                color: '#85858f',
               },
             }}
           >

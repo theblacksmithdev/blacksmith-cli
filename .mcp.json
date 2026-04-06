@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "chakra-ui-docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic-ai/mcp-docs-server",
+        "--url",
+        "https://www.chakra-ui.com/docs",
+        "--name",
+        "chakra-ui-docs"
+      ]
+    }
+  }
+}

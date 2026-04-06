@@ -15,7 +15,7 @@ export function StreamingIndicator({ partialMessage }: StreamingIndicatorProps) 
           fontWeight: 600,
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
-          color: '#555568',
+          color: '#55555f',
           marginBottom: '6px',
           paddingLeft: '12px',
         }}
@@ -25,7 +25,7 @@ export function StreamingIndicator({ partialMessage }: StreamingIndicatorProps) 
 
       <Box
         css={{
-          borderLeft: '2px solid rgba(99,102,241,0.3)',
+          borderLeft: '2px solid #0d9488',
           paddingLeft: '16px',
           paddingTop: '2px',
           paddingBottom: '2px',
@@ -49,7 +49,7 @@ export function StreamingIndicator({ partialMessage }: StreamingIndicatorProps) 
                   width: '6px',
                   height: '6px',
                   borderRadius: '50%',
-                  background: '#6366f1',
+                  background: '#14b8a6',
                   animation: `dotPulse 1.4s ease-in-out ${i * 0.16}s infinite`,
                   '@keyframes dotPulse': {
                     '0%, 100%': { opacity: 0.2, transform: 'scale(0.8)' },

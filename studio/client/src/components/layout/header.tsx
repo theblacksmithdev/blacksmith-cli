@@ -23,8 +23,8 @@ export function Header() {
       px={5}
       gap={3}
       css={{
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        background: 'rgba(10,10,15,0.8)',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        background: 'rgba(12,12,14,0.8)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         position: 'relative',
@@ -36,7 +36,7 @@ export function Header() {
           left: 0,
           right: 0,
           height: '1px',
-          background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.1), transparent)',
+          background: 'linear-gradient(90deg, transparent, rgba(13,148,136,0.1), transparent)',
         },
       }}
     >
@@ -45,7 +45,7 @@ export function Header() {
           fontSize="sm"
           fontWeight="medium"
           css={{
-            color: '#f0f0f5',
+            color: '#e8e8ed',
             letterSpacing: '-0.01em',
           }}
         >
@@ -54,7 +54,7 @@ export function Header() {
       ) : (
         <Text
           fontSize="sm"
-          css={{ color: '#555568' }}
+          css={{ color: '#55555f' }}
         >
           No active session
         </Text>
@@ -85,7 +85,7 @@ export function Header() {
           gap: '6px',
           padding: '6px 14px',
           borderRadius: '20px',
-          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+          background: 'linear-gradient(135deg, #0d9488, #14b8a6)',
           color: '#ffffff',
           fontSize: '13px',
           fontWeight: 500,
@@ -96,11 +96,11 @@ export function Header() {
           '&:hover': {
             opacity: 0.9,
             transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(99,102,241,0.3)',
+            boxShadow: '0 4px 12px rgba(13,148,136,0.3)',
           },
           '&:active': {
             transform: 'translateY(0)',
-            background: '#4f46e5',
+            background: '#0f766e',
           },
         }}
       >

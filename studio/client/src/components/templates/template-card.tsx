@@ -23,8 +23,8 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
       css={{
         padding: '20px',
         borderRadius: '12px',
-        border: '1px solid rgba(255,255,255,0.06)',
-        background: '#12121a',
+        border: '1px solid rgba(255,255,255,0.07)',
+        background: '#141416',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
         textAlign: 'left',
@@ -33,9 +33,9 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
         gap: '12px',
         width: '100%',
         '&:hover': {
-          borderColor: 'rgba(255,255,255,0.12)',
+          borderColor: 'rgba(255,255,255,0.13)',
           transform: 'scale(1.02)',
-          background: '#1a1a26',
+          background: '#1c1c20',
         },
       }}
     >
@@ -45,11 +45,12 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
           width: '40px',
           height: '40px',
           borderRadius: '10px',
-          background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))',
+          background: 'rgba(13,148,136,0.1)',
+          border: '1px solid rgba(13,148,136,0.2)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#818cf8',
+          color: '#14b8a6',
           flexShrink: 0,
         }}
       >
@@ -61,7 +62,7 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
           css={{
             fontWeight: 600,
             fontSize: '14px',
-            color: '#f0f0f5',
+            color: '#e8e8ed',
             letterSpacing: '-0.01em',
             marginBottom: '4px',
           }}
@@ -71,7 +72,7 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
         <Text
           css={{
             fontSize: '13px',
-            color: '#8888a0',
+            color: '#85858f',
             lineHeight: 1.5,
           }}
         >
@@ -93,14 +94,14 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
             width: '5px',
             height: '5px',
             borderRadius: '50%',
-            background: '#6366f1',
+            background: '#0d9488',
             flexShrink: 0,
           }}
         />
         <Text
           css={{
             fontSize: '11px',
-            color: '#555568',
+            color: '#55555f',
             textTransform: 'uppercase',
             letterSpacing: '0.04em',
             fontWeight: 500,

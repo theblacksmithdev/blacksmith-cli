@@ -14,8 +14,8 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
       {icon && (
         <Box
           css={{
-            color: '#555568',
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))',
+            color: '#55555f',
+            background: 'rgba(13,148,136,0.08)',
             width: '72px',
             height: '72px',
             borderRadius: '16px',
@@ -32,7 +32,7 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
           css={{
             fontWeight: 600,
             fontSize: '16px',
-            color: '#8888a0',
+            color: '#85858f',
             letterSpacing: '-0.01em',
           }}
         >
@@ -44,7 +44,7 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
               fontSize: '13px',
               textAlign: 'center',
               maxWidth: '320px',
-              color: '#555568',
+              color: '#55555f',
               lineHeight: 1.6,
             }}
           >

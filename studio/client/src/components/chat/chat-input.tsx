@@ -39,14 +39,14 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
           position: 'relative',
           maxWidth: '720px',
           margin: '0 auto',
-          background: '#12121a',
+          background: '#141416',
           borderRadius: '16px',
-          border: '1px solid rgba(255,255,255,0.06)',
+          border: '1px solid rgba(255,255,255,0.07)',
           transition: 'all 0.2s ease',
           boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
           '&:focus-within': {
-            borderColor: 'rgba(99,102,241,0.4)',
-            boxShadow: '0 0 0 2px rgba(99,102,241,0.15), 0 4px 24px rgba(0,0,0,0.3)',
+            borderColor: 'rgba(13,148,136,0.5)',
+            boxShadow: '0 0 0 2px rgba(13,148,136,0.2), 0 4px 24px rgba(0,0,0,0.3)',
           },
         }}
       >
@@ -66,11 +66,11 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
             background: 'transparent',
             border: 'none',
             outline: 'none',
-            color: '#f0f0f5',
+            color: '#e8e8ed',
             fontSize: '14px',
             lineHeight: '1.6',
             '&::placeholder': {
-              color: '#555568',
+              color: '#55555f',
             },
             '&:focus': {
               outline: 'none',
@@ -96,7 +96,7 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
             as="span"
             css={{
               fontSize: '11px',
-              color: '#555568',
+              color: '#55555f',
               userSelect: 'none',
               letterSpacing: '0.02em',
             }}
@@ -141,19 +141,19 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
                   height: '32px',
                   borderRadius: '50%',
                   background: value.trim() && !disabled
-                    ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
-                    : '#1a1a26',
+                    ? 'linear-gradient(135deg, #0d9488, #14b8a6)'
+                    : '#1c1c20',
                   border: 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: value.trim() && !disabled ? 'pointer' : 'default',
-                  color: value.trim() && !disabled ? '#fff' : '#555568',
+                  color: value.trim() && !disabled ? '#fff' : '#55555f',
                   transition: 'all 0.2s ease',
                   flexShrink: 0,
                   '&:hover': value.trim() && !disabled ? {
                     transform: 'scale(1.05)',
-                    boxShadow: '0 2px 12px rgba(99,102,241,0.3)',
+                    boxShadow: '0 4px 16px rgba(13,148,136,0.25)',
                   } : {},
                 }}
               >

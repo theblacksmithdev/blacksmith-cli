@@ -53,7 +53,7 @@ export function TemplateGrid() {
             fontSize: '24px',
             fontWeight: 600,
             letterSpacing: '-0.02em',
-            color: '#f0f0f5',
+            color: '#e8e8ed',
             marginBottom: '6px',
           }}
         >
@@ -62,7 +62,7 @@ export function TemplateGrid() {
         <Text
           css={{
             fontSize: '14px',
-            color: '#555568',
+            color: '#55555f',
           }}
         >
           Choose a template to get started quickly

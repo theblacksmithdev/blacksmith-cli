@@ -46,7 +46,7 @@ export function ChatView() {
                   fontSize: '32px',
                   fontWeight: 600,
                   letterSpacing: '-0.03em',
-                  background: 'linear-gradient(135deg, #f0f0f5 0%, #8888a0 100%)',
+                  background: 'linear-gradient(135deg, #e8e8ed 0%, #85858f 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -59,7 +59,7 @@ export function ChatView() {
               <Text
                 css={{
                   fontSize: '14px',
-                  color: '#555568',
+                  color: '#55555f',
                   textAlign: 'center',
                   lineHeight: 1.6,
                 }}
@@ -88,17 +88,17 @@ export function ChatView() {
                     gap: '10px',
                     padding: '12px 16px',
                     borderRadius: '12px',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    background: '#12121a',
-                    color: '#8888a0',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    background: '#141416',
+                    color: '#85858f',
                     fontSize: '13px',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
                     textAlign: 'left',
                     '&:hover': {
-                      background: '#1a1a26',
-                      borderColor: 'rgba(255,255,255,0.1)',
-                      color: '#f0f0f5',
+                      background: '#1c1c20',
+                      borderColor: 'rgba(255,255,255,0.13)',
+                      color: '#e8e8ed',
                       transform: 'translateY(-1px)',
                     },
                   }}

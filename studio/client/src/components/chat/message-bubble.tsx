@@ -36,7 +36,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            color: '#555568',
+            color: '#55555f',
             marginBottom: '6px',
             textAlign: isUser ? 'right' : 'left',
             paddingLeft: isUser ? '0' : '12px',
@@ -49,20 +49,20 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         {isUser ? (
           <Box
             css={{
-              background: '#1a1a26',
+              background: '#1c1c20',
               borderRadius: '14px 14px 4px 14px',
               padding: '12px 16px',
               borderLeft: 'none',
             }}
           >
-            <Text css={{ fontSize: '14px', whiteSpace: 'pre-wrap', lineHeight: 1.6, color: '#f0f0f5' }}>
+            <Text css={{ fontSize: '14px', whiteSpace: 'pre-wrap', lineHeight: 1.6, color: '#e8e8ed' }}>
               {message.content}
             </Text>
           </Box>
         ) : (
           <Box
             css={{
-              borderLeft: '2px solid rgba(99,102,241,0.3)',
+              borderLeft: '2px solid #0d9488',
               paddingLeft: '16px',
               paddingTop: '2px',
               paddingBottom: '2px',

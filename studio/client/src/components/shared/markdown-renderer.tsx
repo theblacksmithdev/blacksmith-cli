@@ -24,10 +24,10 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
     <Box
       css={{
         borderRadius: '8px',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.07)',
         overflow: 'hidden',
         marginBottom: '12px',
-        background: '#0a0a0f',
+        background: '#0c0c0e',
       }}
     >
       {/* Header bar */}
@@ -44,7 +44,7 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
         <Text
           css={{
             fontSize: '11px',
-            color: '#555568',
+            color: '#55555f',
             textTransform: 'uppercase',
             letterSpacing: '0.04em',
             fontWeight: 500,
@@ -63,12 +63,12 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
             borderRadius: '4px',
             background: 'transparent',
             border: 'none',
-            color: copied ? '#10b981' : '#555568',
+            color: copied ? '#10b981' : '#55555f',
             fontSize: '11px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             '&:hover': {
-              color: '#8888a0',
+              color: '#85858f',
               background: 'rgba(255,255,255,0.04)',
             },
           }}
@@ -98,7 +98,7 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
 
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
-    <Box className="markdown-body" css={{ fontSize: '14px', lineHeight: '1.7', color: '#f0f0f5' }}>
+    <Box className="markdown-body" css={{ fontSize: '14px', lineHeight: '1.7', color: '#e8e8ed' }}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
@@ -112,7 +112,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 marginTop: '20px',
                 marginBottom: '10px',
                 letterSpacing: '-0.02em',
-                color: '#f0f0f5',
+                color: '#e8e8ed',
               }}
             >
               {children}
@@ -127,7 +127,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 marginTop: '16px',
                 marginBottom: '8px',
                 letterSpacing: '-0.02em',
-                color: '#f0f0f5',
+                color: '#e8e8ed',
               }}
             >
               {children}
@@ -142,14 +142,14 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 marginTop: '12px',
                 marginBottom: '6px',
                 letterSpacing: '-0.01em',
-                color: '#f0f0f5',
+                color: '#e8e8ed',
               }}
             >
               {children}
             </Heading>
           ),
           p: ({ children }) => (
-            <Text css={{ marginBottom: '10px', color: '#f0f0f5', lineHeight: '1.7' }}>
+            <Text css={{ marginBottom: '10px', color: '#e8e8ed', lineHeight: '1.7' }}>
               {children}
             </Text>
           ),
@@ -159,12 +159,12 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
               target="_blank"
               rel="noopener noreferrer"
               css={{
-                color: '#818cf8',
+                color: '#14b8a6',
                 textDecoration: 'none',
-                borderBottom: '1px solid rgba(129,140,248,0.3)',
+                borderBottom: '1px solid rgba(20,184,166,0.3)',
                 transition: 'all 0.2s ease',
                 '&:hover': {
-                  borderBottomColor: '#818cf8',
+                  borderBottomColor: '#14b8a6',
                 },
               }}
             >
@@ -177,12 +177,12 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
               return (
                 <Code
                   css={{
-                    background: '#1a1a26',
+                    background: '#1c1c20',
                     color: '#e879f9',
                     fontSize: '0.9em',
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.07)',
                     fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace",
                   }}
                 >
@@ -196,10 +196,10 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <Box
               as="blockquote"
               css={{
-                borderLeft: '3px solid rgba(99,102,241,0.4)',
+                borderLeft: '3px solid rgba(13,148,136,0.4)',
                 paddingLeft: '16px',
                 margin: '12px 0',
-                color: '#8888a0',
+                color: '#85858f',
                 fontStyle: 'italic',
               }}
             >
@@ -215,7 +215,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 listStyleType: 'disc',
                 '& li': {
                   marginBottom: '4px',
-                  color: '#f0f0f5',
+                  color: '#e8e8ed',
                 },
               }}
             >
@@ -231,7 +231,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 listStyleType: 'decimal',
                 '& li': {
                   marginBottom: '4px',
-                  color: '#f0f0f5',
+                  color: '#e8e8ed',
                 },
               }}
             >
