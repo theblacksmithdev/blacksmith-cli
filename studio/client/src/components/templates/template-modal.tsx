@@ -2,6 +2,7 @@ import { useState } from 'react'
 import {
   Dialog, Field, Input, Textarea, NativeSelect, Button, VStack, Box, Text,
 } from '@chakra-ui/react'
+import { api } from '@/api/client'
 import type { PromptTemplate } from '@/types'
 
 interface TemplateModalProps {
@@ -15,12 +16,10 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
   const [values, setValues] = useState<Record<string, string>>({})
 
   const handleSubmit = async () => {
-    const res = await fetch('/api/templates/interpolate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ templateId: template.id, values }),
+    const data = await api.post<{ prompt: string }>('/templates/interpolate', {
+      templateId: template.id,
+      values,
     })
-    const data = await res.json()
     onSubmit(data.prompt)
     onClose()
     setValues({})

@@ -1,15 +1,46 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/api/client'
+import { queryKeys } from '@/api/query-keys'
 import { useCallback } from 'react'
-import { useSettingsStore } from '@/stores/settings-store'
 
 export function useSettings() {
-  const settings = useSettingsStore((s) => s.settings)
-  const saveSetting = useSettingsStore((s) => s.saveSetting)
+  const queryClient = useQueryClient()
 
-  const get = useCallback((key: string) => settings[key], [settings])
+  const { data: settings = {} } = useQuery({
+    queryKey: queryKeys.settings,
+    queryFn: () => api.get<Record<string, any>>('/settings'),
+  })
+
+  const mutation = useMutation({
+    mutationFn: (pair: { key: string; value: any }) =>
+      api.patch<Record<string, any>>('/settings', { [pair.key]: pair.value }),
+    onMutate: async ({ key, value }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.settings })
+      const previous = queryClient.getQueryData<Record<string, any>>(queryKeys.settings)
+      queryClient.setQueryData(queryKeys.settings, (old: Record<string, any> = {}) => ({
+        ...old,
+        [key]: value,
+      }))
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.settings, context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings })
+    },
+  })
 
   const set = useCallback(
-    (key: string, value: any) => saveSetting(key, value),
-    [saveSetting],
+    (key: string, value: any) => mutation.mutate({ key, value }),
+    [mutation],
+  )
+
+  const get = useCallback(
+    (key: string) => settings[key],
+    [settings],
   )
 
   return {

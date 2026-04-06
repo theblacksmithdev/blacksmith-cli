@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Box, Text, useDisclosure } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { TemplateCard } from './template-card'
 import { TemplateModal } from './template-modal'
 import { PageContainer } from '@/components/shared/page-container'
+import { api } from '@/api/client'
+import { queryKeys } from '@/api/query-keys'
 import { useClaude } from '@/hooks/use-claude'
 import { useSessions } from '@/hooks/use-sessions'
 import { useSessionStore } from '@/stores/session-store'
@@ -11,20 +14,16 @@ import { chatPath } from '@/router/paths'
 import type { PromptTemplate } from '@/types'
 
 export function TemplateGrid() {
-  const [templates, setTemplates] = useState<PromptTemplate[]>([])
+  const { data: templates = [] } = useQuery({
+    queryKey: queryKeys.templates,
+    queryFn: () => api.get<PromptTemplate[]>('/templates'),
+  })
   const [selected, setSelected] = useState<PromptTemplate | null>(null)
   const { open, onOpen, onClose } = useDisclosure()
   const { sendPrompt } = useClaude()
   const { createSession } = useSessions()
   const activeSessionId = useSessionStore((s) => s.activeSessionId)
   const navigate = useNavigate()
-
-  useEffect(() => {
-    fetch('/api/templates')
-      .then((r) => r.json())
-      .then(setTemplates)
-      .catch(() => {})
-  }, [])
 
   const handleSelect = (template: PromptTemplate) => {
     setSelected(template)

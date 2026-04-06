@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'client/src'),
     },
+    dedupe: ['react', 'react-dom'],
   },
   build: {
     outDir: '../dist/client',

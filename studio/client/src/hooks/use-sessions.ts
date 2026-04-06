@@ -1,51 +1,51 @@
-import { useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/api/client'
+import { queryKeys } from '@/api/query-keys'
 import { useSessionStore } from '@/stores/session-store'
 import { useChatStore } from '@/stores/chat-store'
 import type { Session, SessionSummary } from '@/types'
 
-const API = '/api'
-
 export function useSessions() {
-  const { setSessions, setActiveSession, addSession, removeSession } = useSessionStore()
+  const queryClient = useQueryClient()
+  const { setActiveSession } = useSessionStore()
   const { loadMessages, clearMessages } = useChatStore()
 
-  const fetchSessions = useCallback(async () => {
-    const res = await fetch(`${API}/sessions`)
-    const data: SessionSummary[] = await res.json()
-    setSessions(data)
-  }, [setSessions])
+  const sessionsQuery = useQuery({
+    queryKey: queryKeys.sessions,
+    queryFn: () => api.get<SessionSummary[]>('/sessions'),
+  })
 
-  const createSession = useCallback(async (name?: string) => {
-    const res = await fetch(`${API}/sessions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    })
-    const session: Session = await res.json()
-    addSession({
-      id: session.id,
-      name: session.name,
-      createdAt: session.createdAt,
-      updatedAt: session.updatedAt,
-      messageCount: 0,
-    })
-    setActiveSession(session.id)
-    clearMessages()
-    return session
-  }, [addSession, setActiveSession, clearMessages])
+  const createMutation = useMutation({
+    mutationFn: (name?: string) => api.post<Session>('/sessions', { name }),
+    onSuccess: (session) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions })
+      setActiveSession(session.id)
+      clearMessages()
+    },
+  })
 
-  const loadSession = useCallback(async (id: string) => {
-    const res = await fetch(`${API}/sessions/${id}`)
-    if (!res.ok) return
-    const session: Session = await res.json()
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/sessions/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions })
+    },
+  })
+
+  const loadSession = async (id: string) => {
+    const session = await api.get<Session>(`/sessions/${id}`)
     setActiveSession(session.id)
     loadMessages(session.messages)
-  }, [setActiveSession, loadMessages])
+  }
 
-  const deleteSession = useCallback(async (id: string) => {
-    await fetch(`${API}/sessions/${id}`, { method: 'DELETE' })
-    removeSession(id)
-  }, [removeSession])
-
-  return { fetchSessions, createSession, loadSession, deleteSession }
+  return {
+    sessions: sessionsQuery.data ?? [],
+    isLoading: sessionsQuery.isLoading,
+    fetchSessions: () => queryClient.invalidateQueries({ queryKey: queryKeys.sessions }),
+    createSession: async (name?: string) => {
+      const session = await createMutation.mutateAsync(name)
+      return session
+    },
+    loadSession,
+    deleteSession: (id: string) => deleteMutation.mutate(id),
+  }
 }
