@@ -4,6 +4,9 @@ import { queryKeys } from '@/api/query-keys'
 import { useFileStore } from '@/stores/file-store'
 import type { FileNode } from '@/types'
 
+// In-memory content cache to avoid re-fetching files
+const contentCache = new Map<string, { content: string; language: string }>()
+
 export function useFiles() {
   const { openFile, setTabContent } = useFileStore()
 
@@ -15,17 +18,21 @@ export function useFiles() {
   const fetchFileContent = async (filePath: string) => {
     openFile(filePath)
 
-    // Check if content is already cached in the tab
-    const tab = useFileStore.getState().openTabs.find((t) => t.path === filePath)
-    if (tab?.content !== null) return
+    // Serve from cache instantly
+    const cached = contentCache.get(filePath)
+    if (cached) {
+      setTabContent(filePath, cached.content, cached.language)
+      return
+    }
 
     try {
       const data = await api.get<{ content: string; language: string; size: number }>(
         `/files/content?path=${encodeURIComponent(filePath)}`,
       )
+      contentCache.set(filePath, { content: data.content, language: data.language })
       setTabContent(filePath, data.content, data.language)
     } catch {
-      // Ignore errors
+      setTabContent(filePath, '// Failed to load file', 'text')
     }
   }
 
