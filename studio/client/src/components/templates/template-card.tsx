@@ -23,8 +23,8 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
       css={{
         padding: '20px',
         borderRadius: '12px',
-        border: '1px solid rgba(255,255,255,0.08)',
-        background: '#2f2f2f',
+        border: '1px solid var(--studio-border)',
+        background: 'var(--studio-bg-surface)',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
         textAlign: 'left',
@@ -33,9 +33,9 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
         gap: '12px',
         width: '100%',
         '&:hover': {
-          borderColor: 'rgba(255,255,255,0.15)',
+          borderColor: 'var(--studio-border-hover)',
           transform: 'scale(1.02)',
-          background: '#3a3a3a',
+          background: 'var(--studio-bg-hover)',
         },
       }}
     >
@@ -45,12 +45,12 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
           width: '40px',
           height: '40px',
           borderRadius: '10px',
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: 'var(--studio-border)',
+          border: '1px solid var(--studio-border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#ececec',
+          color: 'var(--studio-text-primary)',
           flexShrink: 0,
         }}
       >
@@ -62,7 +62,7 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
           css={{
             fontWeight: 600,
             fontSize: '14px',
-            color: '#ececec',
+            color: 'var(--studio-text-primary)',
             letterSpacing: '-0.01em',
             marginBottom: '4px',
           }}
@@ -72,7 +72,7 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
         <Text
           css={{
             fontSize: '13px',
-            color: '#b4b4b4',
+            color: 'var(--studio-text-secondary)',
             lineHeight: 1.5,
           }}
         >
@@ -94,14 +94,14 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
             width: '5px',
             height: '5px',
             borderRadius: '50%',
-            background: '#676767',
+            background: 'var(--studio-text-muted)',
             flexShrink: 0,
           }}
         />
         <Text
           css={{
             fontSize: '11px',
-            color: '#8e8e8e',
+            color: 'var(--studio-text-tertiary)',
             textTransform: 'uppercase',
             letterSpacing: '0.04em',
             fontWeight: 500,

@@ -31,10 +31,10 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
     .every((f) => values[f.name]?.trim())
 
   const inputCss = {
-    background: '#171717',
-    border: '1px solid rgba(255,255,255,0.08)',
+    background: 'var(--studio-bg-inset)',
+    border: '1px solid var(--studio-border)',
     borderRadius: '8px',
-    color: '#ececec',
+    color: 'var(--studio-text-primary)',
     fontSize: '14px',
     transition: 'all 0.2s ease',
     '&:focus': {
@@ -43,7 +43,7 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
       outline: 'none',
     },
     '&::placeholder': {
-      color: '#8e8e8e',
+      color: 'var(--studio-text-tertiary)',
     },
   }
 
@@ -58,15 +58,15 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
       <Dialog.Positioner>
         <Dialog.Content
           css={{
-            background: '#2f2f2f',
+            background: 'var(--studio-bg-surface)',
             borderRadius: '16px',
-            border: '1px solid rgba(255,255,255,0.08)',
+            border: '1px solid var(--studio-border)',
             boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
           }}
         >
           <Dialog.Header
             css={{
-              borderBottom: '1px solid rgba(255,255,255,0.08)',
+              borderBottom: '1px solid var(--studio-border)',
               padding: '20px 24px',
             }}
           >
@@ -74,7 +74,7 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
               css={{
                 fontSize: '16px',
                 fontWeight: 600,
-                color: '#ececec',
+                color: 'var(--studio-text-primary)',
                 letterSpacing: '-0.01em',
               }}
             >
@@ -83,8 +83,8 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
           </Dialog.Header>
           <Dialog.CloseTrigger
             css={{
-              color: '#8e8e8e',
-              '&:hover': { color: '#b4b4b4' },
+              color: 'var(--studio-text-tertiary)',
+              '&:hover': { color: 'var(--studio-text-secondary)' },
             }}
           />
           <Dialog.Body css={{ padding: '20px 24px' }}>
@@ -95,7 +95,7 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
                     css={{
                       fontSize: '13px',
                       fontWeight: 500,
-                      color: '#b4b4b4',
+                      color: 'var(--studio-text-secondary)',
                       marginBottom: '4px',
                     }}
                   >
@@ -137,7 +137,7 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
           </Dialog.Body>
           <Dialog.Footer
             css={{
-              borderTop: '1px solid rgba(255,255,255,0.08)',
+              borderTop: '1px solid var(--studio-border)',
               padding: '16px 24px',
               gap: '8px',
             }}
@@ -146,11 +146,11 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
               variant="ghost"
               onClick={onClose}
               css={{
-                color: '#b4b4b4',
+                color: 'var(--studio-text-secondary)',
                 borderRadius: '8px',
                 '&:hover': {
-                  background: '#3a3a3a',
-                  color: '#ececec',
+                  background: 'var(--studio-bg-hover)',
+                  color: 'var(--studio-text-primary)',
                 },
               }}
             >
@@ -163,16 +163,16 @@ export function TemplateModal({ template, isOpen, onClose, onSubmit }: TemplateM
                 padding: '8px 20px',
                 borderRadius: '8px',
                 background: allRequiredFilled
-                  ? '#ececec'
-                  : '#2f2f2f',
-                color: allRequiredFilled ? '#212121' : '#676767',
+                  ? 'var(--studio-accent)'
+                  : 'var(--studio-bg-surface)',
+                color: allRequiredFilled ? 'var(--studio-accent-fg)' : 'var(--studio-text-muted)',
                 fontWeight: 500,
                 fontSize: '14px',
                 border: 'none',
                 cursor: allRequiredFilled ? 'pointer' : 'default',
                 transition: 'all 0.2s ease',
                 '&:hover': allRequiredFilled ? {
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                  boxShadow: 'var(--studio-shadow)',
                 } : {},
               }}
               aria-disabled={!allRequiredFilled}

@@ -15,14 +15,14 @@ export function Tooltip({ content, children }: TooltipProps) {
       <ChakraTooltip.Positioner>
         <ChakraTooltip.Content
           css={{
-            background: '#3a3a3a',
-            color: '#ececec',
+            background: 'var(--studio-bg-hover-strong)',
+            color: 'var(--studio-text-primary)',
             fontSize: '12px',
             fontWeight: 500,
             padding: '6px 10px',
             borderRadius: '8px',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            border: '1px solid var(--studio-border)',
+            boxShadow: 'var(--studio-shadow)',
           }}
         >
           {content}

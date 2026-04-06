@@ -24,10 +24,10 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
     <Box
       css={{
         borderRadius: '8px',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid var(--studio-border)',
         overflow: 'hidden',
         marginBottom: '12px',
-        background: '#171717',
+        background: 'var(--studio-code-bg)',
       }}
     >
       {/* Header bar */}
@@ -37,14 +37,14 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '6px 12px',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          borderBottom: '1px solid var(--studio-border)',
           background: 'rgba(255,255,255,0.02)',
         }}
       >
         <Text
           css={{
             fontSize: '11px',
-            color: '#8e8e8e',
+            color: 'var(--studio-text-tertiary)',
             textTransform: 'uppercase',
             letterSpacing: '0.04em',
             fontWeight: 500,
@@ -63,13 +63,13 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
             borderRadius: '4px',
             background: 'transparent',
             border: 'none',
-            color: copied ? '#10a37f' : '#8e8e8e',
+            color: copied ? 'var(--studio-green)' : 'var(--studio-text-tertiary)',
             fontSize: '11px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             '&:hover': {
-              color: '#b4b4b4',
-              background: 'rgba(255,255,255,0.04)',
+              color: 'var(--studio-text-secondary)',
+              background: 'var(--studio-border)',
             },
           }}
         >
@@ -98,7 +98,7 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
 
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
-    <Box className="markdown-body" css={{ fontSize: '14px', lineHeight: '1.7', color: '#ececec' }}>
+    <Box className="markdown-body" css={{ fontSize: '14px', lineHeight: '1.7', color: 'var(--studio-text-primary)' }}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
@@ -112,7 +112,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 marginTop: '20px',
                 marginBottom: '10px',
                 letterSpacing: '-0.02em',
-                color: '#ececec',
+                color: 'var(--studio-text-primary)',
               }}
             >
               {children}
@@ -127,7 +127,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 marginTop: '16px',
                 marginBottom: '8px',
                 letterSpacing: '-0.02em',
-                color: '#ececec',
+                color: 'var(--studio-text-primary)',
               }}
             >
               {children}
@@ -142,14 +142,14 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 marginTop: '12px',
                 marginBottom: '6px',
                 letterSpacing: '-0.01em',
-                color: '#ececec',
+                color: 'var(--studio-text-primary)',
               }}
             >
               {children}
             </Heading>
           ),
           p: ({ children }) => (
-            <Text css={{ marginBottom: '10px', color: '#ececec', lineHeight: '1.7' }}>
+            <Text css={{ marginBottom: '10px', color: 'var(--studio-text-primary)', lineHeight: '1.7' }}>
               {children}
             </Text>
           ),
@@ -159,12 +159,12 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
               target="_blank"
               rel="noopener noreferrer"
               css={{
-                color: '#7ab8f5',
+                color: 'var(--studio-link)',
                 textDecoration: 'none',
                 borderBottom: '1px solid rgba(122,184,245,0.3)',
                 transition: 'all 0.2s ease',
                 '&:hover': {
-                  borderBottomColor: '#7ab8f5',
+                  borderBottomColor: 'var(--studio-link)',
                 },
               }}
             >
@@ -177,12 +177,12 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
               return (
                 <Code
                   css={{
-                    background: '#2f2f2f',
+                    background: 'var(--studio-bg-surface)',
                     color: '#e879f9',
                     fontSize: '0.9em',
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    border: '1px solid var(--studio-border)',
                     fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace",
                   }}
                 >
@@ -196,10 +196,10 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <Box
               as="blockquote"
               css={{
-                borderLeft: '3px solid rgba(255,255,255,0.12)',
+                borderLeft: '3px solid var(--studio-border-hover)',
                 paddingLeft: '16px',
                 margin: '12px 0',
-                color: '#b4b4b4',
+                color: 'var(--studio-text-secondary)',
                 fontStyle: 'italic',
               }}
             >
@@ -215,7 +215,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 listStyleType: 'disc',
                 '& li': {
                   marginBottom: '4px',
-                  color: '#ececec',
+                  color: 'var(--studio-text-primary)',
                 },
               }}
             >
@@ -231,7 +231,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 listStyleType: 'decimal',
                 '& li': {
                   marginBottom: '4px',
-                  color: '#ececec',
+                  color: 'var(--studio-text-primary)',
                 },
               }}
             >

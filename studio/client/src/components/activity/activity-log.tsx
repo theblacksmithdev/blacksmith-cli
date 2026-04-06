@@ -43,7 +43,7 @@ export function ActivityLog() {
           fontSize: '24px',
           fontWeight: 600,
           letterSpacing: '-0.02em',
-          color: '#ececec',
+          color: 'var(--studio-text-primary)',
           marginBottom: '24px',
         }}
       >

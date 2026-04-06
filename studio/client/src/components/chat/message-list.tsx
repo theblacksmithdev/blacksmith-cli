@@ -28,7 +28,7 @@ export function MessageList({ messages, isStreaming, partialMessage }: MessageLi
                 <Box
                   css={{
                     height: '1px',
-                    background: 'rgba(255,255,255,0.04)',
+                    background: 'var(--studio-border)',
                     margin: '8px 0 16px',
                   }}
                 />

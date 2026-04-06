@@ -13,10 +13,13 @@ import {
   Trash2,
   PanelLeft,
   PanelLeftClose,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { useUiStore } from '@/stores/ui-store'
 import { useSessionStore } from '@/stores/session-store'
 import { useSessions } from '@/hooks/use-sessions'
+import { useThemeMode } from '@/hooks/use-theme-mode'
 import { Path } from '@/router/paths'
 import { truncate } from '@/lib/format'
 
@@ -35,6 +38,7 @@ export function Sidebar() {
   const sessions = useSessionStore((s) => s.sessions)
   const activeSessionId = useSessionStore((s) => s.activeSessionId)
   const { fetchSessions, createSession, loadSession, deleteSession } = useSessions()
+  const { mode, toggle: toggleTheme } = useThemeMode()
 
   useEffect(() => {
     fetchSessions()
@@ -59,8 +63,8 @@ export function Sidebar() {
         as="nav"
         css={{
           width: '56px',
-          background: '#171717',
-          borderRight: '1px solid rgba(255,255,255,0.08)',
+          background: 'var(--studio-bg-sidebar)',
+          borderRight: '1px solid var(--studio-border)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -71,6 +75,30 @@ export function Sidebar() {
           transition: 'width 0.2s ease',
         }}
       >
+        {/* Logo — navigates home */}
+        <Tooltip content="Home">
+          <Box
+            as="button"
+            onClick={() => navigate(Path.Chat)}
+            css={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              background: 'var(--studio-accent)',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              marginBottom: '12px',
+              transition: 'opacity 0.15s ease',
+              '&:hover': { opacity: 0.85 },
+            }}
+          >
+            <Anvil size={15} color="var(--studio-accent-fg)" />
+          </Box>
+        </Tooltip>
+
         {/* Expand toggle */}
         <Tooltip content="Expand sidebar">
           <Box
@@ -82,14 +110,14 @@ export function Sidebar() {
               borderRadius: '8px',
               border: 'none',
               background: 'transparent',
-              color: '#8e8e8e',
+              color: 'var(--studio-text-tertiary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               marginBottom: '8px',
               transition: 'all 0.12s ease',
-              '&:hover': { background: '#2f2f2f', color: '#b4b4b4' },
+              '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
             }}
           >
             <PanelLeft size={18} />
@@ -105,16 +133,16 @@ export function Sidebar() {
               width: '36px',
               height: '36px',
               borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.08)',
-              background: '#2f2f2f',
-              color: '#ececec',
+              border: '1px solid var(--studio-border)',
+              background: 'var(--studio-bg-surface)',
+              color: 'var(--studio-text-primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               marginBottom: '16px',
               transition: 'all 0.12s ease',
-              '&:hover': { background: '#3a3a3a', borderColor: 'rgba(255,255,255,0.15)' },
+              '&:hover': { background: 'var(--studio-bg-hover)', borderColor: 'var(--studio-border-hover)' },
             }}
           >
             <Plus size={16} />
@@ -132,16 +160,16 @@ export function Sidebar() {
                 height: '36px',
                 borderRadius: '8px',
                 border: 'none',
-                background: location.pathname === Path.Chat ? 'rgba(255,255,255,0.08)' : 'transparent',
-                color: location.pathname === Path.Chat ? '#ececec' : '#8e8e8e',
+                background: location.pathname === Path.Chat ? 'var(--studio-bg-hover)' : 'transparent',
+                color: location.pathname === Path.Chat ? 'var(--studio-text-primary)' : 'var(--studio-text-tertiary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 transition: 'all 0.12s ease',
                 '&:hover': {
-                  background: location.pathname === Path.Chat ? 'rgba(255,255,255,0.08)' : '#2f2f2f',
-                  color: location.pathname === Path.Chat ? '#ececec' : '#b4b4b4',
+                  background: location.pathname === Path.Chat ? 'var(--studio-bg-hover)' : 'var(--studio-bg-surface)',
+                  color: location.pathname === Path.Chat ? 'var(--studio-text-primary)' : 'var(--studio-text-secondary)',
                 },
               }}
             >
@@ -159,14 +187,14 @@ export function Sidebar() {
                   height: '36px',
                   borderRadius: '8px',
                   border: 'none',
-                  background: location.pathname === path ? 'rgba(255,255,255,0.08)' : 'transparent',
-                  color: location.pathname === path ? '#ececec' : '#8e8e8e',
+                  background: location.pathname === path ? 'var(--studio-bg-hover)' : 'transparent',
+                  color: location.pathname === path ? 'var(--studio-text-primary)' : 'var(--studio-text-tertiary)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
                   transition: 'all 0.12s ease',
-                  '&:hover': { background: '#2f2f2f', color: '#b4b4b4' },
+                  '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
                 }}
               >
                 <Icon size={18} />
@@ -174,6 +202,30 @@ export function Sidebar() {
             </Tooltip>
           ))}
         </VStack>
+
+        {/* Theme toggle */}
+        <Tooltip content={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
+          <Box
+            as="button"
+            onClick={toggleTheme}
+            css={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              border: 'none',
+              background: 'transparent',
+              color: 'var(--studio-text-tertiary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.12s ease',
+              '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
+            }}
+          >
+            {mode === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </Box>
+        </Tooltip>
 
         {/* Bottom */}
         <Tooltip content="Settings">
@@ -185,14 +237,14 @@ export function Sidebar() {
               height: '36px',
               borderRadius: '8px',
               border: 'none',
-              background: location.pathname === Path.Settings ? 'rgba(255,255,255,0.08)' : 'transparent',
-              color: location.pathname === Path.Settings ? '#ececec' : '#8e8e8e',
+              background: location.pathname === Path.Settings ? 'var(--studio-bg-hover)' : 'transparent',
+              color: location.pathname === Path.Settings ? 'var(--studio-text-primary)' : 'var(--studio-text-tertiary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               transition: 'all 0.12s ease',
-              '&:hover': { background: '#2f2f2f', color: '#b4b4b4' },
+              '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
             }}
           >
             <Settings size={16} />
@@ -205,7 +257,7 @@ export function Sidebar() {
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: connectionStatus === 'connected' ? '#10a37f' : '#ef4444',
+            background: connectionStatus === 'connected' ? 'var(--studio-green)' : 'var(--studio-error)',
             marginTop: '10px',
           }}
         />
@@ -219,8 +271,8 @@ export function Sidebar() {
       as="nav"
       css={{
         width: '260px',
-        background: '#171717',
-        borderRight: '1px solid rgba(255,255,255,0.08)',
+        background: 'var(--studio-bg-sidebar)',
+        borderRight: '1px solid var(--studio-border)',
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
@@ -239,25 +291,31 @@ export function Sidebar() {
         >
           <HStack gap={3}>
             <Box
+              as="button"
+              onClick={() => navigate(Path.Chat)}
               css={{
                 width: '28px',
                 height: '28px',
                 borderRadius: '7px',
-                background: '#ececec',
+                background: 'var(--studio-accent)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'opacity 0.15s ease',
+                '&:hover': { opacity: 0.85 },
               }}
             >
-              <Anvil size={14} color="#212121" />
+              <Anvil size={14} color="var(--studio-accent-fg)" />
             </Box>
             <Box>
               <Text
                 css={{
                   fontSize: '13px',
                   fontWeight: 600,
-                  color: '#ececec',
+                  color: 'var(--studio-text-primary)',
                   letterSpacing: '-0.01em',
                   lineHeight: 1.2,
                 }}
@@ -270,11 +328,11 @@ export function Sidebar() {
                     width: '5px',
                     height: '5px',
                     borderRadius: '50%',
-                    background: connectionStatus === 'connected' ? '#10a37f' : '#ef4444',
+                    background: connectionStatus === 'connected' ? 'var(--studio-green)' : 'var(--studio-error)',
                     flexShrink: 0,
                   }}
                 />
-                <Text css={{ fontSize: '10px', color: '#8e8e8e' }}>
+                <Text css={{ fontSize: '10px', color: 'var(--studio-text-tertiary)' }}>
                   {connectionStatus === 'connected' ? 'Online' : 'Offline'}
                 </Text>
               </HStack>
@@ -290,13 +348,13 @@ export function Sidebar() {
               borderRadius: '6px',
               border: 'none',
               background: 'transparent',
-              color: '#8e8e8e',
+              color: 'var(--studio-text-tertiary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               transition: 'all 0.12s ease',
-              '&:hover': { background: '#2f2f2f', color: '#b4b4b4' },
+              '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
             }}
           >
             <PanelLeftClose size={15} />
@@ -314,16 +372,16 @@ export function Sidebar() {
             gap: '8px',
             padding: '8px 10px',
             borderRadius: '8px',
-            border: '1px solid rgba(255,255,255,0.08)',
-            background: '#2f2f2f',
-            color: '#ececec',
+            border: '1px solid var(--studio-border)',
+            background: 'var(--studio-bg-surface)',
+            color: 'var(--studio-text-primary)',
             fontSize: '13px',
             fontWeight: 500,
             cursor: 'pointer',
             transition: 'all 0.15s ease',
             '&:hover': {
-              background: '#3a3a3a',
-              borderColor: 'rgba(255,255,255,0.15)',
+              background: 'var(--studio-bg-hover)',
+              borderColor: 'var(--studio-border-hover)',
             },
           }}
         >
@@ -342,7 +400,7 @@ export function Sidebar() {
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
-                color: '#8e8e8e',
+                color: 'var(--studio-text-tertiary)',
                 padding: '10px 8px 6px',
               }}
             >
@@ -364,22 +422,22 @@ export function Sidebar() {
                       padding: '7px 8px',
                       borderRadius: '7px',
                       border: 'none',
-                      background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
-                      color: isActive ? '#ececec' : '#b4b4b4',
+                      background: isActive ? 'var(--studio-bg-hover)' : 'transparent',
+                      color: isActive ? 'var(--studio-text-primary)' : 'var(--studio-text-secondary)',
                       fontSize: '13px',
                       cursor: 'pointer',
                       transition: 'all 0.1s ease',
                       textAlign: 'left',
                       '&:hover': {
-                        background: isActive ? 'rgba(255,255,255,0.08)' : '#2f2f2f',
-                        color: '#ececec',
+                        background: isActive ? 'var(--studio-bg-hover)' : 'var(--studio-bg-surface)',
+                        color: 'var(--studio-text-primary)',
                         '& .del': { opacity: 1 },
                       },
                     }}
                   >
                     <MessageSquare
                       size={14}
-                      style={{ flexShrink: 0, color: isActive ? '#ececec' : 'inherit' }}
+                      style={{ flexShrink: 0 }}
                     />
                     <Text
                       css={{
@@ -401,10 +459,10 @@ export function Sidebar() {
                         opacity: 0,
                         padding: '2px',
                         borderRadius: '4px',
-                        color: '#8e8e8e',
+                        color: 'var(--studio-text-tertiary)',
                         flexShrink: 0,
                         transition: 'all 0.1s ease',
-                        '&:hover': { color: '#ef4444', background: 'rgba(239,68,68,0.1)' },
+                        '&:hover': { color: 'var(--studio-error)', background: 'rgba(239,68,68,0.1)' },
                       }}
                     >
                       <Trash2 size={12} />
@@ -420,7 +478,7 @@ export function Sidebar() {
       {/* Bottom nav */}
       <Box
         css={{
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          borderTop: '1px solid var(--studio-border)',
           padding: '6px 8px 8px',
           flexShrink: 0,
         }}
@@ -441,14 +499,14 @@ export function Sidebar() {
                   padding: '7px 10px',
                   borderRadius: '7px',
                   border: 'none',
-                  background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
-                  color: isActive ? '#ececec' : '#8e8e8e',
+                  background: isActive ? 'var(--studio-bg-hover)' : 'transparent',
+                  color: isActive ? 'var(--studio-text-primary)' : 'var(--studio-text-tertiary)',
                   fontSize: '13px',
                   fontWeight: isActive ? 500 : 400,
                   cursor: 'pointer',
                   transition: 'all 0.1s ease',
                   textAlign: 'left',
-                  '&:hover': { background: '#2f2f2f', color: '#b4b4b4' },
+                  '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
                 }}
               >
                 <Icon size={15} style={{ flexShrink: 0 }} />
@@ -456,6 +514,31 @@ export function Sidebar() {
               </Box>
             )
           })}
+          {/* Theme toggle */}
+          <Box
+            as="button"
+            onClick={toggleTheme}
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '9px',
+              width: '100%',
+              padding: '7px 10px',
+              borderRadius: '7px',
+              border: 'none',
+              background: 'transparent',
+              color: 'var(--studio-text-tertiary)',
+              fontSize: '13px',
+              fontWeight: 400,
+              cursor: 'pointer',
+              transition: 'all 0.1s ease',
+              textAlign: 'left',
+              '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
+            }}
+          >
+            {mode === 'dark' ? <Sun size={15} style={{ flexShrink: 0 }} /> : <Moon size={15} style={{ flexShrink: 0 }} />}
+            {mode === 'dark' ? 'Light mode' : 'Dark mode'}
+          </Box>
           <Box
             as="button"
             onClick={() => navigate(Path.Settings)}
@@ -467,14 +550,14 @@ export function Sidebar() {
               padding: '7px 10px',
               borderRadius: '7px',
               border: 'none',
-              background: location.pathname === Path.Settings ? 'rgba(255,255,255,0.08)' : 'transparent',
-              color: location.pathname === Path.Settings ? '#ececec' : '#8e8e8e',
+              background: location.pathname === Path.Settings ? 'var(--studio-bg-hover)' : 'transparent',
+              color: location.pathname === Path.Settings ? 'var(--studio-text-primary)' : 'var(--studio-text-tertiary)',
               fontSize: '13px',
               fontWeight: location.pathname === Path.Settings ? 500 : 400,
               cursor: 'pointer',
               transition: 'all 0.1s ease',
               textAlign: 'left',
-              '&:hover': { background: '#2f2f2f', color: '#b4b4b4' },
+              '&:hover': { background: 'var(--studio-bg-surface)', color: 'var(--studio-text-secondary)' },
             }}
           >
             <Settings size={15} style={{ flexShrink: 0 }} />

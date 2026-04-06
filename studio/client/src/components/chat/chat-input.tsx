@@ -41,11 +41,11 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
       <Box
         css={{
           position: 'relative',
-          background: '#2f2f2f',
+          background: 'var(--studio-bg-surface)',
           borderRadius: '16px',
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid var(--studio-border)',
           transition: 'all 0.2s ease',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          boxShadow: 'var(--studio-shadow)',
           '&:focus-within': {
             borderColor: 'rgba(255,255,255,0.2)',
             boxShadow: '0 0 0 1px rgba(255,255,255,0.15)',
@@ -68,11 +68,11 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
             background: 'transparent',
             border: 'none',
             outline: 'none',
-            color: '#ececec',
+            color: 'var(--studio-text-primary)',
             fontSize: '14px',
             lineHeight: '1.6',
             '&::placeholder': {
-              color: '#8e8e8e',
+              color: 'var(--studio-text-tertiary)',
             },
             '&:focus': {
               outline: 'none',
@@ -98,7 +98,7 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
             as="span"
             css={{
               fontSize: '11px',
-              color: '#676767',
+              color: 'var(--studio-text-muted)',
               userSelect: 'none',
               letterSpacing: '0.02em',
             }}
@@ -115,7 +115,7 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
                   width: '32px',
                   height: '32px',
                   borderRadius: '50%',
-                  background: '#ef4444',
+                  background: 'var(--studio-error)',
                   border: 'none',
                   display: 'flex',
                   alignItems: 'center',
@@ -143,14 +143,14 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
                   height: '32px',
                   borderRadius: '50%',
                   background: value.trim() && !disabled
-                    ? '#ececec'
-                    : '#3a3a3a',
+                    ? 'var(--studio-accent)'
+                    : 'var(--studio-bg-hover)',
                   border: 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: value.trim() && !disabled ? 'pointer' : 'default',
-                  color: value.trim() && !disabled ? '#212121' : '#676767',
+                  color: value.trim() && !disabled ? 'var(--studio-accent-fg)' : 'var(--studio-text-muted)',
                   transition: 'all 0.2s ease',
                   flexShrink: 0,
                   '&:hover': value.trim() && !disabled ? {

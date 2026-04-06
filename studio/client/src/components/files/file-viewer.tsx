@@ -45,7 +45,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
           display: 'flex',
           alignItems: 'center',
           padding: '8px 16px',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          borderBottom: '1px solid var(--studio-border)',
           background: 'rgba(47,47,47,0.8)',
           gap: '8px',
         }}
@@ -63,12 +63,12 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
           {pathParts.map((part, i) => (
             <Box key={i} css={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
               {i > 0 && (
-                <Text css={{ color: '#8e8e8e', fontSize: '11px' }}>/</Text>
+                <Text css={{ color: 'var(--studio-text-tertiary)', fontSize: '11px' }}>/</Text>
               )}
               <Text
                 css={{
                   fontSize: '12px',
-                  color: i === pathParts.length - 1 ? '#ececec' : '#8e8e8e',
+                  color: i === pathParts.length - 1 ? 'var(--studio-text-primary)' : 'var(--studio-text-tertiary)',
                   fontWeight: i === pathParts.length - 1 ? 500 : 400,
                 }}
               >
@@ -85,10 +85,10 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
               alignItems: 'center',
               gap: '4px',
               fontSize: '11px',
-              color: '#f59e0b',
+              color: 'var(--studio-warning)',
             }}
           >
-            <Box css={{ width: '5px', height: '5px', borderRadius: '50%', background: '#f59e0b' }} />
+            <Box css={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--studio-warning)' }} />
             Modified
           </Box>
         )}
@@ -98,9 +98,9 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
           css={{
             padding: '2px 8px',
             borderRadius: '4px',
-            background: 'rgba(255,255,255,0.04)',
+            background: 'var(--studio-border)',
             fontSize: '11px',
-            color: '#8e8e8e',
+            color: 'var(--studio-text-tertiary)',
             fontWeight: 500,
             textTransform: 'uppercase',
             letterSpacing: '0.03em',
@@ -122,12 +122,12 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
             borderRadius: '6px',
             background: 'transparent',
             border: 'none',
-            color: copied ? '#10a37f' : '#8e8e8e',
+            color: copied ? 'var(--studio-green)' : 'var(--studio-text-tertiary)',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             '&:hover': {
-              background: '#3a3a3a',
-              color: '#b4b4b4',
+              background: 'var(--studio-bg-hover-strong)',
+              color: 'var(--studio-text-secondary)',
             },
           }}
         >
@@ -140,7 +140,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
         css={{
           flex: 1,
           overflowY: 'auto',
-          background: '#171717',
+          background: 'var(--studio-code-bg)',
         }}
       >
         <Box
@@ -161,7 +161,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
               textAlign: 'right',
               userSelect: 'none',
               flexShrink: 0,
-              borderRight: '1px solid rgba(255,255,255,0.04)',
+              borderRight: '1px solid var(--studio-border)',
             }}
           >
             {lines.map((_, i) => (
@@ -169,7 +169,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
                 key={i}
                 css={{
                   padding: '0 12px',
-                  color: '#676767',
+                  color: 'var(--studio-text-muted)',
                   fontSize: '12px',
                 }}
               >
@@ -184,7 +184,7 @@ export function FileViewer({ filePath, content, language, isChanged }: FileViewe
             css={{
               padding: '12px 16px',
               overflowX: 'auto',
-              color: '#ececec',
+              color: 'var(--studio-text-primary)',
               flex: 1,
             }}
           >

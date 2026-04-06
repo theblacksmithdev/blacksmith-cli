@@ -49,7 +49,7 @@ export function TemplateGrid() {
             fontSize: '24px',
             fontWeight: 600,
             letterSpacing: '-0.02em',
-            color: '#ececec',
+            color: 'var(--studio-text-primary)',
             marginBottom: '6px',
           }}
         >
@@ -58,7 +58,7 @@ export function TemplateGrid() {
         <Text
           css={{
             fontSize: '14px',
-            color: '#8e8e8e',
+            color: 'var(--studio-text-tertiary)',
           }}
         >
           Choose a template to get started quickly

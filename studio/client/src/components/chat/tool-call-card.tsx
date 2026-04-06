@@ -39,11 +39,11 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
         marginTop: '8px',
         borderRadius: '8px',
         overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.08)',
-        background: '#2f2f2f',
+        border: '1px solid var(--studio-border)',
+        background: 'var(--studio-bg-surface)',
         transition: 'all 0.2s ease',
         '&:hover': {
-          borderColor: 'rgba(255,255,255,0.15)',
+          borderColor: 'var(--studio-border-hover)',
         },
       }}
     >
@@ -59,12 +59,12 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
-          color: '#b4b4b4',
+          color: 'var(--studio-text-secondary)',
           fontSize: '12px',
-          borderLeft: '2px solid rgba(255,255,255,0.1)',
+          borderLeft: '2px solid var(--studio-border)',
           transition: 'all 0.2s ease',
           '&:hover': {
-            color: '#ececec',
+            color: 'var(--studio-text-primary)',
           },
         }}
       >
@@ -75,7 +75,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
             fontSize: '11px',
             textTransform: 'uppercase',
             letterSpacing: '0.04em',
-            color: '#b4b4b4',
+            color: 'var(--studio-text-secondary)',
             flexShrink: 0,
           }}
         >
@@ -85,7 +85,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
           css={{
             fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace",
             fontSize: '11px',
-            color: '#b4b4b4',
+            color: 'var(--studio-text-secondary)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -102,7 +102,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
         <Box
           css={{
             padding: '8px 12px',
-            borderTop: '1px solid rgba(255,255,255,0.04)',
+            borderTop: '1px solid var(--studio-border)',
             maxHeight: '200px',
             overflowY: 'auto',
           }}
@@ -111,7 +111,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
             css={{
               fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace",
               fontSize: '11px',
-              color: '#b4b4b4',
+              color: 'var(--studio-text-secondary)',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-all',
             }}

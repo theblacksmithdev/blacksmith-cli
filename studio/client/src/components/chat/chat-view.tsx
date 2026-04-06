@@ -94,14 +94,14 @@ export function ChatView() {
                 width: '56px',
                 height: '56px',
                 borderRadius: '16px',
-                background: '#ececec',
+                background: 'var(--studio-accent)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginBottom: '28px',
               }}
             >
-              <Anvil size={26} color="#212121" />
+              <Anvil size={26} color="var(--studio-accent-fg)" />
             </Box>
 
             {/* Heading */}
@@ -110,7 +110,7 @@ export function ChatView() {
                 fontSize: '28px',
                 fontWeight: 600,
                 letterSpacing: '-0.03em',
-                color: '#ececec',
+                color: 'var(--studio-text-primary)',
                 textAlign: 'center',
                 lineHeight: 1.3,
                 marginBottom: '8px',
@@ -121,7 +121,7 @@ export function ChatView() {
             <Text
               css={{
                 fontSize: '15px',
-                color: '#8e8e8e',
+                color: 'var(--studio-text-tertiary)',
                 textAlign: 'center',
                 lineHeight: 1.6,
                 marginBottom: '40px',
@@ -143,7 +143,7 @@ export function ChatView() {
                   fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '0.08em',
-                  color: '#8e8e8e',
+                  color: 'var(--studio-text-tertiary)',
                   marginBottom: '14px',
                 }}
               >
@@ -155,10 +155,10 @@ export function ChatView() {
                   display: 'grid',
                   gridTemplateColumns: 'repeat(3, 1fr)',
                   gap: '1px',
-                  background: 'rgba(255,255,255,0.04)',
+                  background: 'var(--studio-border)',
                   borderRadius: '14px',
                   overflow: 'hidden',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  border: '1px solid var(--studio-border)',
                 }}
               >
                 {quickActions.map(({ icon: Icon, label, desc, prompt }) => (
@@ -171,19 +171,19 @@ export function ChatView() {
                       flexDirection: 'column',
                       gap: '8px',
                       padding: '20px 18px',
-                      background: '#171717',
-                      color: '#b4b4b4',
+                      background: 'var(--studio-bg-sidebar)',
+                      color: 'var(--studio-text-secondary)',
                       fontSize: '13px',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease',
                       textAlign: 'left',
                       border: 'none',
                       '&:hover': {
-                        background: '#2f2f2f',
-                        color: '#ececec',
+                        background: 'var(--studio-bg-surface)',
+                        color: 'var(--studio-text-primary)',
                         '& .action-icon': {
-                          color: '#ececec',
-                          borderColor: 'rgba(255,255,255,0.15)',
+                          color: 'var(--studio-text-primary)',
+                          borderColor: 'var(--studio-border-hover)',
                         },
                         '& .action-arrow': {
                           opacity: 1,
@@ -199,11 +199,11 @@ export function ChatView() {
                           width: '32px',
                           height: '32px',
                           borderRadius: '8px',
-                          border: '1px solid rgba(255,255,255,0.08)',
+                          border: '1px solid var(--studio-border)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: '#8e8e8e',
+                          color: 'var(--studio-text-tertiary)',
                           transition: 'all 0.15s ease',
                           flexShrink: 0,
                         }}
@@ -216,7 +216,7 @@ export function ChatView() {
                           opacity: 0,
                           transform: 'translateX(-4px)',
                           transition: 'all 0.15s ease',
-                          color: '#8e8e8e',
+                          color: 'var(--studio-text-tertiary)',
                         }}
                       >
                         <ArrowRight size={13} />
@@ -236,7 +236,7 @@ export function ChatView() {
                       <Text
                         css={{
                           fontSize: '12px',
-                          color: '#8e8e8e',
+                          color: 'var(--studio-text-tertiary)',
                         }}
                       >
                         {desc}
@@ -260,13 +260,13 @@ export function ChatView() {
                 borderRadius: '8px',
                 background: 'transparent',
                 border: 'none',
-                color: '#8e8e8e',
+                color: 'var(--studio-text-tertiary)',
                 fontSize: '13px',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
                 '&:hover': {
-                  color: '#ececec',
-                  background: 'rgba(255,255,255,0.06)',
+                  color: 'var(--studio-text-primary)',
+                  background: 'var(--studio-border)',
                 },
               }}
             >

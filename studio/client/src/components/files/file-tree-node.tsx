@@ -55,17 +55,16 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
           paddingTop: '3px',
           paddingBottom: '3px',
           cursor: 'pointer',
-          background: isSelected ? 'rgba(255,255,255,0.08)' : 'transparent',
-          borderLeft: isSelected ? '2px solid #ececec' : '2px solid transparent',
+          background: isSelected ? 'var(--studio-bg-hover)' : 'transparent',
           transition: 'all 0.15s ease',
           border: 'none',
           borderLeftStyle: 'solid',
           borderLeftWidth: '2px',
-          borderLeftColor: isSelected ? '#ececec' : 'transparent',
+          borderLeftColor: isSelected ? 'var(--studio-text-primary)' : 'transparent',
           position: 'relative',
           textAlign: 'left',
           '&:hover': {
-            background: isSelected ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
+            background: isSelected ? 'var(--studio-bg-hover)' : 'rgba(255,255,255,0.03)',
           },
         }}
       >
@@ -79,14 +78,14 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
               top: 0,
               bottom: 0,
               width: '1px',
-              background: 'rgba(255,255,255,0.04)',
+              background: 'var(--studio-border)',
             }}
           />
         ))}
 
         {isDir ? (
           <>
-            <Box css={{ color: '#8e8e8e', flexShrink: 0, display: 'flex' }}>
+            <Box css={{ color: 'var(--studio-text-tertiary)', flexShrink: 0, display: 'flex' }}>
               {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
             </Box>
             <Box css={{ color: '#f59e0b', flexShrink: 0, display: 'flex' }}>
@@ -105,7 +104,7 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
         <Text
           css={{
             fontSize: '12px',
-            color: isSelected ? '#ececec' : '#b4b4b4',
+            color: isSelected ? 'var(--studio-text-primary)' : 'var(--studio-text-secondary)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -122,7 +121,7 @@ export function FileTreeNode({ node, depth, selectedFile, changedFiles, onSelect
               width: '6px',
               height: '6px',
               borderRadius: '50%',
-              background: '#f59e0b',
+              background: 'var(--studio-warning)',
               flexShrink: 0,
             }}
           />

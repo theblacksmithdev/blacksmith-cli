@@ -13,8 +13,8 @@ export function Header() {
       px={5}
       gap={3}
       css={{
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        background: 'rgba(23,23,23,0.6)',
+        borderBottom: '1px solid var(--studio-border)',
+        background: 'var(--studio-bg-sidebar)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         flexShrink: 0,
@@ -25,7 +25,7 @@ export function Header() {
           css={{
             fontSize: '13px',
             fontWeight: 500,
-            color: '#b4b4b4',
+            color: 'var(--studio-text-secondary)',
             letterSpacing: '-0.01em',
           }}
         >
@@ -35,7 +35,7 @@ export function Header() {
         <Text
           css={{
             fontSize: '13px',
-            color: '#8e8e8e',
+            color: 'var(--studio-text-tertiary)',
           }}
         >
           Home
