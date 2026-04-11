@@ -5,15 +5,23 @@ slug: /
 
 # Introduction
 
-**Blacksmith CLI** is a fullstack development framework that scaffolds production-ready web applications combining **Django** (backend) and **React** (frontend). It eliminates the friction of setting up and maintaining a fullstack project by providing:
+**Blacksmith CLI** is a development framework that scaffolds production-ready web applications with **Django**, **React**, or both. Choose the project type that fits your needs:
 
-- **One-command project setup** — Create a complete Django + React project with authentication, routing, and API client pre-configured
-- **Automatic type synchronization** — OpenAPI schema keeps Django serializers and TypeScript types in perfect sync
-- **Full-stack resource scaffolding** — Generate models, serializers, viewsets, pages, hooks, and routes across both stacks with a single command
+- **Fullstack** — Django backend + React frontend, wired together through automatic OpenAPI synchronization
+- **Backend** — Standalone Django REST API
+- **Frontend** — Standalone React application with Vite
+
+Blacksmith eliminates the friction of project setup by providing:
+
+- **One-command project setup** — Create a complete project with authentication, routing, and API client pre-configured
+- **Automatic type synchronization** — OpenAPI schema keeps Django serializers and TypeScript types in perfect sync (fullstack)
+- **Resource scaffolding** — Generate models, serializers, viewsets, pages, hooks, and routes with a single command
 - **AI-ready development** — Generate project-aware documentation for AI coding assistants
-- **Clean ejection** — Eject anytime to a standard Django + React project with no lock-in
+- **Clean ejection** — Eject anytime to a standard project with no lock-in
 
 ## How It Works
+
+### Fullstack Projects
 
 Blacksmith uses **OpenAPI** as the bridge between your Django backend and React frontend. When you define models and serializers in Django, Blacksmith generates:
 
@@ -25,30 +33,32 @@ Blacksmith uses **OpenAPI** as the bridge between your Django backend and React 
 
 This means changing a field in your Django model automatically flows through to your React components — no manual type definitions needed.
 
+### Single-End Projects
+
+Backend-only and frontend-only projects give you the same scaffolding quality without the cross-stack wiring. The generated code lives at the project root (no `backend/` or `frontend/` subdirectory) for a clean, standard structure.
+
 ## Quick Example
 
 ```bash
 # Install Blacksmith CLI
 npm install -g blacksmith-cli
 
-# Create a new project
-blacksmith init my-app
+# Create a fullstack project
+blacksmith init my-app --type fullstack
 
-# Start development (Django + React + auto-sync)
+# Or a backend-only API
+blacksmith init my-api --type backend
+
+# Or a frontend-only app
+blacksmith init my-ui --type frontend
+
+# Start development
 cd my-app
 blacksmith dev
 
-# Generate a complete CRUD resource
+# Generate a CRUD resource
 blacksmith make:resource BlogPost
 ```
-
-After running `make:resource BlogPost`, you get:
-
-**Backend** — Django model, serializer, viewset, URL routes, admin registration, and migrations
-
-**Frontend** — List page, detail page, create/edit forms, React Query hooks, and route registration
-
-All automatically wired together with type-safe API calls.
 
 ## Next Steps
 

@@ -4,6 +4,10 @@ sidebar_position: 2
 
 # OpenAPI Synchronization
 
+:::info Fullstack Only
+OpenAPI synchronization is only available for fullstack projects (`type: "fullstack"`). Backend-only and frontend-only projects do not use this feature.
+:::
+
 OpenAPI is the bridge between your Django backend and React frontend. Blacksmith uses it to automatically generate type-safe client code from your backend API definitions.
 
 ## How It Works

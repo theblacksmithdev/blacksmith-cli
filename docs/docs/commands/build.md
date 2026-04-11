@@ -14,30 +14,32 @@ blacksmith build
 
 ## What It Does
 
-The build command performs two steps:
+The build steps depend on your project type:
 
-### 1. Build React Frontend
+### Fullstack Projects
 
-Runs `npm run build` in the frontend directory using Vite, which:
+1. **Build React frontend** — Runs `npm run build` via Vite (bundle, minify, optimize)
+2. **Collect Django static files** — Runs `manage.py collectstatic` to gather all static files
 
-- Bundles and minifies JavaScript/TypeScript
-- Optimizes CSS (Tailwind CSS purging)
-- Generates static assets in `frontend/dist/`
+### Backend-Only Projects
 
-### 2. Collect Django Static Files
+1. **Collect Django static files** — Runs `manage.py collectstatic`
 
-Runs `python manage.py collectstatic` to gather all static files (including the built frontend) into Django's static files directory for serving in production.
+### Frontend-Only Projects
+
+1. **Build React frontend** — Runs `npm run build` via Vite
 
 ## Output
 
-After building, you'll have:
-
-- `frontend/dist/` — Optimized frontend bundle
-- `backend/staticfiles/` — Collected static files for Django
+| Project Type | Output |
+|---|---|
+| Fullstack | `frontend/dist/` (frontend bundle) + `backend/staticfiles/` (Django static files) |
+| Backend | `staticfiles/` at project root |
+| Frontend | `dist/` at project root |
 
 ## Deployment
 
-The built project can be deployed to any platform that supports Django:
+The built project can be deployed to any platform:
 
 - **Traditional hosting** — Serve with Gunicorn/uWSGI behind Nginx
 - **Platform-as-a-Service** — Deploy to Heroku, Railway, Render, etc.

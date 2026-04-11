@@ -1,25 +1,25 @@
 # Blacksmith CLI
 
-**Fullstack Django + React framework — one command, one codebase, one mental model.**
+**Django + React framework — one command, one codebase, one mental model.**
 
-Blacksmith scaffolds production-ready web applications with a Django REST backend and a React frontend, wired together through automatic OpenAPI synchronization. Define your API in Django, and Blacksmith generates the TypeScript client, types, and hooks for you.
+Blacksmith scaffolds production-ready web applications with Django, React, or both — wired together through automatic OpenAPI synchronization. Choose your project type and Blacksmith handles the rest.
 
 ## Why Blacksmith?
 
-Building fullstack apps usually means gluing together two separate projects, manually keeping types in sync, and writing boilerplate on both sides of the stack. Blacksmith eliminates that friction:
+Building web apps usually means gluing together separate projects, manually keeping types in sync, and writing boilerplate. Blacksmith eliminates that friction:
 
-- **One command to scaffold** a complete project with authentication, routing, and API layer already wired up
-- **Automatic API sync** — change a Django serializer, get updated TypeScript types and API client instantly
-- **Full-stack resource scaffolding** — `make:resource BlogPost` creates the model, serializer, viewset, URLs, hooks, components, and pages
-- **AI-ready** — generates a `CLAUDE.md` and skill files so AI coding assistants understand your entire stack
-- **Clean ejection** — remove Blacksmith at any time and keep a standard Django + React project
+- **Flexible project types** — scaffold a fullstack Django + React app, a standalone Django API, or a standalone React frontend
+- **Automatic API sync** — change a Django serializer, get updated TypeScript types and API client instantly (fullstack)
+- **Resource scaffolding** — `make:resource BlogPost` creates everything you need for the resource based on your project type
+- **AI-ready** — generates `CLAUDE.md` and skill files so AI coding assistants understand your entire stack
+- **Clean ejection** — remove Blacksmith at any time and keep a standard project
 
 ## Quick Start
 
 ### Prerequisites
 
 - **Node.js** >= 20.5.0
-- **Python 3**
+- **Python 3** (for backend and fullstack projects)
 - **npm**
 
 ### Installation
@@ -34,14 +34,20 @@ npm install -g blacksmith-cli
 blacksmith init my-app
 ```
 
-You'll be prompted for configuration (or pass flags to skip prompts):
+You'll be prompted for project type and configuration, or pass flags to skip prompts:
 
 ```bash
-blacksmith init my-app \
-  --backend-port 8000 \
-  --frontend-port 5173 \
-  --theme-color blue \
-  --ai
+# Fullstack (Django + React)
+blacksmith init my-app --type fullstack
+
+# Backend only (Django API)
+blacksmith init my-app --type backend
+
+# Frontend only (React)
+blacksmith init my-app --type frontend
+
+# With all options
+blacksmith init my-app --type fullstack -b 8000 -f 5173 --theme-color blue --ai
 ```
 
 ### Start Developing
@@ -51,49 +57,73 @@ cd my-app
 blacksmith dev
 ```
 
-This starts three processes in parallel:
-1. **Django** development server
-2. **Vite** dev server with HMR
-3. **OpenAPI watcher** that auto-syncs types when backend files change
+What starts depends on your project type:
+- **Fullstack**: Django + Vite + OpenAPI watcher (auto-syncs types on backend changes)
+- **Backend**: Django development server
+- **Frontend**: Vite dev server with HMR
 
 ## Commands
 
 | Command | Description |
 |---|---|
 | `blacksmith init [name]` | Create a new project (interactive or via flags) |
-| `blacksmith dev` | Start Django + Vite + OpenAPI watcher |
-| `blacksmith sync` | Regenerate frontend API client from Django schema |
-| `blacksmith make:resource <Name>` | Scaffold a CRUD resource across the full stack |
-| `blacksmith build` | Production build (Vite + collectstatic) |
+| `blacksmith dev` | Start development server(s) |
+| `blacksmith sync` | Regenerate frontend API client from Django schema (fullstack only) |
+| `blacksmith make:resource <Name>` | Scaffold a resource (scope depends on project type) |
+| `blacksmith build` | Production build |
 | `blacksmith eject` | Remove Blacksmith, keep a clean project |
-| `blacksmith setup:ai` | Generate CLAUDE.md with AI development skills |
+| `blacksmith setup:ai` | Generate/regenerate CLAUDE.md with AI development skills |
 | `blacksmith skills` | List available AI skills |
 | `blacksmith backend <cmd>` | Run a Django management command |
 | `blacksmith frontend <cmd>` | Run an npm command in the frontend |
 
-## Generated Project Structure
+## Project Structures
+
+### Fullstack (`--type fullstack`)
 
 ```
 my-app/
 ├── backend/                  # Django project
 │   ├── config/               # Settings, URLs, WSGI/ASGI
-│   │   └── settings/         # Split settings (base, development, production)
 │   ├── apps/                 # Django apps (one per resource)
 │   │   └── users/            # Built-in user app with JWT auth
 │   ├── manage.py
-│   ├── requirements.txt
 │   └── venv/                 # Python virtual environment
 ├── frontend/                 # React + Vite project
 │   ├── src/
-│   │   ├── api/              # Auto-generated API client (via OpenAPI)
+│   │   ├── api/              # Auto-generated API client + hooks
 │   │   ├── features/         # Feature modules (auth, etc.)
 │   │   ├── pages/            # Top-level page components
 │   │   ├── router/           # React Router with auth guards
-│   │   ├── shared/           # Shared components and hooks
-│   │   └── styles/           # Global styles (Tailwind CSS)
+│   │   └── shared/           # Shared components, hooks, utils
 │   └── package.json
-├── blacksmith.config.json    # Project configuration
+├── blacksmith.config.json
 └── CLAUDE.md                 # AI development guide (with --ai)
+```
+
+### Backend Only (`--type backend`)
+
+```
+my-app/
+├── config/                   # Settings, URLs, WSGI/ASGI
+├── apps/                     # Django apps
+│   └── users/                # Built-in user app with JWT auth
+├── manage.py
+├── venv/
+└── blacksmith.config.json
+```
+
+### Frontend Only (`--type frontend`)
+
+```
+my-app/
+├── src/
+│   ├── api/                  # API hooks
+│   ├── pages/                # Page components
+│   ├── router/               # React Router
+│   └── shared/               # Shared components, hooks, utils
+├── package.json
+└── blacksmith.config.json
 ```
 
 ## Tech Stack
@@ -111,33 +141,30 @@ my-app/
 - **React Router v7** for client-side routing
 - **TanStack React Query** for server state management
 - **React Hook Form** + **Zod** for forms and validation
-- **Tailwind CSS** for styling
+- **Chakra UI** for components
 - **@hey-api/openapi-ts** for API client generation
 
 ## Resource Scaffolding
 
-The `make:resource` command generates a complete CRUD feature across both backend and frontend:
+The `make:resource` command generates files based on your project type:
 
 ```bash
 blacksmith make:resource BlogPost
 ```
 
-**Backend** (in `backend/apps/blog_posts/`):
-- `models.py` — Django model
-- `serializers.py` — DRF serializer
-- `views.py` — DRF viewset
-- `urls.py` — URL configuration
-- `admin.py` — Admin registration
-- `tests.py` — Test scaffold
+**Backend** (fullstack and backend projects):
+- `apps/blog_posts/` — model, serializer, viewset, urls, admin, tests
+- Automatically registered in `INSTALLED_APPS` and `config/urls.py`
+- Migrations run automatically
 
-**Frontend** (in `frontend/src/features/blog-posts/`):
-- API hooks for list, detail, create, update, delete
-- List and detail page components
-- Create and edit form components
+**Frontend** (fullstack and frontend projects):
+- `src/api/hooks/blog-posts/` — query and mutation hooks
+- `src/pages/blog-posts/` — list and detail pages
+- Routes auto-registered
 
-After scaffolding, run `blacksmith sync` to generate the TypeScript types.
+**Fullstack**: Also runs `blacksmith sync` to generate TypeScript types from the new endpoint.
 
-## OpenAPI Sync
+## OpenAPI Sync (Fullstack Only)
 
 Blacksmith bridges Django and React through OpenAPI:
 
@@ -159,38 +186,7 @@ blacksmith setup:ai
 
 This creates:
 - **CLAUDE.md** — project overview, commands, workflow, and conventions
-- **.claude/skills/** — detailed skill files covering Django, DRF, React, React Query, forms, authentication, and more
-
-## Theme Presets
-
-Choose a theme color during project creation:
-
-```bash
-blacksmith init my-app --theme-color violet
-```
-
-Available presets: `default`, `blue`, `green`, `violet`, `red`, `neutral`
-
-## Ejecting
-
-If you outgrow Blacksmith or want full control, eject cleanly:
-
-```bash
-blacksmith eject
-```
-
-This removes the Blacksmith dependency and configuration, leaving you with a standard Django + React project that runs independently.
-
-## Development Workflow
-
-A typical workflow looks like:
-
-1. Create a resource: `blacksmith make:resource Product`
-2. Customize the Django model in `backend/apps/products/models.py`
-3. Update the serializer in `backend/apps/products/serializers.py`
-4. Run `blacksmith sync` to regenerate the frontend API client
-5. Build the UI in `frontend/src/features/products/`
-6. Check the API docs at `http://localhost:8000/api/docs/`
+- **.claude/skills/** — detailed skill files tailored to your project type (Django skills for backend, React skills for frontend, all for fullstack)
 
 ## Configuration
 
@@ -200,10 +196,25 @@ Project settings live in `blacksmith.config.json`:
 {
   "name": "my-app",
   "version": "0.1.0",
+  "type": "fullstack",
   "backend": { "port": 8000 },
   "frontend": { "port": 5173 }
 }
 ```
+
+- `type` — `"fullstack"`, `"backend"`, or `"frontend"`
+- `backend` — present for fullstack and backend projects
+- `frontend` — present for fullstack and frontend projects
+
+## Ejecting
+
+If you outgrow Blacksmith or want full control, eject cleanly:
+
+```bash
+blacksmith eject
+```
+
+This removes the Blacksmith dependency and configuration, leaving you with a standard project that runs independently.
 
 ## License
 

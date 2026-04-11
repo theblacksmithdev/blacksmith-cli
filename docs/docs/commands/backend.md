@@ -4,6 +4,10 @@ sidebar_position: 8
 
 # blacksmith backend
 
+:::info Requires Backend
+This command is only available for fullstack and backend-only projects. Frontend-only projects will receive an error.
+:::
+
 Run Django management commands through the project's virtual environment.
 
 ## Usage

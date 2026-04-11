@@ -6,6 +6,10 @@ sidebar_position: 3
 
 Synchronize the OpenAPI schema between Django backend and React frontend.
 
+:::info Fullstack Only
+This command is only available for fullstack projects. Backend-only and frontend-only projects will receive an error.
+:::
+
 ## Usage
 
 ```bash

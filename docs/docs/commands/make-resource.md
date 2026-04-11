@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # blacksmith make:resource
 
-Generate a complete CRUD resource across both Django backend and React frontend.
+Generate a CRUD resource. The generated files depend on your project type.
 
 ## Usage
 
@@ -20,9 +20,9 @@ blacksmith make:resource <ResourceName>
 
 ## What It Generates
 
-### Backend Files
+### Backend Files (fullstack and backend projects)
 
-Created in `backend/apps/<resource_name>/`:
+Created in `apps/<resource_name>/` (at project root for backend-only, in `backend/` for fullstack):
 
 | File | Description |
 |------|-------------|
@@ -32,12 +32,10 @@ Created in `backend/apps/<resource_name>/`:
 | `urls.py` | URL router configuration |
 | `admin.py` | Django admin site registration |
 | `tests.py` | Test scaffold |
-| `apps.py` | Django app configuration |
-| `__init__.py` | Python package init |
 
-### API Hooks
+### API Hooks (fullstack and frontend projects)
 
-Created in `frontend/src/api/hooks/<resource_name>/`:
+Created in `src/api/hooks/<resource-name>/`:
 
 | File | Description |
 |------|-------------|
@@ -45,31 +43,28 @@ Created in `frontend/src/api/hooks/<resource_name>/`:
 | `use-<resources>-query.ts` | List query with pagination, search, and ordering |
 | `use-<resource>-mutations.ts` | Create, update, and delete with cache invalidation |
 
-### Frontend Pages
+### Frontend Pages (fullstack and frontend projects)
 
-Created in `frontend/src/pages/<resource_name>/`:
+Created in `src/pages/<resource-name>/`:
 
 | File | Description |
 |------|-------------|
 | List page | Paginated list of resources |
 | Detail page | Single resource view |
-| Create form | Form for creating new resources |
-| Edit form | Form for editing existing resources |
 | Card component | Resource card for list views |
-| `hooks/index.ts` | Placeholder for page-local UI hooks |
 
 ### Automatic Integration
 
-The command also:
+The command also performs these steps (where applicable to the project type):
 
-1. **Registers the Django app** in `config/settings/base.py`
-2. **Adds API URLs** to `config/urls.py`
-3. **Creates database migrations** via `manage.py makemigrations`
-4. **Runs migrations** via `manage.py migrate`
-5. **Syncs the OpenAPI schema** to generate new TypeScript types and hooks
-6. **Creates API hooks** in `frontend/src/api/hooks/<resource>/`
-7. **Registers frontend routes** in React Router
-8. **Adds the route path** to the paths enum
+| Step | Fullstack | Backend | Frontend |
+|------|-----------|---------|----------|
+| Register Django app in settings | Yes | Yes | — |
+| Add API URLs to `config/urls.py` | Yes | Yes | — |
+| Run `makemigrations` + `migrate` | Yes | Yes | — |
+| Sync OpenAPI schema | Yes | — | — |
+| Register frontend routes | Yes | — | Yes |
+| Add path to `Path` enum | Yes | — | Yes |
 
 ## Name Conventions
 
@@ -79,20 +74,14 @@ Blacksmith automatically handles name casing across all generated files:
 |-------|-------|---------|
 | `BlogPost` | PascalCase (model, component names) | `class BlogPost` |
 | `blogPost` | camelCase (variables, hooks) | `const blogPost = ...` |
-| `blog_post` | snake_case (Django app, URLs) | `apps/blog_post/` |
-| `blog-post` | kebab-case (route paths) | `/blog-posts` |
-| `blog posts` | Plural display name | `"Blog Posts"` |
+| `blog_posts` | snake_case (Django app, URLs) | `apps/blog_posts/` |
+| `blog-posts` | kebab-case (route paths, directories) | `/blog-posts` |
 
 ## Examples
 
 ```bash
-# Create a Product resource
 blacksmith make:resource Product
-
-# Create a BlogPost resource
 blacksmith make:resource BlogPost
-
-# Create a UserProfile resource
 blacksmith make:resource UserProfile
 ```
 
@@ -103,7 +92,7 @@ After the resource is generated, you'll typically want to:
 1. **Customize the model** — Add your specific fields
 2. **Update the serializer** — Match the new model fields
 3. **Run migrations** — `blacksmith backend makemigrations && blacksmith backend migrate`
-4. **Sync types** — `blacksmith sync` (or let `blacksmith dev` handle it)
+4. **Sync types** (fullstack) — `blacksmith sync` (or let `blacksmith dev` handle it)
 5. **Customize the frontend** — Update the generated pages and forms
 
 See [Creating Resources Guide](/docs/guides/creating-resources) for a detailed walkthrough.

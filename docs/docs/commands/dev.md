@@ -16,36 +16,27 @@ Run this command from your project root (the directory containing `blacksmith.co
 
 ## What It Does
 
-The `dev` command starts three processes concurrently:
+The processes started depend on your project type:
 
-### 1. Django Development Server
+### Fullstack Projects
 
-Starts the Django backend using the project's virtual environment:
+Starts three processes concurrently:
 
-```
-http://localhost:8000
-```
+1. **Django Development Server** — API backend at `http://localhost:<backend-port>`
+2. **Vite Development Server** — React frontend with HMR at `http://localhost:<frontend-port>`
+3. **OpenAPI File Watcher** — Watches `.py` files and auto-syncs TypeScript types on changes
 
-API endpoints are available at `/api/` and Swagger documentation at `/api/docs/`.
+### Backend-Only Projects
 
-### 2. Vite Development Server
+Starts one process:
 
-Starts the React frontend with Hot Module Replacement (HMR):
+1. **Django Development Server** — API backend at `http://localhost:<backend-port>`
 
-```
-http://localhost:5173
-```
+### Frontend-Only Projects
 
-Changes to React components are reflected instantly in the browser.
+Starts one process:
 
-### 3. OpenAPI File Watcher
-
-Watches for changes in backend Python files (`.py`) using `chokidar`. When a change is detected, it automatically:
-
-1. Generates a fresh OpenAPI schema from Django
-2. Regenerates TypeScript types, Zod schemas, API client, and React Query hooks
-
-This means editing a Django serializer immediately updates your frontend types.
+1. **Vite Development Server** — React frontend with HMR at `http://localhost:<frontend-port>`
 
 ## Port Detection
 
@@ -53,7 +44,7 @@ Blacksmith automatically detects if the configured ports are in use and finds av
 
 ## Stopping the Server
 
-Press `Ctrl+C` to gracefully stop all three processes.
+Press `Ctrl+C` to gracefully stop all processes.
 
 ## Troubleshooting
 
@@ -70,9 +61,9 @@ If you see port conflict errors, either stop the process using the port or confi
 
 ### Python Virtual Environment Not Found
 
-Ensure you've run `blacksmith init` first, which creates the virtual environment at `backend/venv/`.
+Ensure you've run `blacksmith init` first, which creates the virtual environment at `venv/` in the backend directory.
 
-### Sync Errors
+### Sync Errors (Fullstack Only)
 
 If the OpenAPI sync fails during development, you can manually trigger it:
 

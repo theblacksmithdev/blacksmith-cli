@@ -4,6 +4,10 @@ sidebar_position: 9
 
 # blacksmith frontend
 
+:::info Requires Frontend
+This command is only available for fullstack and frontend-only projects. Backend-only projects will receive an error.
+:::
+
 Run npm commands in the frontend directory.
 
 ## Usage

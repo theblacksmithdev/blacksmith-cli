@@ -4,7 +4,7 @@ sidebar_position: 6
 
 # blacksmith eject
 
-Remove Blacksmith CLI dependency and convert to a standalone Django + React project.
+Remove Blacksmith CLI dependency and convert to a standalone project. The post-eject instructions are tailored to your project type (fullstack, backend-only, or frontend-only).
 
 ## Usage
 

@@ -4,13 +4,13 @@ sidebar_position: 3
 
 # Prerequisites
 
-Blacksmith CLI requires a few tools to be installed on your system before you can create and develop projects.
+Blacksmith CLI requires a few tools to be installed on your system. The exact requirements depend on your project type.
 
-## Required
+## Required for All Projects
 
 ### Node.js (>= 20.5.0)
 
-Node.js is required to run the Blacksmith CLI itself and to build the React frontend.
+Node.js is required to run the Blacksmith CLI itself and for frontend projects.
 
 ```bash
 # Check your version
@@ -19,9 +19,9 @@ node --version
 # Should output v20.5.0 or higher
 ```
 
-### Python 3
+### Python 3 (Backend and Fullstack Projects)
 
-Python is required for the Django backend. Blacksmith creates a virtual environment for each project.
+Python is required for projects that include a Django backend. Blacksmith creates a virtual environment for each project. Not needed for frontend-only projects.
 
 ```bash
 # Check your version
