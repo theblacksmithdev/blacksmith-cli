@@ -25,6 +25,7 @@ program
 program
   .command('init')
   .argument('[name]', 'Project name')
+  .option('--type <type>', 'Project type: fullstack, backend, or frontend (default: fullstack)')
   .option('--ai', 'Set up AI development skills and documentation (CLAUDE.md)')
   .option('--no-chakra-ui-skill', 'Disable Chakra UI skill when using --ai')
   .option('-b, --backend-port <port>', 'Django backend port (default: 8000)')

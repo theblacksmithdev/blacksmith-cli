@@ -10,6 +10,7 @@ const pathMocks = vi.hoisted(() => ({
   findProjectRoot: vi.fn(),
   getBackendDir: vi.fn(),
   getFrontendDir: vi.fn(),
+  getProjectType: vi.fn(() => 'fullstack'),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 

@@ -2,6 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { log, spinner } from '../utils/logger.js'
 import type { Skill, SkillContext } from '../skills/types.js'
+import type { ProjectType } from '../utils/paths.js'
 import { coreRulesSkill } from '../skills/core-rules.js'
 import { projectOverviewSkill } from '../skills/project-overview.js'
 import { djangoSkill } from '../skills/django.js'
@@ -25,33 +26,47 @@ interface AiSetupOptions {
   projectDir: string
   projectName: string
   includeChakraUiSkill: boolean
+  projectType?: ProjectType
 }
 
-export async function setupAiDev({ projectDir, projectName, includeChakraUiSkill }: AiSetupOptions) {
+export async function setupAiDev({ projectDir, projectName, includeChakraUiSkill, projectType = 'fullstack' }: AiSetupOptions) {
   const aiSpinner = spinner('Setting up AI development environment...')
+
+  const needsBackend = projectType === 'fullstack' || projectType === 'backend'
+  const needsFrontend = projectType === 'fullstack' || projectType === 'frontend'
 
   try {
     const skills: Skill[] = [
       coreRulesSkill,
       projectOverviewSkill,
-      djangoSkill,
-      djangoRestAdvancedSkill,
-      apiDocumentationSkill,
-      reactSkill,
-      reactQuerySkill,
-      pageStructureSkill,
     ]
 
-    if (includeChakraUiSkill) {
-      skills.push(chakraUiReactSkill)
-      skills.push(chakraUiFormsSkill)
-      skills.push(chakraUiAuthSkill)
-      skills.push(blacksmithHooksSkill)
-      skills.push(uiDesignSkill)
+    // Backend skills
+    if (needsBackend) {
+      skills.push(djangoSkill)
+      skills.push(djangoRestAdvancedSkill)
+      skills.push(apiDocumentationSkill)
     }
 
+    // Frontend skills
+    if (needsFrontend) {
+      skills.push(reactSkill)
+      skills.push(reactQuerySkill)
+      skills.push(pageStructureSkill)
+
+      if (includeChakraUiSkill) {
+        skills.push(chakraUiReactSkill)
+        skills.push(chakraUiFormsSkill)
+        skills.push(chakraUiAuthSkill)
+        skills.push(blacksmithHooksSkill)
+        skills.push(uiDesignSkill)
+      }
+
+      skills.push(frontendTestingSkill)
+    }
+
+    // Shared skills
     skills.push(blacksmithCliSkill)
-    skills.push(frontendTestingSkill)
     skills.push(programmingParadigmsSkill)
     skills.push(cleanCodeSkill)
     skills.push(aiGuidelinesSkill)

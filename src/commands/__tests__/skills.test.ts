@@ -9,6 +9,7 @@ vi.mock('../../utils/logger.js', () => createLoggerMock())
 const pathMocks = vi.hoisted(() => ({
   findProjectRoot: vi.fn(),
   loadConfig: vi.fn(),
+  getProjectType: vi.fn(() => 'fullstack'),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 
@@ -32,6 +33,7 @@ describe('setupSkills', () => {
       projectDir: '/project',
       projectName: 'my-project',
       includeChakraUiSkill: true,
+      projectType: 'fullstack',
     })
     expect(log.success).toHaveBeenCalled()
   })

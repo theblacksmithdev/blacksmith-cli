@@ -145,9 +145,14 @@ if (errorMessage) {
 
 ### Creating Resource Hook Files
 
-When building hooks for a resource, create two files:
+> **RULE: All API hooks live in \`src/api/hooks/<resource>/\` — never in page-level \`hooks/\` folders.**
+> Page-level \`hooks/\` are for UI logic only (form state, filters, pagination). API data access is centralized in \`src/api/hooks/\`.
 
-**\`use-<resources>.ts\`** — List query hook:
+When building hooks for a resource, create a folder under \`src/api/hooks/\` with these files:
+
+**\`src/api/hooks/<resource>/index.ts\`** — Re-exports all hooks from the folder.
+
+**\`src/api/hooks/<resource>/use-<resources>.ts\`** — List query hook:
 \`\`\`tsx
 import { useApiQuery } from '@/shared/hooks/use-api-query'
 import { postsListOptions } from '@/api/generated/@tanstack/react-query.gen'
@@ -177,7 +182,7 @@ export function usePosts(params: UsePostsParams = {}) {
 }
 \`\`\`
 
-**\`use-<resource>-mutations.ts\`** — Create/update/delete hooks:
+**\`src/api/hooks/<resource>/use-<resource>-mutations.ts\`** — Create/update/delete hooks:
 \`\`\`tsx
 import { useApiMutation } from '@/shared/hooks/use-api-mutation'
 import {
@@ -218,7 +223,7 @@ export function useDeletePost() {
 1. **Never use raw \`useQuery\` or \`useMutation\`** — always go through \`useApiQuery\` / \`useApiMutation\`
 2. **Never manage API error state with \`useState\`** — error state is derived from TanStack Query's \`error\` field
 3. **Always pass \`invalidateKeys\`** on mutations that modify data — ensures the UI stays in sync
-4. **Use generated options/mutations** from \`@/api/generated/@tanstack/react-query.gen\` — never write \`queryFn\` manually
+4. **Always prefer generated API client code** — use the generated options, mutations, types, and query keys from \`@/api/generated/\`. Check \`@/api/generated/@tanstack/react-query.gen\` for available query options and mutations before writing anything manually. Only write a manual \`queryFn\` as a last resort when no generated code exists for the endpoint (e.g. the backend endpoint hasn't been synced yet)
 5. **Use \`select\`** to reshape API responses at the hook level, not in components
 6. **Use \`enabled\`** for conditional queries (e.g. waiting for an ID from URL params)
 7. **Spread generated options first** (\`...postsListOptions()\`), then add overrides — this preserves the generated \`queryKey\` and \`queryFn\`

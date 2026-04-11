@@ -1,6 +1,6 @@
 import path from 'node:path'
 import fs from 'node:fs'
-import { findProjectRoot, getBackendDir, getFrontendDir, getTemplatesDir } from '../utils/paths.js'
+import { findProjectRoot, getBackendDir, getFrontendDir, getTemplatesDir, hasBackend, hasFrontend } from '../utils/paths.js'
 import { generateNames } from '../utils/names.js'
 import { renderDirectory, appendAfterMarker, insertBeforeMarker } from '../utils/template.js'
 import { exec, execPython } from '../utils/exec.js'
@@ -16,177 +16,197 @@ export async function makeResource(name: string) {
   }
 
   const names = generateNames(name)
-  const backendDir = getBackendDir(root)
-  const frontendDir = getFrontendDir(root)
   const templatesDir = getTemplatesDir()
-
-  const backendAppDir = path.join(backendDir, 'apps', names.snakes)
-
-  // Check if backend resource already exists
-  if (fs.existsSync(backendAppDir)) {
-    log.error(`Backend app "${names.snakes}" already exists.`)
-    process.exit(1)
-  }
-
-  const frontendPageDir = path.join(frontendDir, 'src', 'pages', names.kebabs)
-
-  if (fs.existsSync(frontendPageDir)) {
-    log.error(`Frontend page "${names.kebabs}" already exists.`)
-    process.exit(1)
-  }
+  const projectHasBackend = hasBackend(root)
+  const projectHasFrontend = hasFrontend(root)
 
   const context = { ...names, projectName: name }
 
-  // 1. Generate backend app
-  const backendSpinner = spinner(`Creating backend app: apps/${names.snakes}/`)
-  try {
-    renderDirectory(
-      path.join(templatesDir, 'resource', 'backend'),
-      backendAppDir,
-      context
-    )
-    backendSpinner.succeed(`Created backend/apps/${names.snakes}/`)
-  } catch (error: any) {
-    backendSpinner.fail('Failed to create backend app')
-    log.error(error.message)
-    process.exit(1)
+  // Check if resources already exist
+  if (projectHasBackend) {
+    const backendDir = getBackendDir(root)
+    const backendAppDir = path.join(backendDir, 'apps', names.snakes)
+    if (fs.existsSync(backendAppDir)) {
+      log.error(`Backend app "${names.snakes}" already exists.`)
+      process.exit(1)
+    }
   }
 
-  // 2. Register app in settings
-  const registerSpinner = spinner('Registering app in Django settings...')
-  try {
-    const settingsPath = path.join(backendDir, 'config', 'settings', 'base.py')
-    appendAfterMarker(
-      settingsPath,
-      '# blacksmith:apps',
-      `    'apps.${names.snakes}',`
-    )
-    registerSpinner.succeed('Registered in INSTALLED_APPS')
-  } catch (error: any) {
-    registerSpinner.fail('Failed to register app in settings')
-    log.error(error.message)
-    process.exit(1)
+  if (projectHasFrontend) {
+    const frontendDir = getFrontendDir(root)
+    const frontendPageDir = path.join(frontendDir, 'src', 'pages', names.kebabs)
+    if (fs.existsSync(frontendPageDir)) {
+      log.error(`Frontend page "${names.kebabs}" already exists.`)
+      process.exit(1)
+    }
   }
 
-  // 3. Register URLs
-  const urlSpinner = spinner('Registering API URLs...')
-  try {
-    const urlsPath = path.join(backendDir, 'config', 'urls.py')
-    insertBeforeMarker(
-      urlsPath,
-      '# blacksmith:urls',
-      `    path('api/${names.snakes}/', include('apps.${names.snakes}.urls')),`
-    )
-    urlSpinner.succeed('Registered API URLs')
-  } catch (error: any) {
-    urlSpinner.fail('Failed to register URLs')
-    log.error(error.message)
-    process.exit(1)
-  }
+  // Backend resource generation
+  if (projectHasBackend) {
+    const backendDir = getBackendDir(root)
+    const backendAppDir = path.join(backendDir, 'apps', names.snakes)
 
-  // 4. Run migrations
-  const migrateSpinner = spinner('Running migrations...')
-  try {
-    await execPython(['manage.py', 'makemigrations', names.snakes], backendDir, true)
-    await execPython(['manage.py', 'migrate'], backendDir, true)
-    migrateSpinner.succeed('Migrations complete')
-  } catch (error: any) {
-    migrateSpinner.fail('Migration failed')
-    log.error(error.message)
-    process.exit(1)
-  }
-
-  // 5. Sync OpenAPI (generate schema offline, no running Django needed)
-  const syncSpinner = spinner('Syncing OpenAPI schema...')
-  try {
-    const schemaPath = path.join(frontendDir, '_schema.yml')
-    await execPython(['manage.py', 'spectacular', '--file', schemaPath], backendDir, true)
-
-    const configPath = path.join(frontendDir, 'openapi-ts.config.ts')
-    const configBackup = fs.readFileSync(configPath, 'utf-8')
-    const configWithFile = configBackup.replace(
-      /path:\s*['"]http[^'"]+['"]/,
-      `path: './_schema.yml'`
-    )
-    fs.writeFileSync(configPath, configWithFile, 'utf-8')
-
+    // 1. Generate backend app
+    const backendSpinner = spinner(`Creating backend app: apps/${names.snakes}/`)
     try {
-      await exec(process.execPath, [path.join(frontendDir, 'node_modules', '.bin', 'openapi-ts')], {
-        cwd: frontendDir,
-        silent: true,
-      })
-    } finally {
-      fs.writeFileSync(configPath, configBackup, 'utf-8')
-      if (fs.existsSync(schemaPath)) fs.unlinkSync(schemaPath)
+      renderDirectory(
+        path.join(templatesDir, 'resource', 'backend'),
+        backendAppDir,
+        context
+      )
+      backendSpinner.succeed(`Created apps/${names.snakes}/`)
+    } catch (error: any) {
+      backendSpinner.fail('Failed to create backend app')
+      log.error(error.message)
+      process.exit(1)
     }
 
-    syncSpinner.succeed('Frontend types and hooks regenerated')
-  } catch {
-    syncSpinner.warn('Could not sync OpenAPI. Run "blacksmith sync" manually.')
+    // 2. Register app in settings
+    const registerSpinner = spinner('Registering app in Django settings...')
+    try {
+      const settingsPath = path.join(backendDir, 'config', 'settings', 'base.py')
+      appendAfterMarker(
+        settingsPath,
+        '# blacksmith:apps',
+        `    'apps.${names.snakes}',`
+      )
+      registerSpinner.succeed('Registered in INSTALLED_APPS')
+    } catch (error: any) {
+      registerSpinner.fail('Failed to register app in settings')
+      log.error(error.message)
+      process.exit(1)
+    }
+
+    // 3. Register URLs
+    const urlSpinner = spinner('Registering API URLs...')
+    try {
+      const urlsPath = path.join(backendDir, 'config', 'urls.py')
+      insertBeforeMarker(
+        urlsPath,
+        '# blacksmith:urls',
+        `    path('api/${names.snakes}/', include('apps.${names.snakes}.urls')),`
+      )
+      urlSpinner.succeed('Registered API URLs')
+    } catch (error: any) {
+      urlSpinner.fail('Failed to register URLs')
+      log.error(error.message)
+      process.exit(1)
+    }
+
+    // 4. Run migrations
+    const migrateSpinner = spinner('Running migrations...')
+    try {
+      await execPython(['manage.py', 'makemigrations', names.snakes], backendDir, true)
+      await execPython(['manage.py', 'migrate'], backendDir, true)
+      migrateSpinner.succeed('Migrations complete')
+    } catch (error: any) {
+      migrateSpinner.fail('Migration failed')
+      log.error(error.message)
+      process.exit(1)
+    }
   }
 
-  // 6. Generate API hooks
-  const apiHooksDir = path.join(frontendDir, 'src', 'api', 'hooks', names.kebabs)
-  const apiHooksSpinner = spinner(`Creating API hooks: api/hooks/${names.kebabs}/`)
-  try {
-    renderDirectory(
-      path.join(templatesDir, 'resource', 'api-hooks'),
-      apiHooksDir,
-      context
-    )
-    apiHooksSpinner.succeed(`Created frontend/src/api/hooks/${names.kebabs}/`)
-  } catch (error: any) {
-    apiHooksSpinner.fail('Failed to create API hooks')
-    log.error(error.message)
-    process.exit(1)
+  // 5. Sync OpenAPI (only for fullstack projects)
+  if (projectHasBackend && projectHasFrontend) {
+    const backendDir = getBackendDir(root)
+    const frontendDir = getFrontendDir(root)
+    const syncSpinner = spinner('Syncing OpenAPI schema...')
+    try {
+      const schemaPath = path.join(frontendDir, '_schema.yml')
+      await execPython(['manage.py', 'spectacular', '--file', schemaPath], backendDir, true)
+
+      const configPath = path.join(frontendDir, 'openapi-ts.config.ts')
+      const configBackup = fs.readFileSync(configPath, 'utf-8')
+      const configWithFile = configBackup.replace(
+        /path:\s*['"]http[^'"]+['"]/,
+        `path: './_schema.yml'`
+      )
+      fs.writeFileSync(configPath, configWithFile, 'utf-8')
+
+      try {
+        await exec(process.execPath, [path.join(frontendDir, 'node_modules', '.bin', 'openapi-ts')], {
+          cwd: frontendDir,
+          silent: true,
+        })
+      } finally {
+        fs.writeFileSync(configPath, configBackup, 'utf-8')
+        if (fs.existsSync(schemaPath)) fs.unlinkSync(schemaPath)
+      }
+
+      syncSpinner.succeed('Frontend types and hooks regenerated')
+    } catch {
+      syncSpinner.warn('Could not sync OpenAPI. Run "blacksmith sync" manually.')
+    }
   }
 
-  // 7. Generate frontend page
-  const frontendSpinner = spinner(`Creating frontend page: pages/${names.kebabs}/`)
-  try {
-    renderDirectory(
-      path.join(templatesDir, 'resource', 'pages'),
-      frontendPageDir,
-      context
-    )
-    frontendSpinner.succeed(`Created frontend/src/pages/${names.kebabs}/`)
-  } catch (error: any) {
-    frontendSpinner.fail('Failed to create frontend page')
-    log.error(error.message)
-    process.exit(1)
-  }
+  // Frontend resource generation
+  if (projectHasFrontend) {
+    const frontendDir = getFrontendDir(root)
 
-  // 8. Register path in paths enum
-  const pathSpinner = spinner('Registering route path...')
-  try {
-    const pathsFile = path.join(frontendDir, 'src', 'router', 'paths.ts')
-    insertBeforeMarker(
-      pathsFile,
-      '// blacksmith:path',
-      `  ${names.Names} = '/${names.kebabs}',`
-    )
-    pathSpinner.succeed('Registered route path')
-  } catch {
-    pathSpinner.warn('Could not auto-register path. Add it manually to frontend/src/router/paths.ts')
-  }
+    // 6. Generate API hooks
+    const apiHooksDir = path.join(frontendDir, 'src', 'api', 'hooks', names.kebabs)
+    const apiHooksSpinner = spinner(`Creating API hooks: api/hooks/${names.kebabs}/`)
+    try {
+      renderDirectory(
+        path.join(templatesDir, 'resource', 'api-hooks'),
+        apiHooksDir,
+        context
+      )
+      apiHooksSpinner.succeed(`Created src/api/hooks/${names.kebabs}/`)
+    } catch (error: any) {
+      apiHooksSpinner.fail('Failed to create API hooks')
+      log.error(error.message)
+      process.exit(1)
+    }
 
-  // 9. Register routes in frontend router
-  const routeSpinner = spinner('Registering frontend routes...')
-  try {
-    const routesPath = path.join(frontendDir, 'src', 'router', 'routes.tsx')
-    insertBeforeMarker(
-      routesPath,
-      '// blacksmith:import',
-      `import { ${names.names}Routes } from '@/pages/${names.kebabs}'`
-    )
-    insertBeforeMarker(
-      routesPath,
-      '// blacksmith:routes',
-      `  ...${names.names}Routes,`
-    )
-    routeSpinner.succeed('Registered frontend routes')
-  } catch {
-    routeSpinner.warn('Could not auto-register routes. Add them manually to frontend/src/router/routes.tsx')
+    // 7. Generate frontend page
+    const frontendPageDir = path.join(frontendDir, 'src', 'pages', names.kebabs)
+    const frontendSpinner = spinner(`Creating frontend page: pages/${names.kebabs}/`)
+    try {
+      renderDirectory(
+        path.join(templatesDir, 'resource', 'pages'),
+        frontendPageDir,
+        context
+      )
+      frontendSpinner.succeed(`Created src/pages/${names.kebabs}/`)
+    } catch (error: any) {
+      frontendSpinner.fail('Failed to create frontend page')
+      log.error(error.message)
+      process.exit(1)
+    }
+
+    // 8. Register path in paths enum
+    const pathSpinner = spinner('Registering route path...')
+    try {
+      const pathsFile = path.join(frontendDir, 'src', 'router', 'paths.ts')
+      insertBeforeMarker(
+        pathsFile,
+        '// blacksmith:path',
+        `  ${names.Names} = '/${names.kebabs}',`
+      )
+      pathSpinner.succeed('Registered route path')
+    } catch {
+      pathSpinner.warn('Could not auto-register path. Add it manually to src/router/paths.ts')
+    }
+
+    // 9. Register routes in frontend router
+    const routeSpinner = spinner('Registering frontend routes...')
+    try {
+      const routesPath = path.join(frontendDir, 'src', 'router', 'routes.tsx')
+      insertBeforeMarker(
+        routesPath,
+        '// blacksmith:import',
+        `import { ${names.names}Routes } from '@/pages/${names.kebabs}'`
+      )
+      insertBeforeMarker(
+        routesPath,
+        '// blacksmith:routes',
+        `  ...${names.names}Routes,`
+      )
+      routeSpinner.succeed('Registered frontend routes')
+    } catch {
+      routeSpinner.warn('Could not auto-register routes. Add them manually to src/router/routes.tsx')
+    }
   }
 
   // 10. Print summary

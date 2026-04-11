@@ -40,11 +40,39 @@ export function findProjectRoot(startDir?: string): string {
 }
 
 /**
+ * Get the project type from config (defaults to 'fullstack' for backward compatibility)
+ */
+export function getProjectType(projectRoot?: string): ProjectType {
+  const config = loadConfig(projectRoot)
+  return config.type || 'fullstack'
+}
+
+/**
+ * Check if the project has a backend
+ */
+export function hasBackend(projectRoot?: string): boolean {
+  const type = getProjectType(projectRoot)
+  return type === 'fullstack' || type === 'backend'
+}
+
+/**
+ * Check if the project has a frontend
+ */
+export function hasFrontend(projectRoot?: string): boolean {
+  const type = getProjectType(projectRoot)
+  return type === 'fullstack' || type === 'frontend'
+}
+
+/**
  * Get the backend directory of a Blacksmith project
  */
 export function getBackendDir(projectRoot?: string): string {
   const root = projectRoot || findProjectRoot()
-  return path.join(root, 'backend')
+  const type = getProjectType(root)
+  if (type === 'frontend') {
+    throw new Error('This is a frontend-only project. There is no backend directory.')
+  }
+  return type === 'backend' ? root : path.join(root, 'backend')
 }
 
 /**
@@ -52,14 +80,21 @@ export function getBackendDir(projectRoot?: string): string {
  */
 export function getFrontendDir(projectRoot?: string): string {
   const root = projectRoot || findProjectRoot()
-  return path.join(root, 'frontend')
+  const type = getProjectType(root)
+  if (type === 'backend') {
+    throw new Error('This is a backend-only project. There is no frontend directory.')
+  }
+  return type === 'frontend' ? root : path.join(root, 'frontend')
 }
+
+export type ProjectType = 'fullstack' | 'backend' | 'frontend'
 
 export interface BlacksmithConfig {
   name: string
   version: string
-  backend: { port: number }
-  frontend: { port: number }
+  type?: ProjectType
+  backend?: { port: number }
+  frontend?: { port: number }
 }
 
 export function loadConfig(projectRoot?: string): BlacksmithConfig {

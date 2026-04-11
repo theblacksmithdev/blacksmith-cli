@@ -37,6 +37,11 @@ export const djangoSkill: Skill = {
 - Override \`get_queryset()\` to scope data to the current user when needed
 - Override \`perform_create()\` to inject \`request.user\` or other context into the serializer save
 
+### Sync After Backend Changes (Fullstack Projects)
+> **RULE: After creating or modifying any endpoint (views, serializers, URLs, or model fields that affect the API), run \`blacksmith sync\` from the project root before writing frontend code that uses the endpoint.**
+>
+> This regenerates the TypeScript types, query options, mutations, and Zod schemas in \`frontend/src/api/generated/\`. Without syncing, the frontend will be working against stale or missing type definitions.
+
 ### URLs
 - Each app has its own \`urls.py\` with a \`DefaultRouter\`
 - Register viewsets on the router: \`router.register('resources', ResourceViewSet)\`

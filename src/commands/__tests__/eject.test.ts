@@ -8,6 +8,7 @@ vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
   findProjectRoot: vi.fn(),
+  loadConfig: vi.fn(() => ({ type: 'fullstack' })),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 

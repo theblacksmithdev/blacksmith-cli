@@ -39,14 +39,25 @@ export const coreRulesSkill: Skill = {
 - When adding a new page, add its path to the enum before \`// blacksmith:path\`
 - Use \`buildPath(Path.ResetPassword, { token })\` for dynamic segments
 
-### 5. Follow the Page/Feature Folder Structure
+### 5. API Hooks Live in \`src/api/hooks/\`
+- All API data access hooks go in \`src/api/hooks/<resource>/\` — never in page-level \`hooks/\` folders
+- Each resource gets a folder with \`use-<resources>.ts\` (queries), \`use-<resource>-mutations.ts\` (mutations), and \`index.ts\` (re-exports)
+- Import as: \`import { usePosts, useCreatePost } from '@/api/hooks/posts'\`
+- See the \`react-query\` skill for full conventions
+
+### 6. Use Generated API Client Code
+- Always check \`src/api/generated/\` first before writing any API calls — use the generated types, query options, mutations, and query keys
+- Only write manual API client code when no generated code exists for the endpoint (e.g. the endpoint hasn't been synced yet)
+- **In fullstack projects:** after creating or modifying any backend endpoint (views, serializers, URLs), run \`blacksmith sync\` from the project root to regenerate the frontend API client before writing frontend code that consumes it
+
+### 7. Follow the Page/Feature Folder Structure
 \`\`\`
 pages/<page>/
 ├── <page>.tsx         # Thin orchestrator (default export)
 ├── routes.tsx         # RouteObject[] using Path enum
 ├── index.ts           # Re-exports public API
 ├── components/        # Child components
-└── hooks/             # Page-local hooks (UI logic, not API hooks)
+└── hooks/             # Page-local hooks (UI logic only, not API hooks)
 \`\`\`
 - See the \`page-structure\` skill for full conventions
 `

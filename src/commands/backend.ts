@@ -1,4 +1,4 @@
-import { findProjectRoot, getBackendDir } from '../utils/paths.js'
+import { findProjectRoot, getBackendDir, hasBackend } from '../utils/paths.js'
 import { log } from '../utils/logger.js'
 import { execPython } from '../utils/exec.js'
 
@@ -8,6 +8,10 @@ export async function backend(args: string[]) {
     root = findProjectRoot()
   } catch {
     log.error('Not inside a Blacksmith project. Run "blacksmith init <name>" first.')
+    process.exit(1)
+  }
+  if (!hasBackend(root)) {
+    log.error('This is a frontend-only project. The "backend" command is not available.')
     process.exit(1)
   }
   if (args.length === 0) {

@@ -11,6 +11,8 @@ const pathMocks = vi.hoisted(() => ({
   getBackendDir: vi.fn(),
   getFrontendDir: vi.fn(),
   getTemplatesDir: vi.fn(),
+  hasBackend: vi.fn(() => true),
+  hasFrontend: vi.fn(() => true),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 

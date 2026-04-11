@@ -100,18 +100,25 @@ export function banner() {
   console.log()
 }
 
-export function printNextSteps(projectName: string, backendPort = 8000, frontendPort = 5173) {
+export function printNextSteps(projectName: string, projectType: string = 'fullstack', backendPort?: number, frontendPort?: number) {
   log.blank()
   log.success('Project created successfully!')
   log.blank()
   console.log(chalk.bold('  Next steps:'))
   console.log()
   console.log(`  ${chalk.cyan('cd')} ${projectName}`)
-  console.log(`  ${chalk.cyan('blacksmith dev')}        ${chalk.dim('# Start development servers')}`)
+  console.log(`  ${chalk.cyan('blacksmith dev')}        ${chalk.dim('# Start development server' + (projectType === 'fullstack' ? 's' : ''))}`)
   console.log()
-  console.log(chalk.dim(`  Django:   http://localhost:${backendPort}`))
-  console.log(chalk.dim(`  React:    http://localhost:${frontendPort}`))
-  console.log(chalk.dim(`  Swagger:  http://localhost:${backendPort}/api/docs/`))
-  console.log(chalk.dim(`  ReDoc:    http://localhost:${backendPort}/api/redoc/`))
+
+  if (backendPort !== undefined) {
+    console.log(chalk.dim(`  Django:   http://localhost:${backendPort}`))
+    console.log(chalk.dim(`  Swagger:  http://localhost:${backendPort}/api/docs/`))
+    console.log(chalk.dim(`  ReDoc:    http://localhost:${backendPort}/api/redoc/`))
+  }
+
+  if (frontendPort !== undefined) {
+    console.log(chalk.dim(`  React:    http://localhost:${frontendPort}`))
+  }
+
   log.blank()
 }

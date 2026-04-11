@@ -1,6 +1,6 @@
 import path from 'node:path'
 import fs from 'node:fs'
-import { findProjectRoot, getBackendDir, getFrontendDir } from '../utils/paths.js'
+import { findProjectRoot, getBackendDir, getFrontendDir, getProjectType } from '../utils/paths.js'
 import { exec, execPython } from '../utils/exec.js'
 import { log, spinner } from '../utils/logger.js'
 
@@ -10,6 +10,13 @@ export async function sync() {
     root = findProjectRoot()
   } catch {
     log.error('Not inside a Blacksmith project. Run "blacksmith init <name>" first.')
+    process.exit(1)
+  }
+
+  const projectType = getProjectType(root)
+  if (projectType !== 'fullstack') {
+    log.error('The "sync" command is only available for fullstack projects.')
+    log.step('It generates frontend TypeScript types from the Django API schema.')
     process.exit(1)
   }
 

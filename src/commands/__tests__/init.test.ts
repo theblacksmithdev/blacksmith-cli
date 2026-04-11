@@ -74,6 +74,7 @@ describe('init', () => {
     setupSuccessfulInit()
 
     await init('my-app', {
+      type: 'fullstack',
       backendPort: '8000',
       frontendPort: '5173',
       themeColor: 'default',
@@ -97,6 +98,7 @@ describe('init', () => {
 
     await expect(
       init('existing', {
+        type: 'fullstack',
         backendPort: '8000',
         frontendPort: '5173',
         themeColor: 'default',
@@ -115,6 +117,7 @@ describe('init', () => {
 
     await expect(
       init('new-app', {
+        type: 'fullstack',
         backendPort: '8000',
         frontendPort: '5173',
         themeColor: 'default',
@@ -130,6 +133,7 @@ describe('init', () => {
 
     await expect(
       init('new-app', {
+        type: 'fullstack',
         backendPort: '99999',
         frontendPort: '5173',
         themeColor: 'default',
@@ -144,6 +148,7 @@ describe('init', () => {
     setupSuccessfulInit()
 
     await init('my-app', {
+      type: 'fullstack',
       backendPort: '8000',
       frontendPort: '5173',
       themeColor: 'blue',
@@ -169,6 +174,7 @@ describe('init', () => {
     setupSuccessfulInit()
 
     await init('my-app', {
+      type: 'fullstack',
       backendPort: '8000',
       frontendPort: '5173',
       themeColor: 'default',

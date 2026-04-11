@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { useTmpDir } from '../../__tests__/helpers.js'
-import { findProjectRoot, getBackendDir, getFrontendDir, loadConfig, dirExists, fileExists } from '../paths.js'
+import { findProjectRoot, getBackendDir, getFrontendDir, getProjectType, hasBackend, hasFrontend, loadConfig, dirExists, fileExists } from '../paths.js'
 
 describe('findProjectRoot', () => {
   const getTmpDir = useTmpDir()
@@ -26,17 +26,93 @@ describe('findProjectRoot', () => {
   })
 })
 
+describe('getProjectType', () => {
+  const getTmpDir = useTmpDir()
+
+  it('should return "fullstack" when type is not set (backward compat)', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ name: 'test' }))
+    expect(getProjectType(getTmpDir())).toBe('fullstack')
+  })
+
+  it('should return the configured type', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ name: 'test', type: 'backend' }))
+    expect(getProjectType(getTmpDir())).toBe('backend')
+  })
+})
+
+describe('hasBackend', () => {
+  const getTmpDir = useTmpDir()
+
+  it('should return true for fullstack projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'fullstack' }))
+    expect(hasBackend(getTmpDir())).toBe(true)
+  })
+
+  it('should return true for backend projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'backend' }))
+    expect(hasBackend(getTmpDir())).toBe(true)
+  })
+
+  it('should return false for frontend projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'frontend' }))
+    expect(hasBackend(getTmpDir())).toBe(false)
+  })
+})
+
+describe('hasFrontend', () => {
+  const getTmpDir = useTmpDir()
+
+  it('should return true for fullstack projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'fullstack' }))
+    expect(hasFrontend(getTmpDir())).toBe(true)
+  })
+
+  it('should return true for frontend projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'frontend' }))
+    expect(hasFrontend(getTmpDir())).toBe(true)
+  })
+
+  it('should return false for backend projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'backend' }))
+    expect(hasFrontend(getTmpDir())).toBe(false)
+  })
+})
+
 describe('getBackendDir', () => {
-  it('should return backend path relative to project root', () => {
-    const result = getBackendDir('/some/project')
-    expect(result).toBe(path.join('/some/project', 'backend'))
+  const getTmpDir = useTmpDir()
+
+  it('should return backend subdirectory for fullstack projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'fullstack' }))
+    expect(getBackendDir(getTmpDir())).toBe(path.join(getTmpDir(), 'backend'))
+  })
+
+  it('should return project root for backend-only projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'backend' }))
+    expect(getBackendDir(getTmpDir())).toBe(getTmpDir())
+  })
+
+  it('should throw for frontend-only projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'frontend' }))
+    expect(() => getBackendDir(getTmpDir())).toThrow('frontend-only project')
   })
 })
 
 describe('getFrontendDir', () => {
-  it('should return frontend path relative to project root', () => {
-    const result = getFrontendDir('/some/project')
-    expect(result).toBe(path.join('/some/project', 'frontend'))
+  const getTmpDir = useTmpDir()
+
+  it('should return frontend subdirectory for fullstack projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'fullstack' }))
+    expect(getFrontendDir(getTmpDir())).toBe(path.join(getTmpDir(), 'frontend'))
+  })
+
+  it('should return project root for frontend-only projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'frontend' }))
+    expect(getFrontendDir(getTmpDir())).toBe(getTmpDir())
+  })
+
+  it('should throw for backend-only projects', () => {
+    fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ type: 'backend' }))
+    expect(() => getFrontendDir(getTmpDir())).toThrow('backend-only project')
   })
 })
 

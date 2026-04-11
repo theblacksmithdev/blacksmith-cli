@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import { findProjectRoot, loadConfig } from '../utils/paths.js'
+import { findProjectRoot, loadConfig, getProjectType } from '../utils/paths.js'
 import { setupAiDev } from './ai-setup.js'
 import { log } from '../utils/logger.js'
 
@@ -53,6 +53,7 @@ export async function setupSkills(options: SetupOptions) {
     projectDir: root,
     projectName: config.name,
     includeChakraUiSkill: options.chakraUiSkill !== false,
+    projectType: getProjectType(root),
   })
 
   log.blank()
