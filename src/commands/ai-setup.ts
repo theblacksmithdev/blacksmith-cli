@@ -8,6 +8,7 @@ import { projectOverviewSkill } from '../skills/project-overview.js'
 import { djangoSkill } from '../skills/django.js'
 import { djangoRestAdvancedSkill } from '../skills/django-rest-advanced.js'
 import { apiDocumentationSkill } from '../skills/api-documentation.js'
+import { backendModularizationSkill } from '../skills/backend-modularization.js'
 import { reactSkill } from '../skills/react.js'
 import { reactQuerySkill } from '../skills/react-query.js'
 import { pageStructureSkill } from '../skills/page-structure.js'
@@ -18,6 +19,7 @@ import { blacksmithHooksSkill } from '../skills/blacksmith-hooks.js'
 import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
 import { uiDesignSkill } from '../skills/ui-design.js'
 import { programmingParadigmsSkill } from '../skills/programming-paradigms.js'
+import { frontendModularizationSkill } from '../skills/frontend-modularization.js'
 import { frontendTestingSkill } from '../skills/frontend-testing.js'
 import { cleanCodeSkill } from '../skills/clean-code.js'
 import { aiGuidelinesSkill } from '../skills/ai-guidelines.js'
@@ -46,6 +48,7 @@ export async function setupAiDev({ projectDir, projectName, includeChakraUiSkill
       skills.push(djangoSkill)
       skills.push(djangoRestAdvancedSkill)
       skills.push(apiDocumentationSkill)
+      skills.push(backendModularizationSkill)
     }
 
     // Frontend skills
@@ -53,6 +56,7 @@ export async function setupAiDev({ projectDir, projectName, includeChakraUiSkill
       skills.push(reactSkill)
       skills.push(reactQuerySkill)
       skills.push(pageStructureSkill)
+      skills.push(frontendModularizationSkill)
 
       if (includeChakraUiSkill) {
         skills.push(chakraUiReactSkill)

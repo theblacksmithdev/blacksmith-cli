@@ -7,12 +7,14 @@ import { projectOverviewSkill } from '../skills/project-overview.js'
 import { djangoSkill } from '../skills/django.js'
 import { djangoRestAdvancedSkill } from '../skills/django-rest-advanced.js'
 import { apiDocumentationSkill } from '../skills/api-documentation.js'
+import { backendModularizationSkill } from '../skills/backend-modularization.js'
 import { reactSkill } from '../skills/react.js'
 import { chakraUiReactSkill } from '../skills/chakra-ui-react.js'
 import { chakraUiFormsSkill } from '../skills/chakra-ui-forms.js'
 import { chakraUiAuthSkill } from '../skills/chakra-ui-auth.js'
 import { blacksmithHooksSkill } from '../skills/blacksmith-hooks.js'
 import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
+import { frontendModularizationSkill } from '../skills/frontend-modularization.js'
 import { frontendTestingSkill } from '../skills/frontend-testing.js'
 import { cleanCodeSkill } from '../skills/clean-code.js'
 import { aiGuidelinesSkill } from '../skills/ai-guidelines.js'
@@ -23,7 +25,9 @@ const allSkills: Skill[] = [
   djangoSkill,
   djangoRestAdvancedSkill,
   apiDocumentationSkill,
+  backendModularizationSkill,
   reactSkill,
+  frontendModularizationSkill,
   chakraUiReactSkill,
   chakraUiFormsSkill,
   chakraUiAuthSkill,
