@@ -15,12 +15,12 @@ Blacksmith is the CLI that scaffolded and manages this project. It lives outside
 | Command | Description |
 |---|---|
 | \`blacksmith init [name]\` | Create a new project (interactive prompts if no flags) |
-| \`blacksmith dev\` | Start Django + Vite + OpenAPI watcher in parallel |
-| \`blacksmith sync\` | Regenerate frontend API client from Django OpenAPI schema |
-| \`blacksmith make:resource <Name>\` | Scaffold a full CRUD resource across backend and frontend |
-| \`blacksmith build\` | Production build (Vite build + Django collectstatic) |
+| \`blacksmith dev\` | Start development server(s) |
+| \`blacksmith sync\` | Regenerate frontend API client from Django OpenAPI schema (fullstack only) |
+| \`blacksmith make:resource <Name>\` | Scaffold a resource (backend, frontend, or both depending on project type) |
+| \`blacksmith build\` | Production build |
 | \`blacksmith eject\` | Remove Blacksmith dependency, keep a clean project |
-| \`blacksmith setup:ai\` | Generate CLAUDE.md with AI development skills |
+| \`blacksmith setup:ai\` | Generate/regenerate CLAUDE.md with AI development skills |
 | \`blacksmith skills\` | List all available AI development skills |
 
 ### Configuration
@@ -31,47 +31,46 @@ Project settings are stored in \`blacksmith.config.json\` at the project root:
 {
   "name": "my-app",
   "version": "0.1.0",
+  "type": "fullstack",
   "backend": { "port": 8000 },
   "frontend": { "port": 5173 }
 }
 \`\`\`
 
-- **Ports** are read by \`blacksmith dev\` and \`blacksmith sync\` — change them here, not in code
+- **\`type\`** — \`"fullstack"\`, \`"backend"\`, or \`"frontend"\`. Determines which commands and steps are available
+- **\`backend\`** — present for fullstack and backend projects. Absent for frontend-only
+- **\`frontend\`** — present for fullstack and frontend projects. Absent for backend-only
+- **Ports** are read by \`blacksmith dev\` — change them here, not in code
 - The CLI finds the project root by walking up directories looking for this file
 
 ### How \`blacksmith dev\` Works
 
-Runs three concurrent processes:
-1. **Django** — \`./venv/bin/python manage.py runserver 0.0.0.0:<backend-port>\`
-2. **Vite** — \`npm run dev\` in the frontend directory
-3. **OpenAPI watcher** — watches \`.py\` files in backend, runs \`npx openapi-ts\` on changes (2s debounce)
+Depends on project type:
+- **Fullstack**: Runs three concurrent processes — Django, Vite, and an OpenAPI file watcher (auto-syncs types on \`.py\` changes)
+- **Backend**: Runs Django only
+- **Frontend**: Runs Vite only
 
-All three are managed by \`concurrently\` and stop together on Ctrl+C.
+All processes are managed by \`concurrently\` and stop together on Ctrl+C.
 
 ### How \`blacksmith make:resource\` Works
 
-Given a PascalCase name (e.g. \`BlogPost\`), it generates:
+Given a PascalCase name (e.g. \`BlogPost\`), it scaffolds based on project type:
 
-**Backend:**
-- \`backend/apps/blog_posts/models.py\` — Django model with timestamps
-- \`backend/apps/blog_posts/serializers.py\` — DRF ModelSerializer
-- \`backend/apps/blog_posts/views.py\` — DRF ModelViewSet with drf-spectacular schemas
-- \`backend/apps/blog_posts/urls.py\` — DefaultRouter registration
-- \`backend/apps/blog_posts/admin.py\` — Admin registration
+**Backend (fullstack and backend projects):**
+- \`apps/blog_posts/\` — model, serializer, viewset, urls, admin, tests
 - Wires the app into \`INSTALLED_APPS\` and \`config/urls.py\`
 - Runs \`makemigrations\` and \`migrate\`
 
-**Frontend:**
-- \`frontend/src/features/blog-posts/\` — Feature module with hooks and components
-- \`frontend/src/pages/blog-posts/\` — List and detail pages
-- Registers route path in \`frontend/src/router/paths.ts\` (\`Path\` enum)
-- Registers routes in \`frontend/src/router/routes.tsx\`
+**Frontend (fullstack and frontend projects):**
+- \`src/api/hooks/blog-posts/\` — query and mutation hooks
+- \`src/pages/blog-posts/\` — list and detail pages
+- Registers route path in \`src/router/paths.ts\` and routes in \`src/router/routes.tsx\`
 
-Then runs \`blacksmith sync\` to generate the TypeScript API client.
+**Fullstack only:** Also runs \`blacksmith sync\` to generate the TypeScript API client.
 
-### How \`blacksmith sync\` Works
+### How \`blacksmith sync\` Works (Fullstack Only)
 
-1. Fetches the OpenAPI schema from \`http://localhost:<backend-port>/api/schema/\`
+1. Generates the OpenAPI schema offline using \`manage.py spectacular\`
 2. Runs \`openapi-ts\` to generate TypeScript types, Zod schemas, SDK functions, and TanStack Query hooks
 3. Output goes to \`frontend/src/api/generated/\` — never edit these files manually
 
@@ -84,11 +83,12 @@ Then runs \`blacksmith sync\` to generate the TypeScript API client.
 blacksmith init
 
 # Skip prompts with flags
-blacksmith init my-app -b 9000 -f 3000 --ai
+blacksmith init my-app --type fullstack -b 9000 -f 3000 --ai
 \`\`\`
 
 | Flag | Description |
 |---|---|
+| \`--type <type>\` | Project type: fullstack, backend, or frontend (default: fullstack) |
 | \`-b, --backend-port <port>\` | Django port (default: 8000) |
 | \`-f, --frontend-port <port>\` | Vite port (default: 5173) |
 | \`--ai\` | Generate CLAUDE.md with project skills |

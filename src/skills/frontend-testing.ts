@@ -71,12 +71,47 @@ router/
 - Use \`.spec.ts\` for pure logic tests (hooks, utilities, no JSX)
 - Name matches the source file: \`customer-card.tsx\` → \`customer-card.spec.tsx\`
 
-### Always Use \`renderWithProviders\`
+### Test Rendering Setup
 
-> **RULE: Never import \`render\` from \`@testing-library/react\` directly. Always use \`renderWithProviders\` from \`@/__tests__/test-utils\`.**
+> **RULE: Never import \`render\` from \`@testing-library/react\` directly. Create a \`renderWithProviders\` helper in \`src/__tests__/test-utils.tsx\` that wraps components with all app providers.**
 
-\`renderWithProviders\` wraps components with all app providers (ChakraProvider, QueryClientProvider, MemoryRouter) so tests match the real app environment.
+Create \`src/__tests__/test-utils.tsx\` if it doesn't exist:
 
+\`\`\`tsx
+// src/__tests__/test-utils.tsx
+import { render, type RenderOptions } from '@testing-library/react'
+import { ChakraProvider } from '@chakra-ui/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
+import userEvent from '@testing-library/user-event'
+
+interface ProviderOptions extends Omit<RenderOptions, 'wrapper'> {
+  routerEntries?: string[]
+  queryClient?: QueryClient
+}
+
+export function renderWithProviders(ui: React.ReactElement, options: ProviderOptions = {}) {
+  const { routerEntries = ['/'], queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } }), ...renderOptions } = options
+  const user = userEvent.setup()
+
+  const result = render(ui, {
+    wrapper: ({ children }) => (
+      <ChakraProvider>
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={routerEntries}>{children}</MemoryRouter>
+        </QueryClientProvider>
+      </ChakraProvider>
+    ),
+    ...renderOptions,
+  })
+
+  return { ...result, user }
+}
+
+export { screen, waitFor, within } from '@testing-library/react'
+\`\`\`
+
+**Usage:**
 \`\`\`tsx
 import { screen } from '@/__tests__/test-utils'
 import { renderWithProviders } from '@/__tests__/test-utils'
@@ -87,14 +122,6 @@ describe('MyComponent', () => {
     renderWithProviders(<MyComponent />)
     expect(screen.getByText('Hello')).toBeInTheDocument()
   })
-})
-\`\`\`
-
-**Options:**
-\`\`\`tsx
-renderWithProviders(<MyComponent />, {
-  routerEntries: ['/customers/1'],  // Set initial route
-  queryClient: customQueryClient,   // Custom query client
 })
 \`\`\`
 
@@ -188,7 +215,7 @@ vi.mock('react-router-dom', async () => {
 
 ### Test Structure
 \`\`\`tsx
-import { screen, waitFor } from '@/__tests__/test-utils'
+import { screen } from '@/__tests__/test-utils'
 import { renderWithProviders } from '@/__tests__/test-utils'
 
 // Mocks at the top, before imports of modules that use them

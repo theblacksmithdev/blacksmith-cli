@@ -20,11 +20,12 @@ export const coreRulesSkill: Skill = {
 - **Typography**: Use \`Heading\` and \`Text\` — NEVER raw \`<h1>\`–\`<h6>\`, \`<p>\`, or \`<span>\` with text classes
 - **Separators**: Use \`Divider\` — NEVER \`<hr>\`
 - **Everything else**: \`Button\`, \`Card\`, \`Badge\`, \`Input\`, \`Table\`, \`Modal\`, \`Alert\`, \`Skeleton\`, \`Stat\`, etc.
+- **Exceptions**: Semantic HTML landmarks (\`<main>\`, \`<section>\`, \`<nav>\`, \`<header>\`, \`<footer>\`, \`<article>\`, \`<aside>\`) are acceptable for page structure. \`<form>\` is acceptable with React Hook Form. \`<Link>\` from react-router-dom for navigation
 - See the \`chakra-ui-react\` skill for the full component list
 
 ### 2. Pages Are Thin Orchestrators
-- A page file should be ~20-30 lines: import components, call hooks, compose JSX
-- Break every page into child components in a \`components/\` folder
+- Pages import components, call hooks, and compose JSX — they should not contain business logic or large JSX blocks
+- Break every page into child components in a \`components/\` folder. Aim for clarity, not a strict line count
 - See the \`page-structure\` skill for the full pattern with examples
 
 ### 3. Components Render, Hooks Think
@@ -39,11 +40,11 @@ export const coreRulesSkill: Skill = {
 - When adding a new page, add its path to the enum before \`// blacksmith:path\`
 - Use \`buildPath(Path.ResetPassword, { token })\` for dynamic segments
 
-### 5. API Hooks Live in \`src/api/hooks/\`
-- All API data access hooks go in \`src/api/hooks/<resource>/\` — never in page-level \`hooks/\` folders
-- Each resource gets a folder with \`use-<resources>.ts\` (queries), \`use-<resource>-mutations.ts\` (mutations), and \`index.ts\` (re-exports)
-- Import as: \`import { usePosts, useCreatePost } from '@/api/hooks/posts'\`
-- See the \`react-query\` skill for full conventions
+### 5. API Hooks vs UI Hooks — Two Different Places
+- **API hooks** (data fetching) → \`src/api/hooks/<resource>/\` — queries, mutations, cache invalidation. Import as: \`import { usePosts } from '@/api/hooks/posts'\`
+- **UI hooks** (page logic) → \`pages/<page>/hooks/\` or \`features/<feature>/hooks/\` — form state, pagination, filtering, debouncing
+- Never put API data fetching in page-level hooks. Never put UI-only logic in \`src/api/hooks/\`
+- See the \`react-query\` skill for API hook conventions
 
 ### 6. Use Generated API Client Code
 - Always check \`src/api/generated/\` first before writing any API calls — use the generated types, query options, mutations, and query keys
