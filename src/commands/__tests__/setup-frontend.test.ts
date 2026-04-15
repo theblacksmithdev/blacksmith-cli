@@ -112,6 +112,7 @@ describe('setupFrontendDeps', () => {
   it('should exit when package.json is missing', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.hasFrontend.mockReturnValue(true)
     fsMocks.existsSync.mockReturnValue(false)
 
     await expect(setupFrontendDeps()).rejects.toThrow('process.exit called')
@@ -150,6 +151,7 @@ describe('setupFrontend', () => {
     // Mock for setupFrontendDeps
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.hasFrontend.mockReturnValue(true)
     fsMocks.existsSync.mockReturnValue(true)
 
     await setupFrontend()

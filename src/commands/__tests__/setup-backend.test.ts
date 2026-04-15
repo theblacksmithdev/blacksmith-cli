@@ -146,6 +146,7 @@ describe('setupBackendDeps', () => {
   it('should install dependencies and run migrations', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.hasBackend.mockReturnValue(true)
     fsMocks.existsSync.mockReturnValue(true) // venv and requirements.txt exist
     execMocks.execPip.mockResolvedValue({})
     execMocks.execPython.mockResolvedValue({})
@@ -167,6 +168,7 @@ describe('setupBackendDeps', () => {
   it('should exit when venv does not exist', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.hasBackend.mockReturnValue(true)
     fsMocks.existsSync.mockReturnValueOnce(false) // venv missing
 
     await expect(setupBackendDeps()).rejects.toThrow('process.exit called')
@@ -179,6 +181,7 @@ describe('setupBackendDeps', () => {
   it('should exit when requirements.txt is missing', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.hasBackend.mockReturnValue(true)
     fsMocks.existsSync
       .mockReturnValueOnce(true)  // venv exists
       .mockReturnValueOnce(false) // requirements.txt missing
@@ -191,6 +194,7 @@ describe('setupBackendDeps', () => {
   it('should exit when pip install fails', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.hasBackend.mockReturnValue(true)
     fsMocks.existsSync.mockReturnValue(true)
     execMocks.execPip.mockRejectedValue(new Error('pip failed'))
 
@@ -201,6 +205,7 @@ describe('setupBackendDeps', () => {
   it('should exit when migrations fail', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.hasBackend.mockReturnValue(true)
     fsMocks.existsSync.mockReturnValue(true)
     execMocks.execPip.mockResolvedValue({})
     execMocks.execPython.mockRejectedValue(new Error('migrate failed'))
@@ -216,9 +221,10 @@ describe('setupBackend', () => {
     execMocks.commandExists.mockResolvedValue(true)
     execMocks.exec.mockResolvedValue({ stdout: 'Python 3.12.0' })
 
-    // Mock for setupBackendVenv - venv already exists
+    // Mock for setupBackendVenv/Deps - project detection and venv exists
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.hasBackend.mockReturnValue(true)
     fsMocks.existsSync.mockReturnValue(true)
 
     // Mock for setupBackendDeps
