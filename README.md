@@ -72,7 +72,10 @@ What starts depends on your project type:
 | `blacksmith make:resource <Name>` | Scaffold a resource (scope depends on project type) |
 | `blacksmith build` | Production build |
 | `blacksmith eject` | Remove Blacksmith, keep a clean project |
+| `blacksmith setup` | Set up the entire project (backend + frontend) |
 | `blacksmith setup:ai` | Generate/regenerate CLAUDE.md with AI development skills |
+| `blacksmith setup:backend` | Set up the backend (install Python, create venv, install deps) |
+| `blacksmith setup:frontend` | Set up the frontend (install Node.js, install deps) |
 | `blacksmith skills` | List available AI skills |
 | `blacksmith backend <cmd>` | Run a Django management command |
 | `blacksmith frontend <cmd>` | Run an npm command in the frontend |

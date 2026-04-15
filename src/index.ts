@@ -8,9 +8,11 @@ import { build } from './commands/build.js'
 import { eject } from './commands/eject.js'
 import { setupSkills, listSkills } from './commands/skills.js'
 import { setupMcp } from './commands/mcp-setup.js'
-import { studio } from './commands/studio.js'
 import { backend } from './commands/backend.js'
 import { frontend } from './commands/frontend.js'
+import { setupBackend, setupBackendPython, setupBackendVenv, setupBackendDeps } from './commands/setup-backend.js'
+import { setupFrontend, setupFrontendNode, setupFrontendDeps } from './commands/setup-frontend.js'
+import { setup } from './commands/setup.js'
 
 const program = new Command()
 
@@ -72,10 +74,46 @@ program
   .action(setupMcp)
 
 program
-  .command('studio')
-  .description('Launch Blacksmith Studio — web UI for Claude Code')
-  .option('-p, --port <port>', 'Port for the Studio server (default: 3939)')
-  .action(studio)
+  .command('setup')
+  .description('Set up the entire project (backend + frontend)')
+  .action(setup)
+
+// Backend setup commands
+const setupBackendCmd = program
+  .command('setup:backend')
+  .description('Set up the backend project (install Python, create venv, install deps)')
+  .action(setupBackend)
+
+setupBackendCmd
+  .command('python')
+  .description('Install Python 3 if not already installed')
+  .action(setupBackendPython)
+
+setupBackendCmd
+  .command('venv')
+  .description('Create a Python virtual environment')
+  .action(setupBackendVenv)
+
+setupBackendCmd
+  .command('deps')
+  .description('Install Python dependencies and run migrations')
+  .action(setupBackendDeps)
+
+// Frontend setup commands
+const setupFrontendCmd = program
+  .command('setup:frontend')
+  .description('Set up the frontend project (install Node.js, install deps)')
+  .action(setupFrontend)
+
+setupFrontendCmd
+  .command('node')
+  .description('Install Node.js and npm if not already installed')
+  .action(setupFrontendNode)
+
+setupFrontendCmd
+  .command('deps')
+  .description('Install Node.js dependencies')
+  .action(setupFrontendDeps)
 
 program
   .command('skills')
