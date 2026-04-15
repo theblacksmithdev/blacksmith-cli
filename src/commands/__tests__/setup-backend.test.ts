@@ -5,9 +5,9 @@ import { mockExit } from '../../__tests__/setup.js'
 vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const fsMocks = vi.hoisted(() => ({
-  existsSync: vi.fn(() => true),
+  existsSync: vi.fn(),
 }))
-vi.mock('node:fs', () => ({ default: fsMocks }))
+vi.mock('node:fs', () => ({ default: fsMocks, existsSync: fsMocks.existsSync }))
 
 const pathMocks = vi.hoisted(() => ({
   findProjectRoot: vi.fn(),
@@ -33,8 +33,8 @@ import {
 import { log, spinner } from '../../utils/logger.js'
 
 describe('setupBackendPython', () => {
-  it('should report success when Python is already installed', async () => {
-    execMocks.commandExists.mockResolvedValue(true)
+  it('should report success when Python and pip are already installed', async () => {
+    execMocks.commandExists.mockResolvedValue(true) // python3, pip3, pip
     execMocks.exec.mockResolvedValue({ stdout: 'Python 3.12.0' })
 
     await setupBackendPython()
@@ -45,7 +45,8 @@ describe('setupBackendPython', () => {
   it('should attempt brew install on macOS when Python is missing', async () => {
     execMocks.commandExists
       .mockResolvedValueOnce(false) // python3
-      .mockResolvedValueOnce(true)  // brew
+      .mockResolvedValueOnce(true)  // brew (for python install)
+      .mockResolvedValueOnce(true)  // pip3 (ensurePip check)
 
     const originalPlatform = process.platform
     Object.defineProperty(process, 'platform', { value: 'darwin' })
@@ -72,13 +73,59 @@ describe('setupBackendPython', () => {
 
     Object.defineProperty(process, 'platform', { value: originalPlatform })
   })
+
+  it('should install pip via ensurepip when pip is missing', async () => {
+    execMocks.commandExists
+      .mockResolvedValueOnce(true)  // python3
+      .mockResolvedValueOnce(false) // pip3
+      .mockResolvedValueOnce(false) // pip
+    execMocks.exec
+      .mockResolvedValueOnce({ stdout: 'Python 3.12.0' }) // python3 --version
+      .mockResolvedValueOnce({}) // ensurepip
+
+    await setupBackendPython()
+
+    expect(execMocks.exec).toHaveBeenCalledWith(
+      'python3',
+      ['-m', 'ensurepip', '--upgrade'],
+      { silent: true }
+    )
+  })
+
+  it('should fall back to package manager when ensurepip fails on linux', async () => {
+    execMocks.commandExists
+      .mockResolvedValueOnce(true)  // python3
+      .mockResolvedValueOnce(false) // pip3
+      .mockResolvedValueOnce(false) // pip
+      .mockResolvedValueOnce(true)  // apt-get
+
+    const originalPlatform = process.platform
+    Object.defineProperty(process, 'platform', { value: 'linux' })
+
+    execMocks.exec
+      .mockResolvedValueOnce({ stdout: 'Python 3.12.0' }) // python3 --version
+      .mockRejectedValueOnce(new Error('ensurepip not available')) // ensurepip fails
+      .mockResolvedValueOnce({}) // apt-get install
+
+    await setupBackendPython()
+
+    expect(execMocks.exec).toHaveBeenCalledWith(
+      'sudo',
+      ['apt-get', 'install', '-y', 'python3-pip'],
+      { silent: false }
+    )
+
+    Object.defineProperty(process, 'platform', { value: originalPlatform })
+  })
 })
 
 describe('setupBackendVenv', () => {
   it('should create a virtual environment', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
-    fsMocks.existsSync.mockReturnValue(false) // venv doesn't exist
+    fsMocks.existsSync
+      .mockReturnValueOnce(false) // venv doesn't exist (initial check)
+      .mockReturnValueOnce(true)  // venv/bin/pip exists (post-creation check)
     execMocks.commandExists.mockResolvedValue(true)
     execMocks.exec.mockResolvedValue({})
 
@@ -88,6 +135,24 @@ describe('setupBackendVenv', () => {
       'python3',
       ['-m', 'venv', 'venv'],
       { cwd: '/project/backend', silent: true }
+    )
+  })
+
+  it('should install pip via ensurepip when venv pip is missing', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    fsMocks.existsSync
+      .mockReturnValueOnce(false) // venv doesn't exist
+      .mockReturnValueOnce(false) // venv/bin/pip missing after creation
+    execMocks.commandExists.mockResolvedValue(true)
+    execMocks.exec.mockResolvedValue({})
+
+    await setupBackendVenv()
+
+    expect(execMocks.exec).toHaveBeenCalledWith(
+      '/project/backend/venv/bin/python',
+      ['-m', 'ensurepip', '--upgrade'],
+      { silent: true }
     )
   })
 
@@ -123,7 +188,7 @@ describe('setupBackendVenv', () => {
   it('should exit when Python is not installed', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
-    fsMocks.existsSync.mockReturnValue(false)
+    fsMocks.existsSync.mockReturnValueOnce(false) // venv doesn't exist
     execMocks.commandExists.mockResolvedValue(false)
 
     await expect(setupBackendVenv()).rejects.toThrow('process.exit called')
@@ -133,7 +198,7 @@ describe('setupBackendVenv', () => {
   it('should exit when venv creation fails', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
-    fsMocks.existsSync.mockReturnValue(false)
+    fsMocks.existsSync.mockReturnValueOnce(false) // venv doesn't exist
     execMocks.commandExists.mockResolvedValue(true)
     execMocks.exec.mockRejectedValue(new Error('venv failed'))
 
@@ -143,6 +208,10 @@ describe('setupBackendVenv', () => {
 })
 
 describe('setupBackendDeps', () => {
+  beforeEach(() => {
+    fsMocks.existsSync.mockReset()
+  })
+
   it('should install dependencies and run migrations', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.getBackendDir.mockReturnValue('/project/backend')
