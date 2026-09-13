@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { findProjectRoot, getBackendDir, hasBackend } from '../utils/paths.js'
 import { exec, execPip, execPython, commandExists } from '../utils/exec.js'
+import { ensureGitignore } from '../utils/gitignore.js'
 import { log, spinner } from '../utils/logger.js'
 
 function ensureBackendProject(): string {
@@ -121,6 +122,12 @@ async function ensurePip() {
 export async function setupBackendVenv() {
   const backendDir = ensureBackendProject()
   const venvPath = path.join(backendDir, 'venv')
+
+  // venv/ must be ignored before the venv exists, otherwise it lands in git.
+  // Projects generated before .gitignore shipped correctly are healed here.
+  if (ensureGitignore(backendDir, 'backend')) {
+    log.step('Added backend/.gitignore (ignores venv/)')
+  }
 
   if (fs.existsSync(venvPath)) {
     log.success('Virtual environment already exists')

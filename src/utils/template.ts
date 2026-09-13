@@ -57,6 +57,27 @@ export function renderToFile(
 }
 
 /**
+ * Template files whose output name must differ from the name on disk.
+ *
+ * npm strips files named `.gitignore` from published tarballs, and any
+ * `.gitignore` living inside the templates directory would also apply as a real
+ * ignore rule to this repo. Templates therefore store them dot-less and the
+ * leading dot is restored when the project is generated.
+ */
+const DOTFILE_TEMPLATES: Record<string, string> = {
+  gitignore: '.gitignore',
+  npmrc: '.npmrc',
+  dockerignore: '.dockerignore',
+}
+
+/**
+ * Map a rendered template file name to its final name on disk.
+ */
+export function resolveOutputName(name: string): string {
+  return DOTFILE_TEMPLATES[name] ?? name
+}
+
+/**
  * Recursively render all templates from a source directory to a destination directory.
  * Template files (.hbs) are rendered and written without the .hbs extension.
  * Non-template files are copied as-is.
@@ -83,12 +104,12 @@ export function renderDirectory(
       renderDirectory(srcPath, destSubDir, context)
     } else if (entry.name.endsWith('.hbs')) {
       // Template file: render and write without .hbs extension
-      const outputName = renderedName.replace(/\.hbs$/, '')
+      const outputName = resolveOutputName(renderedName.replace(/\.hbs$/, ''))
       const destPath = path.join(destDir, outputName)
       renderToFile(srcPath, destPath, context)
     } else {
       // Non-template file: copy as-is
-      const destPath = path.join(destDir, renderedName)
+      const destPath = path.join(destDir, resolveOutputName(renderedName))
       const destDirPath = path.dirname(destPath)
       if (!fs.existsSync(destDirPath)) {
         fs.mkdirSync(destDirPath, { recursive: true })

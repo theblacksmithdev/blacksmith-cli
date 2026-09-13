@@ -24,6 +24,11 @@ const execMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../utils/exec.js', () => execMocks)
 
+const gitignoreMocks = vi.hoisted(() => ({
+  ensureGitignore: vi.fn(() => false),
+}))
+vi.mock('../../utils/gitignore.js', () => gitignoreMocks)
+
 import {
   setupBackend,
   setupBackendPython,

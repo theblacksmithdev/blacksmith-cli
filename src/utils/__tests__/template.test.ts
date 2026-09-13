@@ -7,6 +7,7 @@ import {
   renderTemplateFile,
   renderToFile,
   renderDirectory,
+  resolveOutputName,
   appendAfterMarker,
   insertBeforeMarker,
 } from '../template.js'
@@ -142,6 +143,31 @@ describe('file-based template operations', () => {
       expect(fs.readFileSync(outputPath, 'utf-8')).toBe('export default "MyFeature"')
     })
 
+    it('should write template "gitignore" as ".gitignore"', () => {
+      const srcDir = path.join(getTmpDir(), 'src')
+      const destDir = path.join(getTmpDir(), 'dest')
+      fs.mkdirSync(srcDir)
+      fs.writeFileSync(path.join(srcDir, 'gitignore'), 'venv/\nnode_modules/\n')
+
+      renderDirectory(srcDir, destDir, {})
+
+      expect(fs.existsSync(path.join(destDir, 'gitignore'))).toBe(false)
+      expect(fs.readFileSync(path.join(destDir, '.gitignore'), 'utf-8')).toBe(
+        'venv/\nnode_modules/\n'
+      )
+    })
+
+    it('should write a rendered "gitignore.hbs" as ".gitignore"', () => {
+      const srcDir = path.join(getTmpDir(), 'src')
+      const destDir = path.join(getTmpDir(), 'dest')
+      fs.mkdirSync(srcDir)
+      fs.writeFileSync(path.join(srcDir, 'gitignore.hbs'), '{{name}}/venv/')
+
+      renderDirectory(srcDir, destDir, { name: 'backend' })
+
+      expect(fs.readFileSync(path.join(destDir, '.gitignore'), 'utf-8')).toBe('backend/venv/')
+    })
+
     it('should throw when source directory does not exist', () => {
       expect(() => renderDirectory('/nonexistent', getTmpDir(), {})).toThrow(
         'Template directory not found'
@@ -187,5 +213,18 @@ describe('file-based template operations', () => {
         'Marker "// MISSING" not found'
       )
     })
+  })
+})
+
+describe('resolveOutputName', () => {
+  it('should restore the leading dot on dotfile templates', () => {
+    expect(resolveOutputName('gitignore')).toBe('.gitignore')
+    expect(resolveOutputName('npmrc')).toBe('.npmrc')
+    expect(resolveOutputName('dockerignore')).toBe('.dockerignore')
+  })
+
+  it('should leave other names untouched', () => {
+    expect(resolveOutputName('index.ts')).toBe('index.ts')
+    expect(resolveOutputName('gitignore.bak')).toBe('gitignore.bak')
   })
 })

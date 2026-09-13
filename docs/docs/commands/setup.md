@@ -22,6 +22,10 @@ Based on your project type in `blacksmith.config.json`:
 
 Each setup runs the full sequence for that side of the project (install runtime, create environment, install dependencies).
 
+Before creating `venv/` or `node_modules/`, setup writes any missing `.gitignore`
+files so those directories never end up staged for commit. An existing
+`.gitignore` is left untouched.
+
 ## Examples
 
 ```bash

@@ -6,10 +6,16 @@ vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
   findProjectRoot: vi.fn(),
+  getProjectType: vi.fn(() => 'fullstack'),
   hasBackend: vi.fn(),
   hasFrontend: vi.fn(),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
+
+const gitignoreMocks = vi.hoisted(() => ({
+  ensureGitignore: vi.fn(() => false),
+}))
+vi.mock('../../utils/gitignore.js', () => gitignoreMocks)
 
 const backendMocks = vi.hoisted(() => ({
   setupBackend: vi.fn(),
