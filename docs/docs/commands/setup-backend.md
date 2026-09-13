@@ -39,6 +39,9 @@ If Python is already present, it reports the installed version.
 
 Creates a Python virtual environment in the backend directory (`venv/`). Skips if one already exists.
 
+Writes a backend `.gitignore` first if one is missing, so `venv/` is ignored
+before it exists. An existing `.gitignore` is never overwritten.
+
 Requires Python 3 to be installed first.
 
 ### `setup:backend deps`

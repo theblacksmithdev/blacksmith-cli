@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
+import { fileURLToPath } from 'node:url'
 import { createLoggerMock } from '../../__tests__/helpers.js'
 import { mockExit } from '../../__tests__/setup.js'
 
@@ -38,6 +39,14 @@ vi.mock('node:child_process', () => ({
 
 import { init } from '../init.js'
 import { log } from '../../utils/logger.js'
+
+/** The real templates directory, so .gitignore generation runs against real files */
+const REAL_TEMPLATES_DIR = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  'templates'
+)
 
 describe('init', () => {
   let tmpDir: string
@@ -90,6 +99,45 @@ describe('init', () => {
     expect(config.name).toBe('my-app')
     expect(config.backend.port).toBe(8000)
     expect(config.frontend.port).toBe(5173)
+  })
+
+  it('should write .gitignore files that ignore venv and node_modules', async () => {
+    setupSuccessfulInit()
+    pathMocks.getTemplatesDir.mockReturnValue(REAL_TEMPLATES_DIR)
+
+    await init('my-app', {
+      type: 'fullstack',
+      backendPort: '8000',
+      frontendPort: '5173',
+      themeColor: 'default',
+      ai: false,
+    })
+
+    const projectDir = path.join(tmpDir, 'my-app')
+
+    const root = fs.readFileSync(path.join(projectDir, '.gitignore'), 'utf-8')
+    expect(root).toMatch(/^backend\/venv\/$/m)
+    expect(root).toMatch(/^frontend\/node_modules\/$/m)
+
+    const backend = fs.readFileSync(path.join(projectDir, 'backend', '.gitignore'), 'utf-8')
+    expect(backend).toMatch(/^venv\/$/m)
+
+    const frontend = fs.readFileSync(path.join(projectDir, 'frontend', '.gitignore'), 'utf-8')
+    expect(frontend).toMatch(/^node_modules\/$/m)
+  })
+
+  it('should not write a root .gitignore for single-stack projects', async () => {
+    setupSuccessfulInit()
+    pathMocks.getTemplatesDir.mockReturnValue(REAL_TEMPLATES_DIR)
+
+    await init('api-only', { type: 'backend', backendPort: '8000', ai: false })
+
+    // The backend template renders into the project root, so its own .gitignore
+    // lands there — the project-level one would shadow it.
+    const projectDir = path.join(tmpDir, 'api-only')
+    const content = fs.readFileSync(path.join(projectDir, '.gitignore'), 'utf-8')
+    expect(content).toMatch(/^venv\/$/m)
+    expect(content).not.toMatch(/^backend\/venv\/$/m)
   })
 
   it('should exit when project directory already exists', async () => {

@@ -36,6 +36,9 @@ If Node.js is already present, it reports the installed versions.
 
 Installs Node.js dependencies by running `npm install` in the frontend directory.
 
+Writes a frontend `.gitignore` first if one is missing, so `node_modules/` is
+ignored before it exists. An existing `.gitignore` is never overwritten.
+
 Requires Node.js and npm to be installed first.
 
 ## Full Setup

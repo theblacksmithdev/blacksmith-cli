@@ -1,4 +1,5 @@
-import { findProjectRoot, hasBackend, hasFrontend } from '../utils/paths.js'
+import { findProjectRoot, getProjectType, hasBackend, hasFrontend } from '../utils/paths.js'
+import { ensureGitignore } from '../utils/gitignore.js'
 import { log } from '../utils/logger.js'
 import { setupBackend } from './setup-backend.js'
 import { setupFrontend } from './setup-frontend.js'
@@ -14,6 +15,12 @@ export async function setup() {
 
   const needsBackend = hasBackend(root)
   const needsFrontend = hasFrontend(root)
+
+  // Fullstack projects keep a root .gitignore; backend/frontend-only projects
+  // are covered by the .gitignore the sub-setup writes into the project root.
+  if (getProjectType(root) === 'fullstack' && ensureGitignore(root, 'project')) {
+    log.step('Added .gitignore')
+  }
 
   if (needsBackend) {
     await setupBackend()

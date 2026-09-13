@@ -3,13 +3,21 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
 
 # Virtual environment
 venv/
 .venv/
+env/
+ENV/
+.python-version
 
 # Environment variables
 .env
+.env.local
+.env.*.local
 
 # Database
 db.sqlite3

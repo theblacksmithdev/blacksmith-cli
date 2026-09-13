@@ -2,6 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { spawn } from 'node:child_process'
 import { renderDirectory } from '../utils/template.js'
+import { ensureGitignore } from '../utils/gitignore.js'
 import { exec, execPython, execPip, commandExists } from '../utils/exec.js'
 import { getTemplatesDir } from '../utils/paths.js'
 import type { ProjectType } from '../utils/paths.js'
@@ -146,6 +147,12 @@ export async function init(name: string | undefined, options: InitOptions) {
     JSON.stringify(configObj, null, 2)
   )
 
+  // Fullstack projects get a root .gitignore; backend/frontend-only projects
+  // get theirs from their own template, which renders straight into projectDir.
+  if (projectType === 'fullstack') {
+    ensureGitignore(projectDir, 'project')
+  }
+
   // 2. Generate backend
   if (backendDir) {
     const backendSpinner = spinner('Generating Django backend...')
@@ -161,6 +168,9 @@ export async function init(name: string | undefined, options: InitOptions) {
         path.join(backendDir, '.env.example'),
         path.join(backendDir, '.env')
       )
+
+      // Safety net: venv/ must be ignored before the venv is created
+      ensureGitignore(backendDir, 'backend')
 
       backendSpinner.succeed('Django backend generated')
     } catch (error: any) {
@@ -217,6 +227,10 @@ export async function init(name: string | undefined, options: InitOptions) {
         frontendDir,
         context
       )
+
+      // Safety net: node_modules/ must be ignored before npm install runs
+      ensureGitignore(frontendDir, 'frontend')
+
       frontendSpinner.succeed('React frontend generated')
     } catch (error: any) {
       frontendSpinner.fail('Failed to generate frontend')

@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { findProjectRoot, getFrontendDir, hasFrontend } from '../utils/paths.js'
 import { exec, commandExists } from '../utils/exec.js'
+import { ensureGitignore } from '../utils/gitignore.js'
 import { log, spinner } from '../utils/logger.js'
 
 function ensureFrontendProject(): string {
@@ -78,6 +79,12 @@ export async function setupFrontendDeps() {
   if (!fs.existsSync(packageJsonPath)) {
     log.error('package.json not found in frontend directory.')
     process.exit(1)
+  }
+
+  // node_modules/ must be ignored before npm install runs, otherwise it lands
+  // in git. Projects generated before .gitignore shipped correctly are healed here.
+  if (ensureGitignore(frontendDir, 'frontend')) {
+    log.step('Added frontend/.gitignore (ignores node_modules/)')
   }
 
   const hasNode = await commandExists('node')
