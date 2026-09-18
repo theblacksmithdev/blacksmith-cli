@@ -10,7 +10,7 @@
 import type { User } from '@prisma/client'
 import { prisma } from '../../db/client.js'
 import { ApiError } from '../../utils/errors.js'
-import { hashPassword, verifyPassword } from '../../utils/password.js'
+import { DUMMY_PASSWORD_HASH, hashPassword, verifyPassword } from '../../utils/password.js'
 import { issueTokens, verifyToken, type TokenPair } from '../../utils/tokens.js'
 import type {
   ChangePasswordInput,
@@ -36,9 +36,7 @@ export async function login({ email, password }: LoginInput): Promise<TokenPair>
 
   // Verify against a real hash either way, so a missing account and a wrong
   // password take the same time and cannot be told apart by timing.
-  const valid = user
-    ? await verifyPassword(password, user.password)
-    : await verifyPassword(password, await hashPassword('never-matches'))
+  const valid = await verifyPassword(password, user?.password ?? DUMMY_PASSWORD_HASH)
 
   if (!user || !valid) {
     throw ApiError.nonField('Invalid email or password.')
@@ -98,9 +96,16 @@ export async function changePassword(
   })
 }
 
+/**
+ * Exchange a refresh token for a new pair.
+ *
+ * Both tokens are reissued, matching SimpleJWT's ROTATE_REFRESH_TOKENS on the
+ * Django backend. Unlike Django it does NOT blacklist the old refresh token —
+ * these tokens are stateless, so the previous one stays valid until it
+ * expires. To close that window, persist issued refresh tokens and reject any
+ * that have been rotated or logged out.
+ */
 export function refreshTokens(refresh: string): TokenPair {
   const { user_id } = verifyToken(refresh, 'refresh')
-  // ROTATE_REFRESH_TOKENS is on for the Django backend, so both tokens are
-  // reissued here too and the client always stores the newest pair.
   return issueTokens(user_id)
 }

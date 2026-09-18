@@ -38,17 +38,21 @@ export async function generateClientFromSchema(
   schemaPath: string
 ): Promise<void> {
   const configPath = path.join(frontendDir, 'openapi-ts.config.ts')
-  const original = fs.readFileSync(configPath, 'utf-8')
-  const patched = original.replace(
-    /path:\s*['"]http[^'"]+['"]/,
-    `path: './${path.basename(schemaPath)}'`
-  )
-  fs.writeFileSync(configPath, patched, 'utf-8')
+  let original: string | null = null
 
+  // The outer finally also covers a failure reading or patching the config,
+  // which would otherwise leave the exported schema behind in the project.
   try {
+    original = fs.readFileSync(configPath, 'utf-8')
+    const patched = original.replace(
+      /path:\s*['"]http[^'"]+['"]/,
+      `path: './${path.basename(schemaPath)}'`
+    )
+    fs.writeFileSync(configPath, patched, 'utf-8')
+
     await runOpenApiTs(frontendDir)
   } finally {
-    fs.writeFileSync(configPath, original, 'utf-8')
+    if (original !== null) fs.writeFileSync(configPath, original, 'utf-8')
     if (fs.existsSync(schemaPath)) fs.unlinkSync(schemaPath)
   }
 }

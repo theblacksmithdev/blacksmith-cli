@@ -5,9 +5,15 @@ sidebar_position: 3
 # Authentication
 
 :::note Express backends
-The endpoints, request bodies and token behaviour described here are identical on an
-Express backend — it reproduces SimpleJWT's contract deliberately. Only the server-side
-implementation differs; see [Express Backend](../stack/backend-express.md).
+The endpoints, request bodies and token shapes described here are identical on an
+Express backend — it reproduces SimpleJWT's request/response contract deliberately.
+
+**One behavioural difference:** Express tokens are stateless. Refresh rotates the pair,
+as Django's `ROTATE_REFRESH_TOKENS` does, but there is no equivalent of
+`BLACKLIST_AFTER_ROTATION` — the previous refresh token stays valid until it expires, and
+logout does not invalidate anything server-side. If you need tokens to stop working the
+moment they are rotated or a user signs out, persist issued refresh tokens and reject
+rotated ones. See [Express Backend](../stack/backend-express.md).
 :::
 
 

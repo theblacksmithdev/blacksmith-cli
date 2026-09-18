@@ -13,7 +13,9 @@ dist/
 src/api/generated/
 
 # OpenAPI schema dumped by blacksmith sync / CI
+# (.yml from drf-spectacular, .json from the Express generator)
 _schema.yml
+_schema.json
 
 # IDE
 .vscode/

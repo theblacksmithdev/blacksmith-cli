@@ -114,6 +114,10 @@ JWT access and refresh tokens, mirroring SimpleJWT's behaviour on the Django
 side — including token rotation on refresh and SimpleJWT's error wording, which
 the frontend's 401 interceptor keys off.
 
+Tokens are **stateless**: unlike Django's `BLACKLIST_AFTER_ROTATION`, a rotated
+or logged-out refresh token stays valid until it expires. Closing that window
+means persisting issued refresh tokens and rejecting the ones you have retired.
+
 | Endpoint | Purpose |
 |----------|---------|
 | `POST /api/auth/register/` | Create an account, returns a token pair |

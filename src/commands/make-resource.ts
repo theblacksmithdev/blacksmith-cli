@@ -50,11 +50,12 @@ async function generateExpressResource({
       context
     )
     appendAfterMarker(schemaPath, '// blacksmith:models', model.trimEnd())
-    // Prisma requires both sides of a relation to be declared
+    // Prisma requires both sides of a relation to be declared. snake_case to
+    // match every other field in the schema, per the express-prisma skill.
     appendAfterMarker(
       schemaPath,
       '// blacksmith:user-relations',
-      `  ${names.names} ${names.Name}[]`
+      `  ${names.snakes} ${names.Name}[]`
     )
     schemaSpinner.succeed(`Added the ${names.Name} model to prisma/schema.prisma`)
   } catch (error: any) {

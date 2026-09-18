@@ -7,33 +7,33 @@
 
 import { useApiMutation } from '@/shared/hooks/use-api-mutation'
 import {
-  {{snakes}}CreateMutation,
-  {{snakes}}UpdateMutation,
-  {{snakes}}DestroyMutation,
-  {{snakes}}ListQueryKey,
-  {{snakes}}RetrieveQueryKey,
+  {{names}}CreateMutation,
+  {{names}}UpdateMutation,
+  {{names}}DestroyMutation,
+  {{names}}ListQueryKey,
+  {{names}}RetrieveQueryKey,
 } from '@/api/generated/@tanstack/react-query.gen'
 
 export function useCreate{{Name}}() {
   return useApiMutation({
-    ...{{snakes}}CreateMutation(),
-    invalidateKeys: [{{snakes}}ListQueryKey()],
+    ...{{names}}CreateMutation(),
+    invalidateKeys: [{{names}}ListQueryKey()],
   })
 }
 
 export function useUpdate{{Name}}(id: string) {
   return useApiMutation({
-    ...{{snakes}}UpdateMutation(),
+    ...{{names}}UpdateMutation(),
     invalidateKeys: [
-      {{snakes}}ListQueryKey(),
-      {{snakes}}RetrieveQueryKey({ path: { id } }),
+      {{names}}ListQueryKey(),
+      {{names}}RetrieveQueryKey({ path: { id } }),
     ],
   })
 }
 
 export function useDelete{{Name}}() {
   return useApiMutation({
-    ...{{snakes}}DestroyMutation(),
-    invalidateKeys: [{{snakes}}ListQueryKey()],
+    ...{{names}}DestroyMutation(),
+    invalidateKeys: [{{names}}ListQueryKey()],
   })
 }

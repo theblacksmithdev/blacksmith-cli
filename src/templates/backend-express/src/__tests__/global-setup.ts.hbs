@@ -13,8 +13,13 @@
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+import { TEST_DATABASE_URL } from './database-url.js'
 
-const DATABASE_URL = process.env.DATABASE_URL ?? 'file:./test.db'
+// vitest.config.ts puts this in the workers' environment; globalSetup runs in
+// the main process, so it is read from there and passed to Prisma explicitly.
+// Both come from TEST_DATABASE_URL so the schema push and the tests can never
+// target different databases.
+const DATABASE_URL = process.env.DATABASE_URL ?? TEST_DATABASE_URL
 
 /** Absolute path of a `file:` SQLite URL, or null for any other database. */
 function sqliteFile(url: string): string | null {

@@ -17,6 +17,13 @@ import { apiRouter } from './modules/index.js'
 export function createApp() {
   const app = express()
 
+  // Pagination links are absolute, built from req.protocol and the Host
+  // header. Behind a TLS terminator (nginx, a load balancer, most PaaS) those
+  // read as plain http and the internal host unless X-Forwarded-* is trusted.
+  if (isProduction) {
+    app.set('trust proxy', 1)
+  }
+
   app.use(
     cors({
       // Development mirrors Django's CORS_ALLOW_ALL_ORIGINS

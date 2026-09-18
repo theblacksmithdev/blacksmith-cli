@@ -93,6 +93,50 @@ describe.each([
   })
 })
 
+/**
+ * hey-api derives its exported names from the OpenAPI operationId by
+ * camelCasing it: `blog_posts_list` becomes `blogPostsList`. The hook
+ * templates must interpolate the camelCase plural to match.
+ *
+ * Single-word resources hide any mistake here, because their snake_case and
+ * camelCase plurals are identical — so this asserts on a multi-word name.
+ */
+describe('generated API hooks match hey-api naming', () => {
+  const getTmpDir = useTmpDir()
+
+  const MULTI_WORD = { ...generateNames('BlogPost'), projectName: 'my-app' }
+
+  function renderHooks() {
+    const dest = path.join(getTmpDir(), 'hooks')
+    renderDirectory(path.join(TEMPLATES_DIR, 'resource', 'api-hooks'), dest, MULTI_WORD)
+    return walkFiles(dest)
+      .map((f) => fs.readFileSync(f, 'utf-8'))
+      .join('\n')
+  }
+
+  it('imports camelCase query and mutation helpers', () => {
+    const hooks = renderHooks()
+
+    for (const name of [
+      'blogPostsListOptions',
+      'blogPostsRetrieveOptions',
+      'blogPostsCreateMutation',
+      'blogPostsUpdateMutation',
+      'blogPostsDestroyMutation',
+      'blogPostsListQueryKey',
+      'blogPostsRetrieveQueryKey',
+    ]) {
+      expect(hooks, name).toContain(name)
+    }
+  })
+
+  it('never emits a snake_case identifier', () => {
+    // `blog_postsListOptions` does not exist in the generated client, so this
+    // would be an import of a missing member and the frontend would not build.
+    expect(renderHooks()).not.toMatch(/blog_posts[A-Z]/)
+  })
+})
+
 describe('generated test files', () => {
   const getTmpDir = useTmpDir()
 

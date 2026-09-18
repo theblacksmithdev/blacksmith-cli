@@ -112,6 +112,13 @@ jobs:
           fi
         working-directory: {{backendPath}}
 
+      # Exporting the schema imports the route modules, which need the
+      # generated client. Explicit rather than relying on Prisma's postinstall,
+      # which does not run under `npm ci --ignore-scripts`.
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: {{backendPath}}
+
       - name: Export OpenAPI schema
         run: npm run openapi -- ../{{frontendPath}}/{{schemaFile}}
         working-directory: {{backendPath}}

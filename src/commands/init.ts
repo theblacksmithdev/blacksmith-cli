@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process'
 import { renderDirectory } from '../utils/template.js'
 import { ensureGitignore } from '../utils/gitignore.js'
 import { backendTemplateDir, ensureCiWorkflow, projectLayout } from '../utils/scaffold.js'
-import { generateClientFromSchema } from '../utils/openapi.js'
+import { syncFrontendClient } from '../utils/openapi.js'
 import { exec, execPython, execPip, commandExists } from '../utils/exec.js'
 import { getTemplatesDir } from '../utils/paths.js'
 import type { BackendFramework, ProjectType } from '../utils/paths.js'
@@ -58,14 +58,18 @@ export async function init(name: string | undefined, options: InitOptions) {
   const needsBackend = projectType === 'fullstack' || projectType === 'backend'
   const needsFrontend = projectType === 'fullstack' || projectType === 'frontend'
 
+  // A bad --backend value is an error even on a frontend-only project, where
+  // the flag is otherwise ignored — silently accepting a typo helps nobody.
+  if (options.backend && !BACKEND_FRAMEWORKS.includes(options.backend as BackendFramework)) {
+    log.error(`Invalid backend framework: "${options.backend}". Must be one of: django, express`)
+    process.exit(1)
+  }
+
   // Backend framework prompt
   let backendFramework: BackendFramework = 'django'
   if (needsBackend) {
-    if (options.backend && BACKEND_FRAMEWORKS.includes(options.backend as BackendFramework)) {
+    if (options.backend) {
       backendFramework = options.backend as BackendFramework
-    } else if (options.backend) {
-      log.error(`Invalid backend framework: "${options.backend}". Must be one of: django, express`)
-      process.exit(1)
     } else {
       const selected = await promptSelect('Backend framework', BACKEND_FRAMEWORKS, 'django')
       // The config must never record a framework the CLI cannot act on, so an
@@ -318,12 +322,7 @@ export async function init(name: string | undefined, options: InitOptions) {
       // The Express backend can export its schema without booting, so there is
       // no server to start, wait for, and kill here.
       try {
-        const schemaPath = path.join(frontendDir, '_schema.json')
-        await exec('npm', ['run', 'openapi', '--', schemaPath], {
-          cwd: backendDir,
-          silent: true,
-        })
-        await generateClientFromSchema(frontendDir, schemaPath)
+        await syncFrontendClient(backendDir, frontendDir, true)
         syncSpinner.succeed('OpenAPI types synced')
       } catch {
         syncSpinner.warn('OpenAPI sync skipped (run "blacksmith sync" to retry)')

@@ -1,15 +1,14 @@
 import { defineConfig } from 'vitest/config'
+import { TEST_DATABASE_URL } from './src/__tests__/database-url'
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
     include: ['src/**/*.spec.ts'],
-    // SQLite paths are relative to prisma/schema.prisma, so this is
-    // prisma/test.db — separate from the dev database and git-ignored.
     env: {
       NODE_ENV: 'test',
-      DATABASE_URL: 'file:./test.db',
+      DATABASE_URL: TEST_DATABASE_URL,
       JWT_SECRET: 'test-secret-not-used-outside-the-test-suite',
     },
     // Every spec file shares one SQLite database, and the setup file empties

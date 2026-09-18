@@ -26,6 +26,21 @@ function ensureBackendProject(): BackendProject {
     process.exit(1)
   }
 
+  return describeBackend(root)
+}
+
+/** The backend project we are inside, or null when there is none. */
+function findBackendProject(): BackendProject | null {
+  let root: string
+  try {
+    root = findProjectRoot()
+  } catch {
+    return null
+  }
+  return hasBackend(root) ? describeBackend(root) : null
+}
+
+function describeBackend(root: string): BackendProject {
   const framework = getBackendFramework(root)
   return { dir: getBackendDir(root), framework, isExpress: framework === 'express' }
 }
@@ -44,7 +59,11 @@ function rejectOnExpress(project: BackendProject, command: string): void {
 }
 
 export async function setupBackendPython() {
-  rejectOnExpress(ensureBackendProject(), 'setup:backend python')
+  // Installing Python needs no project — this is the one backend subcommand a
+  // user can run on a bare machine before `init`. Only reject when there IS a
+  // project and it is an Express one.
+  const project = findBackendProject()
+  if (project) rejectOnExpress(project, 'setup:backend python')
 
   const hasPython = await commandExists('python3')
   if (hasPython) {
