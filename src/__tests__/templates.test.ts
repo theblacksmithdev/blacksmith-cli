@@ -50,11 +50,11 @@ function walkFiles(dir: string): string[] {
  * renderTemplate uses internally for JSX and Python f-strings.
  */
 describe.each([
-  ['backend', 'backend', PROJECT_CONTEXT],
-  ['backend-express', 'backend-express', EXPRESS_CONTEXT],
+  ['backend/django', path.join('backend', 'django'), PROJECT_CONTEXT],
+  ['backend/express', path.join('backend', 'express'), EXPRESS_CONTEXT],
   ['frontend', 'frontend', PROJECT_CONTEXT],
-  ['resource/backend', path.join('resource', 'backend'), RESOURCE_CONTEXT],
-  ['resource/backend-express', path.join('resource', 'backend-express'), RESOURCE_CONTEXT],
+  ['resource/backend/django', path.join('resource', 'backend', 'django'), RESOURCE_CONTEXT],
+  ['resource/backend/express', path.join('resource', 'backend', 'express'), RESOURCE_CONTEXT],
   ['resource/pages', path.join('resource', 'pages'), RESOURCE_CONTEXT],
   ['resource/api-hooks', path.join('resource', 'api-hooks'), RESOURCE_CONTEXT],
   ['resource/frontend', path.join('resource', 'frontend'), RESOURCE_CONTEXT],
@@ -142,7 +142,7 @@ describe('generated test files', () => {
 
   it('gives the backend a pytest config, test settings and conftest', () => {
     const dest = path.join(getTmpDir(), 'backend')
-    renderDirectory(path.join(TEMPLATES_DIR, 'backend'), dest, PROJECT_CONTEXT)
+    renderDirectory(path.join(TEMPLATES_DIR, 'backend', 'django'), dest, PROJECT_CONTEXT)
 
     expect(fs.existsSync(path.join(dest, 'pytest.ini'))).toBe(true)
     expect(fs.existsSync(path.join(dest, 'conftest.py'))).toBe(true)
@@ -152,7 +152,7 @@ describe('generated test files', () => {
 
   it('gives the Express backend a vitest config, setup and specs', () => {
     const dest = path.join(getTmpDir(), 'backend-express')
-    renderDirectory(path.join(TEMPLATES_DIR, 'backend-express'), dest, EXPRESS_CONTEXT)
+    renderDirectory(path.join(TEMPLATES_DIR, 'backend', 'express'), dest, EXPRESS_CONTEXT)
 
     expect(fs.existsSync(path.join(dest, 'vitest.config.ts'))).toBe(true)
     expect(fs.existsSync(path.join(dest, 'src', '__tests__', 'setup.ts'))).toBe(true)
@@ -167,7 +167,7 @@ describe('generated test files', () => {
 
   it('keeps the markers make:resource writes into', () => {
     const dest = path.join(getTmpDir(), 'backend-express')
-    renderDirectory(path.join(TEMPLATES_DIR, 'backend-express'), dest, EXPRESS_CONTEXT)
+    renderDirectory(path.join(TEMPLATES_DIR, 'backend', 'express'), dest, EXPRESS_CONTEXT)
 
     const schema = fs.readFileSync(path.join(dest, 'prisma', 'schema.prisma'), 'utf-8')
     expect(schema).toContain('// blacksmith:models')
@@ -187,7 +187,7 @@ describe('generated test files', () => {
 
   it('renders the Python f-string helper in resource tests correctly', () => {
     const dest = path.join(getTmpDir(), 'resource')
-    renderDirectory(path.join(TEMPLATES_DIR, 'resource', 'backend'), dest, RESOURCE_CONTEXT)
+    renderDirectory(path.join(TEMPLATES_DIR, 'resource', 'backend', 'django'), dest, RESOURCE_CONTEXT)
 
     const tests = fs.readFileSync(path.join(dest, 'tests.py'), 'utf-8')
     expect(tests).toContain("return f'/api/products/{ product.id }/'")
@@ -196,7 +196,7 @@ describe('generated test files', () => {
   it('renders the Express resource module with substituted names', () => {
     const dest = path.join(getTmpDir(), 'module')
     renderDirectory(
-      path.join(TEMPLATES_DIR, 'resource', 'backend-express'),
+      path.join(TEMPLATES_DIR, 'resource', 'backend', 'express'),
       dest,
       RESOURCE_CONTEXT
     )
@@ -222,7 +222,7 @@ describe('generated test files', () => {
 
   it('renders the Prisma model for a resource', () => {
     const model = renderTemplateFile(
-      path.join(TEMPLATES_DIR, 'resource', 'backend-express.prisma.hbs'),
+      path.join(TEMPLATES_DIR, 'resource', 'backend', 'express.prisma.hbs'),
       RESOURCE_CONTEXT
     )
 

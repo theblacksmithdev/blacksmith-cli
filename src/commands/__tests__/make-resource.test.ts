@@ -48,7 +48,7 @@ describe('makeResource', () => {
     await makeResource('BlogPost')
 
     expect(templateMocks.renderDirectory).toHaveBeenCalledWith(
-      '/templates/resource/backend',
+      path.join('/templates', 'resource', 'backend', 'django'),
       path.join(getTmpDir(), 'backend', 'apps', 'blog_posts'),
       expect.objectContaining({
         Name: 'BlogPost',
@@ -153,12 +153,12 @@ describe('makeResource', () => {
       await makeResource('Product')
 
       const calls = templateMocks.renderDirectory.mock.calls
-      const moduleCall = calls.find((c: any[]) => c[0] === '/templates/resource/backend-express')
+      const moduleCall = calls.find((c: any[]) => c[0] === path.join('/templates', 'resource', 'backend', 'express'))
       expect(moduleCall).toBeDefined()
       expect(moduleCall![1]).toBe(
         path.join(getTmpDir(), 'backend', 'src', 'modules', 'products')
       )
-      expect(calls.find((c: any[]) => c[0] === '/templates/resource/backend')).toBeUndefined()
+      expect(calls.find((c: any[]) => c[0] === path.join('/templates', 'resource', 'backend', 'django'))).toBeUndefined()
     })
 
     it('adds the Prisma model and the User back-relation it needs', async () => {

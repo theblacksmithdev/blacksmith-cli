@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import { spawn } from 'node:child_process'
 import { renderDirectory } from '../utils/template.js'
 import { ensureGitignore } from '../utils/gitignore.js'
+import type { GitignoreKind } from '../utils/gitignore.js'
 import { backendTemplateDir, ensureCiWorkflow, projectLayout } from '../utils/scaffold.js'
 import { syncFrontendClient } from '../utils/openapi.js'
 import { exec, execPython, execPip, commandExists } from '../utils/exec.js'
@@ -206,7 +207,7 @@ export async function init(name: string | undefined, options: InitOptions) {
 
       // Safety net: the dependency directory (venv/ or node_modules/) must be
       // ignored before it is created
-      ensureGitignore(backendDir, isExpressBackend ? 'backend-express' : 'backend')
+      ensureGitignore(backendDir, backendTemplateDir(backendFramework) as GitignoreKind)
 
       backendSpinner.succeed(`${frameworkLabel} backend generated`)
     } catch (error: any) {

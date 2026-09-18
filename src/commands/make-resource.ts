@@ -4,6 +4,7 @@ import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, ge
 import { generateNames } from '../utils/names.js'
 import { renderDirectory, renderTemplateFile, appendAfterMarker, insertBeforeMarker } from '../utils/template.js'
 import { exec, execPython } from '../utils/exec.js'
+import { resourcePrismaTemplate, resourceTemplateDir } from '../utils/scaffold.js'
 import { syncFrontendClient } from '../utils/openapi.js'
 import { log, spinner } from '../utils/logger.js'
 
@@ -30,7 +31,7 @@ async function generateExpressResource({
   const moduleSpinner = spinner(`Creating backend module: src/modules/${names.kebabs}/`)
   try {
     renderDirectory(
-      path.join(templatesDir, 'resource', 'backend-express'),
+      path.join(templatesDir, resourceTemplateDir('express')),
       moduleDir,
       context
     )
@@ -46,7 +47,7 @@ async function generateExpressResource({
   try {
     const schemaPath = path.join(backendDir, 'prisma', 'schema.prisma')
     const model = renderTemplateFile(
-      path.join(templatesDir, 'resource', 'backend-express.prisma.hbs'),
+      path.join(templatesDir, resourcePrismaTemplate()),
       context
     )
     appendAfterMarker(schemaPath, '// blacksmith:models', model.trimEnd())
@@ -161,7 +162,7 @@ export async function makeResource(name: string) {
     const backendSpinner = spinner(`Creating backend app: apps/${names.snakes}/`)
     try {
       renderDirectory(
-        path.join(templatesDir, 'resource', 'backend'),
+        path.join(templatesDir, resourceTemplateDir('django')),
         backendAppDir,
         context
       )

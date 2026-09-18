@@ -84,12 +84,9 @@ describe('projectLayout', () => {
 })
 
 describe('backendTemplateDir', () => {
-  it('keeps the original directory name for Django', () => {
-    expect(backendTemplateDir('django')).toBe('backend')
-  })
-
-  it('resolves Express to its own template directory', () => {
-    expect(backendTemplateDir('express')).toBe('backend-express')
+  it('resolves each framework to its own directory under backend/', () => {
+    expect(backendTemplateDir('django')).toBe(path.join('backend', 'django'))
+    expect(backendTemplateDir('express')).toBe(path.join('backend', 'express'))
   })
 })
 

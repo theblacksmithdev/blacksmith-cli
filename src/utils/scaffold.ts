@@ -35,13 +35,30 @@ export function projectLayout(
 }
 
 /**
- * Directory under the templates root holding a backend framework's templates.
+ * Directory under the templates root holding a backend framework's project
+ * templates: `backend/django` or `backend/express`.
  *
- * Django keeps the original `backend/` name so existing template paths and
- * generated projects are untouched.
+ * This is a path into the template tree, not the generated layout — a project
+ * always gets a plain `backend/` directory whichever framework it uses.
  */
 export function backendTemplateDir(framework: BackendFramework): string {
-  return framework === 'express' ? 'backend-express' : 'backend'
+  return path.join('backend', framework)
+}
+
+/** Directory holding a backend framework's `make:resource` templates. */
+export function resourceTemplateDir(framework: BackendFramework): string {
+  return path.join('resource', 'backend', framework)
+}
+
+/**
+ * The Prisma model appended to schema.prisma for a new resource.
+ *
+ * Kept beside the framework directories rather than inside them: everything
+ * under `resource/backend/express/` is rendered into the generated module, and
+ * this fragment belongs in the schema instead.
+ */
+export function resourcePrismaTemplate(): string {
+  return path.join('resource', 'backend', 'express.prisma.hbs')
 }
 
 /**

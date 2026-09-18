@@ -170,7 +170,7 @@ export async function setupBackendVenv() {
 
   // venv/ must be ignored before the venv exists, otherwise it lands in git.
   // Projects generated before .gitignore shipped correctly are healed here.
-  if (ensureGitignore(backendDir, 'backend')) {
+  if (ensureGitignore(backendDir, 'backend/django')) {
     log.step('Added backend/.gitignore (ignores venv/)')
   }
 
@@ -269,7 +269,7 @@ async function setupExpressDeps(backendDir: string) {
 
   // node_modules/ must be ignored before npm install runs. Projects generated
   // before .gitignore shipped correctly are healed here.
-  if (ensureGitignore(backendDir, 'backend-express')) {
+  if (ensureGitignore(backendDir, 'backend/express')) {
     log.step('Added backend/.gitignore (ignores node_modules/)')
   }
 

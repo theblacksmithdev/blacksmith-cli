@@ -206,7 +206,7 @@ describe('init', () => {
     })
 
     const calls = templateMocks.renderDirectory.mock.calls
-    const backendCall = calls.find((c: any[]) => c[0] === '/templates/backend')
+    const backendCall = calls.find((c: any[]) => c[0] === path.join('/templates', 'backend', 'django'))
     expect(backendCall).toBeDefined()
     expect(backendCall![2]).toMatchObject({
       projectName: 'my-app',
@@ -274,8 +274,8 @@ describe('init', () => {
     })
 
     const calls = templateMocks.renderDirectory.mock.calls
-    expect(calls.find((c: any[]) => c[0] === '/templates/backend-express')).toBeDefined()
-    expect(calls.find((c: any[]) => c[0] === '/templates/backend')).toBeUndefined()
+    expect(calls.find((c: any[]) => c[0] === path.join('/templates', 'backend', 'express'))).toBeDefined()
+    expect(calls.find((c: any[]) => c[0] === path.join('/templates', 'backend', 'django'))).toBeUndefined()
   })
 
   it('should not require Python for an Express backend', async () => {
