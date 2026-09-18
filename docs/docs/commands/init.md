@@ -4,7 +4,8 @@ sidebar_position: 1
 
 # blacksmith init
 
-Scaffold a new Django, React, or fullstack Django + React project.
+Scaffold a new backend, React, or fullstack project. The backend is either Django or Express —
+see [Choosing a Backend](../guides/choosing-a-backend.md).
 
 ## Usage
 
@@ -23,7 +24,8 @@ blacksmith init <project-name> [options]
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--type <type>` | `fullstack` | Project type: `fullstack`, `backend`, or `frontend` |
-| `--backend-port <port>` | `8000` | Port for the Django development server |
+| `--backend <framework>` | `django` | Backend framework: `django` or `express` |
+| `--backend-port <port>` | `8000` | Port for the backend development server |
 | `--frontend-port <port>` | `5173` | Port for the Vite development server |
 | `--theme-color <color>` | `default` | UI theme color preset |
 | `--ai` | `false` | Generate CLAUDE.md and AI development skill files |
@@ -32,9 +34,19 @@ blacksmith init <project-name> [options]
 
 | Type | Description |
 |------|-------------|
-| `fullstack` | Django backend + React frontend in `backend/` and `frontend/` subdirectories |
-| `backend` | Django API project at the project root (no frontend) |
+| `fullstack` | Backend + React frontend in `backend/` and `frontend/` subdirectories |
+| `backend` | API project at the project root (no frontend) |
 | `frontend` | React + Vite project at the project root (no backend) |
+
+### Backend Frameworks
+
+| Framework | Description |
+|-----------|-------------|
+| `django` | Django + DRF + drf-spectacular + SimpleJWT, with a Python virtual environment |
+| `express` | Express 5 + Prisma + Zod + zod-to-openapi, in TypeScript |
+
+Both expose the same HTTP API, so the generated frontend is identical. Omit the
+flag and `init` prompts for it. The flag is ignored for `--type frontend`.
 
 ### Theme Color Options
 
@@ -52,12 +64,14 @@ blacksmith init <project-name> [options]
 The `init` command performs the following steps based on the selected project type:
 
 ### All project types
-1. **Validates prerequisites** — Checks that required tools are installed (Python 3 for backend, Node.js/npm for frontend)
+1. **Validates prerequisites** — Checks that required tools are installed (Python 3 for a Django backend, Node.js/npm for an Express backend or any frontend)
 2. **Creates project directory** and `blacksmith.config.json`
 3. **Optionally generates AI files** (`CLAUDE.md` and `.claude/skills/`) with skills tailored to the project type
 
 ### Backend steps (fullstack and backend)
-4. **Scaffolds Django project** — Split settings, users app, DRF, drf-spectacular, SimpleJWT, environment management
+4. **Scaffolds the backend** —
+   - *Django*: split settings, users app, DRF, drf-spectacular, SimpleJWT, environment management
+   - *Express*: app and module layout, Prisma schema, JWT auth, Zod validation, OpenAPI registry
 5. **Creates Python virtual environment** and installs dependencies
 6. **Runs initial database migrations**
 

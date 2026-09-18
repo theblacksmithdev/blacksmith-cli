@@ -4,6 +4,12 @@ sidebar_position: 3
 
 # blacksmith sync
 
+:::note Express backends
+The schema is exported with the backend's `npm run openapi` script instead of
+`manage.py spectacular`. Both run offline — no server needs to be listening.
+:::
+
+
 Synchronize the OpenAPI schema between Django backend and React frontend.
 
 :::info Fullstack Only

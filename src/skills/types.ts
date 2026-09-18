@@ -1,5 +1,9 @@
+import type { BackendFramework } from '../utils/paths.js'
+
 export interface SkillContext {
   projectName: string
+  /** Backend framework the project was generated with. Defaults to Django. */
+  backendFramework?: BackendFramework
 }
 
 export interface Skill {

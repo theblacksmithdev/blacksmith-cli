@@ -48,6 +48,17 @@ export function getProjectType(projectRoot?: string): ProjectType {
 }
 
 /**
+ * Get the backend framework from config.
+ *
+ * Projects generated before Express support have no `framework` field, so an
+ * absent value reads as Django — every existing project keeps working as-is.
+ */
+export function getBackendFramework(projectRoot?: string): BackendFramework {
+  const config = loadConfig(projectRoot)
+  return config.backend?.framework || 'django'
+}
+
+/**
  * Check if the project has a backend
  */
 export function hasBackend(projectRoot?: string): boolean {
@@ -89,11 +100,14 @@ export function getFrontendDir(projectRoot?: string): string {
 
 export type ProjectType = 'fullstack' | 'backend' | 'frontend'
 
+/** Backend framework a project's API is built with. */
+export type BackendFramework = 'django' | 'express'
+
 export interface BlacksmithConfig {
   name: string
   version: string
   type?: ProjectType
-  backend?: { port: number }
+  backend?: { port: number; framework?: BackendFramework }
   frontend?: { port: number }
 }
 

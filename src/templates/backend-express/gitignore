@@ -1,0 +1,35 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Prisma / SQLite
+prisma/*.db
+prisma/*.db-journal
+prisma/dev.db*
+prisma/test.db*
+
+# Generated OpenAPI document
+openapi.json
+
+# Test output
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

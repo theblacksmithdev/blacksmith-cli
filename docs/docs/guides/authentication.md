@@ -4,6 +4,13 @@ sidebar_position: 3
 
 # Authentication
 
+:::note Express backends
+The endpoints, request bodies and token behaviour described here are identical on an
+Express backend — it reproduces SimpleJWT's contract deliberately. Only the server-side
+implementation differs; see [Express Backend](../stack/backend-express.md).
+:::
+
+
 Blacksmith generates a complete JWT-based authentication system across both the backend and frontend.
 
 ## Backend: SimpleJWT

@@ -33,6 +33,18 @@ describe('ensureGitignore', () => {
     expect(content).toMatch(/^\.venv\/$/m)
   })
 
+  it('should ignore node_modules/ and the Prisma database in the Express backend .gitignore', () => {
+    const dir = getTmpDir()
+
+    expect(ensureGitignore(dir, 'backend-express')).toBe(true)
+
+    const content = fs.readFileSync(path.join(dir, '.gitignore'), 'utf-8')
+    expect(content).toMatch(/^node_modules\/$/m)
+    expect(content).toMatch(/^dist\/$/m)
+    // The dev and test SQLite files must never be committed
+    expect(content).toMatch(/^prisma\/\*\.db$/m)
+  })
+
   it('should ignore node_modules/ in the frontend .gitignore', () => {
     const dir = getTmpDir()
     ensureGitignore(dir, 'frontend')

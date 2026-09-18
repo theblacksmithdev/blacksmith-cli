@@ -1,0 +1,55 @@
+import { screen, renderWithProviders } from '@/__tests__/test-utils'
+
+vi.mock('@/api/hooks/{{kebabs}}')
+
+import { use{{Names}} } from '@/api/hooks/{{kebabs}}'
+import {{Names}}Page from '../{{kebabs}}-page'
+
+const items = [
+  { id: '1', title: 'First {{Name}}', created_at: '2024-01-15T10:00:00Z' },
+  { id: '2', title: 'Second {{Name}}', created_at: '2024-02-20T10:00:00Z' },
+]
+
+function mockQuery(overrides = {}) {
+  vi.mocked(use{{Names}}).mockReturnValue({
+    data: { {{names}}: items, total: items.length },
+    isLoading: false,
+    errorMessage: null,
+    ...overrides,
+  } as any)
+}
+
+describe('{{Names}}Page', () => {
+  beforeEach(() => {
+    mockQuery()
+  })
+
+  it('renders the page heading', () => {
+    renderWithProviders(<{{Names}}Page />)
+
+    expect(screen.getByRole('heading', { name: '{{Names}}' })).toBeInTheDocument()
+  })
+
+  it('renders each {{name}}', () => {
+    renderWithProviders(<{{Names}}Page />)
+
+    expect(screen.getByText('First {{Name}}')).toBeInTheDocument()
+    expect(screen.getByText('Second {{Name}}')).toBeInTheDocument()
+  })
+
+  it('shows the error message when the request fails', () => {
+    mockQuery({ data: undefined, errorMessage: 'Failed to load {{names}}' })
+
+    renderWithProviders(<{{Names}}Page />)
+
+    expect(screen.getByText('Failed to load {{names}}')).toBeInTheDocument()
+  })
+
+  it('shows the empty state when there are no {{names}}', () => {
+    mockQuery({ data: { {{names}}: [], total: 0 } })
+
+    renderWithProviders(<{{Names}}Page />)
+
+    expect(screen.getByText(/no {{names}} yet/i)).toBeInTheDocument()
+  })
+})

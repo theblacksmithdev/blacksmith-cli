@@ -23,6 +23,10 @@ const sidebars: SidebarsConfig = {
         'commands/build',
         'commands/eject',
         'commands/setup-ai',
+        'commands/setup',
+        'commands/setup-backend',
+        'commands/setup-frontend',
+        'commands/test',
         'commands/backend',
         'commands/frontend',
         'commands/skills',
@@ -33,6 +37,7 @@ const sidebars: SidebarsConfig = {
       label: 'Guides',
       items: [
         'guides/project-structure',
+        'guides/choosing-a-backend',
         'guides/openapi-sync',
         'guides/authentication',
         'guides/creating-resources',
@@ -54,6 +59,7 @@ const sidebars: SidebarsConfig = {
       label: 'Technology Stack',
       items: [
         'stack/backend',
+        'stack/backend-express',
         'stack/frontend',
       ],
     },

@@ -17,7 +17,8 @@ Every Blacksmith project has a `blacksmith.config.json` file in the project root
   "version": "0.1.0",
   "type": "fullstack",
   "backend": {
-    "port": 8000
+    "port": 8000,
+    "framework": "django"
   },
   "frontend": {
     "port": 5173
@@ -32,7 +33,8 @@ Every Blacksmith project has a `blacksmith.config.json` file in the project root
   "version": "0.1.0",
   "type": "backend",
   "backend": {
-    "port": 8000
+    "port": 8000,
+    "framework": "express"
   }
 }
 ```
@@ -57,12 +59,21 @@ Every Blacksmith project has a `blacksmith.config.json` file in the project root
 | `version` | string | Yes | Project version |
 | `type` | string | Yes | Project type: `fullstack`, `backend`, or `frontend` |
 | `backend` | object | No | Present for fullstack and backend projects |
-| `backend.port` | number | — | Port for the Django development server |
+| `backend.port` | number | — | Port for the backend development server |
+| `backend.framework` | string | No | `django` or `express`. Absent means `django` |
 | `frontend` | object | No | Present for fullstack and frontend projects |
 | `frontend.port` | number | — | Port for the Vite development server |
 
 :::info Backward Compatibility
-Projects created before the `type` field was introduced will default to `fullstack` behavior.
+Projects created before the `type` field was introduced default to `fullstack` behavior.
+Projects created before Express support have no `backend.framework` field; its absence reads
+as `django`, so they keep working untouched.
+:::
+
+:::warning
+`backend.framework` records which backend was generated — it does not switch one. Changing it
+on an existing project points the CLI at a toolchain the code does not use. See
+[Choosing a Backend](../guides/choosing-a-backend.md).
 :::
 
 ### Changing Ports
@@ -82,12 +93,22 @@ Then restart `blacksmith dev` for the changes to take effect.
 
 ### Backend (.env)
 
-Located in the backend directory (project root for backend-only, `backend/` for fullstack), this file contains Django-specific environment variables:
+Located in the backend directory (project root for backend-only, `backend/` for fullstack).
 
+**Django:**
 ```bash
 SECRET_KEY=your-secret-key-here
 DEBUG=True
 DJANGO_SETTINGS_MODULE=config.settings.development
+```
+
+**Express:**
+```bash
+NODE_ENV=development
+PORT=8000
+DATABASE_URL="file:./dev.db"
+JWT_SECRET=change-me-in-production
+CORS_ALLOWED_ORIGINS=http://localhost:5173
 ```
 
 A `.env.example` template is also generated for reference.

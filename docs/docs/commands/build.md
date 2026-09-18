@@ -4,6 +4,12 @@ sidebar_position: 5
 
 # blacksmith build
 
+:::note Express backends
+The backend step runs `npm run build` (Prisma generate + `tsc`) and emits `backend/dist/`.
+There is no `collectstatic` step.
+:::
+
+
 Build the project for production deployment.
 
 ## Usage

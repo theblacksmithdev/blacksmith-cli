@@ -4,6 +4,27 @@ sidebar_position: 8
 
 # blacksmith backend
 
+Runs a command against the backend's own toolchain. What that means depends on the
+project's backend framework:
+
+| Framework | Runs |
+|-----------|------|
+| Django | `manage.py <args>` inside the virtual environment |
+| Express | `npm <args>` in the backend directory |
+
+**Express examples:**
+
+```bash
+blacksmith backend run migrate            # npm run migrate
+blacksmith backend run openapi            # regenerate openapi.json
+blacksmith backend exec prisma studio     # browse the database
+blacksmith backend install zod            # add a dependency
+```
+
+Express projects have no management commands and no admin site, so there is no
+`createsuperuser` equivalent — create the first user through `POST /api/auth/register/`
+or Prisma Studio.
+
 :::info Requires Backend
 This command is only available for fullstack and backend-only projects. Frontend-only projects will receive an error.
 :::

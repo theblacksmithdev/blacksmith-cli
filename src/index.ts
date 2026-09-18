@@ -13,12 +13,13 @@ import { frontend } from './commands/frontend.js'
 import { setupBackend, setupBackendPython, setupBackendVenv, setupBackendDeps } from './commands/setup-backend.js'
 import { setupFrontend, setupFrontendNode, setupFrontendDeps } from './commands/setup-frontend.js'
 import { setup } from './commands/setup.js'
+import { test } from './commands/test.js'
 
 const program = new Command()
 
 program
   .name('blacksmith')
-  .description('Fullstack Django + React framework')
+  .description('Fullstack Django or Express + React framework')
   .version('0.1.0')
   .hook('preAction', () => {
     banner()
@@ -28,9 +29,10 @@ program
   .command('init')
   .argument('[name]', 'Project name')
   .option('--type <type>', 'Project type: fullstack, backend, or frontend (default: fullstack)')
+  .option('--backend <framework>', 'Backend framework: django or express (default: django)')
   .option('--ai', 'Set up AI development skills and documentation (CLAUDE.md)')
   .option('--no-chakra-ui-skill', 'Disable Chakra UI skill when using --ai')
-  .option('-b, --backend-port <port>', 'Django backend port (default: 8000)')
+  .option('-b, --backend-port <port>', 'Backend port (default: 8000)')
   .option('-f, --frontend-port <port>', 'Vite frontend port (default: 5173)')
   .option('-t, --theme-color <color>', 'Theme color (zinc, slate, blue, green, orange, red, violet)')
   .description('Create a new Blacksmith project')
@@ -119,6 +121,15 @@ program
   .command('skills')
   .description('List all available AI development skills')
   .action(listSkills)
+
+program
+  .command('test')
+  .description('Run the backend (pytest) and frontend (vitest) test suites')
+  .option('--backend', 'Run only the backend tests')
+  .option('--frontend', 'Run only the frontend tests')
+  .option('--coverage', 'Report coverage')
+  .option('--watch', 'Re-run on change (single suite only)')
+  .action(test)
 
 program
   .command('backend')

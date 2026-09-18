@@ -1,0 +1,22 @@
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'node',
+    include: ['src/**/*.spec.ts'],
+    // SQLite paths are relative to prisma/schema.prisma, so this is
+    // prisma/test.db — separate from the dev database and git-ignored.
+    env: {
+      NODE_ENV: 'test',
+      DATABASE_URL: 'file:./test.db',
+      JWT_SECRET: 'test-secret-not-used-outside-the-test-suite',
+    },
+    // Every spec file shares one SQLite database, and the setup file empties
+    // it between tests — so files must not run at the same time. This mirrors
+    // how pytest-django runs the Django backend's suite.
+    fileParallelism: false,
+    globalSetup: ['src/__tests__/global-setup.ts'],
+    setupFiles: ['src/__tests__/setup.ts'],
+  },
+})

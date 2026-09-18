@@ -1,0 +1,13 @@
+
+model {{Name}} {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String   @default("")
+  created_by    User     @relation(fields: [created_by_id], references: [id], onDelete: Cascade)
+  created_by_id Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@index([created_by_id])
+  @@map("{{snakes}}")
+}

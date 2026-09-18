@@ -4,6 +4,13 @@ sidebar_position: 11
 
 # blacksmith setup:backend
 
+:::note Express backends
+On an Express project, `blacksmith setup:backend` installs npm dependencies and applies
+Prisma migrations with `prisma migrate deploy`. The `python` and `venv` subcommands are
+Django-only and exit with an error; `deps` works on both.
+:::
+
+
 :::info Requires Backend
 This command is only available for fullstack and backend-only projects. Frontend-only projects will receive an error.
 :::

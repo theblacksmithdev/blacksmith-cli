@@ -216,6 +216,23 @@ describe('file-based template operations', () => {
   })
 })
 
+describe('JSX and f-string brace handling', () => {
+  it('should keep a Python f-string that wraps a Handlebars expression', () => {
+    // From templates/resource/backend/tests.py.hbs — `{ {{snake}}.id }` must
+    // survive as an f-string placeholder, not be eaten as a triple-brace.
+    const result = renderTemplate(
+      "return f'/api/{{snakes}}/{ {{snake}}.id }/'",
+      { snake: 'product', snakes: 'products' }
+    )
+    expect(result).toBe("return f'/api/products/{ product.id }/'")
+  })
+
+  it('should keep a JSX expression container around a Handlebars expression', () => {
+    const result = renderTemplate('<div>{ {{name}} }</div>', { name: 'value' })
+    expect(result).toBe('<div>{ value }</div>')
+  })
+})
+
 describe('resolveOutputName', () => {
   it('should restore the leading dot on dotfile templates', () => {
     expect(resolveOutputName('gitignore')).toBe('.gitignore')

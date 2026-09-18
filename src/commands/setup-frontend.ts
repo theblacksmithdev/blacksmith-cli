@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { findProjectRoot, getFrontendDir, hasFrontend } from '../utils/paths.js'
-import { exec, commandExists } from '../utils/exec.js'
+import { exec, execSilent, commandExists } from '../utils/exec.js'
 import { ensureGitignore } from '../utils/gitignore.js'
 import { log, spinner } from '../utils/logger.js'
 
@@ -28,10 +28,10 @@ export async function setupFrontendNode() {
 
   if (hasNode && hasNpm) {
     log.success('Node.js and npm are already installed')
-    const nodeResult = await exec('node', ['--version'], { silent: true })
-    const npmResult = await exec('npm', ['--version'], { silent: true })
-    log.step(`Node: ${nodeResult.stdout.trim()}`)
-    log.step(`npm: ${npmResult.stdout.trim()}`)
+    const nodeVersion = await execSilent('node', ['--version'])
+    const npmVersion = await execSilent('npm', ['--version'])
+    log.step(`Node: ${nodeVersion.trim()}`)
+    log.step(`npm: ${npmVersion.trim()}`)
     return
   }
 

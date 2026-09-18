@@ -4,20 +4,147 @@ sidebar_position: 7
 
 # Testing
 
-Blacksmith projects include a complete frontend testing setup with Vitest, React Testing Library, and co-located test utilities. This guide covers the conventions, patterns, and tools for writing effective tests.
+:::note Express backends
+Backend tests use Vitest + Supertest rather than pytest. Specs live beside the code as
+`*.spec.ts`, run sequentially against a shared SQLite database, and every table is emptied
+between tests. `blacksmith test` works the same either way.
+:::
+
+
+Blacksmith projects ship with a working test suite on both sides: **pytest** for the
+Django backend and **Vitest** with React Testing Library for the React frontend. A
+freshly generated project has passing tests from the first commit, and
+`make:resource` scaffolds tests for every resource you add.
 
 ## Quick Start
 
 ```bash
-# Run all frontend tests
-blacksmith frontend test
+# Run every suite the project has
+blacksmith test
 
-# Watch mode (re-runs on file changes)
-blacksmith frontend run test:watch
+# One side only
+blacksmith test --backend
+blacksmith test --frontend
 
-# With coverage report
-blacksmith frontend run test:coverage
+# With coverage
+blacksmith test --coverage
+
+# Watch one suite while you work
+blacksmith test --frontend --watch
 ```
+
+See [`blacksmith test`](../commands/test.md) for the full command reference.
+
+---
+
+# Backend (pytest)
+
+## Test Stack
+
+| Tool | Purpose |
+|------|---------|
+| [pytest](https://docs.pytest.org/) | Test runner, configured in `pytest.ini` |
+| [pytest-django](https://pytest-django.readthedocs.io/) | Django integration: the `db` fixture, settings wiring, `django_user_model` |
+| [pytest-cov](https://pytest-cov.readthedocs.io/) | Coverage reporting |
+| [DRF APIClient](https://www.django-rest-framework.org/api-guide/testing/) | Authenticated API requests |
+
+## File Placement
+
+Tests live in `tests.py` inside each app, next to the code they cover:
+
+```
+backend/
+├── pytest.ini                  # DJANGO_SETTINGS_MODULE and discovery rules
+├── conftest.py                 # Shared fixtures, available everywhere
+├── config/settings/test.py     # Settings used only by the test suite
+└── apps/
+    ├── users/tests.py
+    └── products/tests.py       # Created by make:resource
+```
+
+`pytest.ini` also picks up `test_*.py` and `*_tests.py`, so split a large
+`tests.py` into a `tests/` package whenever it outgrows one file.
+
+## Test Settings
+
+The suite runs against `config/settings/test.py`, never your development
+settings. It is deliberately self-contained so CI, a fresh clone and your
+machine all behave identically:
+
+- An **in-memory SQLite** database — fast, and never touches `db.sqlite3`
+- **MD5 password hashing** — the default PBKDF2 hasher dominates runtime when tests create users
+- A **fixed `SECRET_KEY`** — the suite never reads your `.env`
+- **`locmem` email** — assert on `django.core.mail.outbox` instead of sending
+
+## Fixtures
+
+`conftest.py` provides these to every test without an import:
+
+| Fixture | What it gives you |
+|---------|-------------------|
+| `api_client` | An unauthenticated DRF `APIClient` |
+| `auth_client` | An `APIClient` already authenticated as `user` |
+| `user` | A saved ordinary user |
+| `other_user` | A second user, for ownership and permission boundaries |
+| `admin_user` | A superuser |
+| `test_password` | The password every fixture user is created with |
+
+```python
+def test_returns_the_current_user(auth_client, user):
+    response = auth_client.get('/api/auth/me/')
+
+    assert response.status_code == 200
+    assert response.data['email'] == user.email
+```
+
+Any test that touches the database needs either a fixture that already does
+(`user`, `auth_client`, ...) or pytest-django's `db` fixture:
+
+```python
+def test_requires_authentication(api_client, db):
+    assert api_client.get('/api/products/').status_code == 401
+```
+
+## Writing Tests
+
+Group related cases in a class — no base class needed, and the name shows up in
+the failure output:
+
+```python
+class TestCreateProduct:
+    def test_creates_a_product(self, auth_client):
+        response = auth_client.post('/api/products/', {'title': 'New Product'})
+
+        assert response.status_code == 201
+        assert response.data['title'] == 'New Product'
+
+    def test_assigns_the_current_user_as_owner(self, auth_client, user):
+        auth_client.post('/api/products/', {'title': 'New Product'})
+
+        assert Product.objects.get(title='New Product').created_by == user
+```
+
+Resource viewsets are scoped to `created_by=request.user`, so always cover the
+ownership boundary — `other_user` exists for exactly this:
+
+```python
+def test_returns_404_for_another_users_product(self, auth_client, other_user):
+    theirs = Product.objects.create(title='Not Yours', created_by=other_user)
+
+    response = auth_client.get(f'/api/products/{ theirs.id }/')
+
+    assert response.status_code == 404
+```
+
+## Coverage
+
+```bash
+blacksmith test --backend --coverage
+```
+
+---
+
+# Frontend (Vitest)
 
 ## Test Stack
 
@@ -66,7 +193,7 @@ pages/customers/
 
 All component tests should use `renderWithProviders` from `src/__tests__/test-utils.tsx` instead of importing `render` from `@testing-library/react` directly. This wraps your component with all the app's providers:
 
-- **ThemeProvider** — consistent light mode for deterministic tests
+- **ChakraProvider** — the app's theme, for deterministic snapshots
 - **QueryClientProvider** — test-friendly QueryClient (no retries, no GC)
 - **MemoryRouter** — routing support without a real browser history
 
@@ -318,3 +445,60 @@ beforeEach(() => {
 5. **Prefer `getByRole` and `getByText`** — use `getByTestId` only as a last resort
 6. **Keep tests focused** — a component test doesn't need to test its child components in detail
 7. **Update tests with code** — when you modify a component, update its tests. When you delete a component, delete its tests
+
+---
+
+# Continuous Integration
+
+Every generated project includes `.github/workflows/ci.yml`, which runs both
+suites on pushes to `main` and on every pull request. Fullstack projects get two
+parallel jobs; single-stack projects get the one that applies.
+
+## What Runs
+
+**Backend job**
+
+1. Install Python dependencies from `requirements.txt`
+2. `manage.py makemigrations --check --dry-run` — fails if a model change has no migration
+3. `pytest --cov`
+
+**Frontend job**
+
+1. Rebuild the typed API client (fullstack only — see below)
+2. `npm ci`
+3. `npm run test`
+4. `npm run build`
+
+## Why CI Regenerates the API Client
+
+`src/api/generated/` is git-ignored, because it is derived from the Django
+schema rather than written by hand. That means it does not exist in a fresh
+clone, so CI rebuilds it before type-checking the frontend:
+
+```yaml
+- name: Export OpenAPI schema
+  run: python manage.py spectacular --file ../frontend/_schema.yml
+  working-directory: backend
+
+- name: Generate API client
+  run: npx openapi-ts --input _schema.yml --output src/api/generated
+```
+
+`manage.py spectacular` writes the schema offline — no server needs to be
+running. This is the same path [`blacksmith sync`](../commands/sync.md) takes
+locally.
+
+## Customizing
+
+The workflow is yours once generated; Blacksmith never overwrites it. Common
+changes:
+
+- **Python or Node version** — edit `python-version` / `node-version`
+- **A real database** — add a `services:` block for Postgres and point
+  `config/settings/test.py` at it
+- **Coverage thresholds** — add `--cov-fail-under=80` to the pytest step
+
+:::note
+An existing project created before CI shipped picks the workflow up the next
+time you run [`blacksmith setup`](../commands/setup.md).
+:::

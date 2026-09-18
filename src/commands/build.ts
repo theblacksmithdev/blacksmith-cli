@@ -1,4 +1,4 @@
-import { findProjectRoot, getBackendDir, getFrontendDir, hasBackend, hasFrontend } from '../utils/paths.js'
+import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, hasBackend, hasFrontend } from '../utils/paths.js'
 import { exec, execPython } from '../utils/exec.js'
 import { log, spinner } from '../utils/logger.js'
 
@@ -13,6 +13,7 @@ export async function build() {
 
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
+  const isExpressBackend = projectHasBackend && getBackendFramework(root) === 'express'
 
   // Build frontend
   if (projectHasFrontend) {
@@ -28,21 +29,36 @@ export async function build() {
     }
   }
 
-  // Collect static files
+  // Compile the backend (Express) or collect static files (Django)
   if (projectHasBackend) {
     const backendDir = getBackendDir(root)
-    const backendSpinner = spinner('Collecting static files...')
-    try {
-      await execPython(
-        ['manage.py', 'collectstatic', '--noinput'],
-        backendDir,
-        true
-      )
-      backendSpinner.succeed('Static files collected')
-    } catch (error: any) {
-      backendSpinner.fail('Failed to collect static files')
-      log.error(error.message || error)
-      process.exit(1)
+
+    if (isExpressBackend) {
+      const backendSpinner = spinner('Building backend...')
+      try {
+        // The template's build script regenerates the Prisma client first, so
+        // a clean checkout compiles without a separate setup step.
+        await exec('npm', ['run', 'build'], { cwd: backendDir, silent: true })
+        backendSpinner.succeed('Backend built → dist/')
+      } catch (error: any) {
+        backendSpinner.fail('Backend build failed')
+        log.error(error.message || error)
+        process.exit(1)
+      }
+    } else {
+      const backendSpinner = spinner('Collecting static files...')
+      try {
+        await execPython(
+          ['manage.py', 'collectstatic', '--noinput'],
+          backendDir,
+          true
+        )
+        backendSpinner.succeed('Static files collected')
+      } catch (error: any) {
+        backendSpinner.fail('Failed to collect static files')
+        log.error(error.message || error)
+        process.exit(1)
+      }
     }
   }
 
@@ -50,6 +66,8 @@ export async function build() {
   log.success('Production build complete!')
   log.blank()
   if (projectHasFrontend) log.step('Frontend assets: dist/')
-  if (projectHasBackend) log.step('Backend ready for deployment')
+  if (projectHasBackend) {
+    log.step(isExpressBackend ? 'Backend output: dist/' : 'Backend ready for deployment')
+  }
   log.blank()
 }

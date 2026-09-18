@@ -1,7 +1,5 @@
-import path from 'node:path'
-import fs from 'node:fs'
-import { findProjectRoot, getBackendDir, getFrontendDir, getProjectType } from '../utils/paths.js'
-import { exec, execPython } from '../utils/exec.js'
+import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, getProjectType } from '../utils/paths.js'
+import { syncFrontendClient } from '../utils/openapi.js'
 import { log, spinner } from '../utils/logger.js'
 
 export async function sync() {
@@ -16,38 +14,17 @@ export async function sync() {
   const projectType = getProjectType(root)
   if (projectType !== 'fullstack') {
     log.error('The "sync" command is only available for fullstack projects.')
-    log.step('It generates frontend TypeScript types from the Django API schema.')
+    log.step('It generates frontend TypeScript types from the backend API schema.')
     process.exit(1)
   }
 
   const backendDir = getBackendDir(root)
   const frontendDir = getFrontendDir(root)
+  const isExpress = getBackendFramework(root) === 'express'
   const s = spinner('Syncing OpenAPI schema to frontend...')
 
   try {
-    // Generate schema offline using drf-spectacular management command
-    const schemaPath = path.join(frontendDir, '_schema.yml')
-    await execPython(['manage.py', 'spectacular', '--file', schemaPath], backendDir, true)
-
-    // Temporarily update the openapi-ts config to use the local schema file
-    const configPath = path.join(frontendDir, 'openapi-ts.config.ts')
-    const configBackup = fs.readFileSync(configPath, 'utf-8')
-    const configWithFile = configBackup.replace(
-      /path:\s*['"]http[^'"]+['"]/,
-      `path: './_schema.yml'`
-    )
-    fs.writeFileSync(configPath, configWithFile, 'utf-8')
-
-    try {
-      await exec(process.execPath, [path.join(frontendDir, 'node_modules', '.bin', 'openapi-ts')], {
-        cwd: frontendDir,
-        silent: true,
-      })
-    } finally {
-      // Always restore the original config and clean up the schema file
-      fs.writeFileSync(configPath, configBackup, 'utf-8')
-      if (fs.existsSync(schemaPath)) fs.unlinkSync(schemaPath)
-    }
+    await syncFrontendClient(backendDir, frontendDir, isExpress)
 
     s.succeed('Frontend types, schemas, and hooks synced from OpenAPI spec')
     log.blank()
@@ -62,5 +39,4 @@ export async function sync() {
     log.error(error.message || error)
     process.exit(1)
   }
-
 }

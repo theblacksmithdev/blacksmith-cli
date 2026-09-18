@@ -4,6 +4,13 @@ sidebar_position: 1
 
 # Project Structure
 
+:::note Express backends
+The layouts below show the Django backend. An Express backend replaces `apps/`, `config/`,
+`manage.py` and `venv/` with `src/` (config, db, middleware, modules, utils), `prisma/` and
+`package.json`. See [Express Backend](../stack/backend-express.md).
+:::
+
+
 The generated structure depends on the project type selected during `blacksmith init`.
 
 ## Fullstack (`--type fullstack`)
@@ -14,6 +21,7 @@ Both Django and React live in subdirectories:
 my-app/
 ├── blacksmith.config.json          # Project configuration (type: "fullstack")
 ├── .gitignore                      # Ignores venv/, node_modules/, .env, build output
+├── .github/workflows/ci.yml        # Runs both test suites on push and PR
 ├── CLAUDE.md                       # AI development guide (with --ai flag)
 │
 ├── backend/                        # Django project
@@ -21,13 +29,16 @@ my-app/
 │   │   ├── settings/
 │   │   │   ├── base.py             # Shared settings
 │   │   │   ├── development.py      # Development-specific settings
-│   │   │   └── production.py       # Production-specific settings
+│   │   │   ├── production.py       # Production-specific settings
+│   │   │   └── test.py             # Settings used by the pytest suite
 │   │   ├── urls.py                 # Root URL configuration
 │   │   ├── wsgi.py                 # WSGI entry point
 │   │   └── asgi.py                 # ASGI entry point
 │   ├── apps/                       # Django applications
-│   │   └── users/                  # Pre-built user auth app
+│   │   └── users/                  # Pre-built user auth app (with tests.py)
 │   ├── utils/                      # Shared backend utilities
+│   ├── conftest.py                 # Shared pytest fixtures
+│   ├── pytest.ini                  # pytest + pytest-django configuration
 │   ├── manage.py
 │   ├── requirements.txt
 │   ├── venv/                       # Python virtual environment (git-ignored)
@@ -37,6 +48,7 @@ my-app/
 │
 ├── frontend/                       # React + Vite project
 │   ├── src/
+│   │   ├── __tests__/              # Vitest setup and shared test utilities
 │   │   ├── api/                    # API client layer
 │   │   │   ├── generated/          # Auto-generated from OpenAPI (do not edit)
 │   │   │   └── hooks/              # Resource API hooks
@@ -100,6 +112,19 @@ my-ui/
 ├── package.json
 └── vite.config.ts
 ```
+
+## Tests
+
+Both sides ship with a working suite, and `make:resource` adds tests for every
+resource you generate. See the [Testing guide](./testing.md).
+
+| | Backend | Frontend |
+|---|---|---|
+| Runner | pytest + pytest-django | Vitest |
+| Config | `pytest.ini` | `test` block in `vite.config.ts` |
+| Fixtures / helpers | `conftest.py` | `src/__tests__/test-utils.tsx` |
+| Test files | `apps/<app>/tests.py` | `__tests__/*.spec.tsx` beside the source |
+| Run it | `blacksmith test --backend` | `blacksmith test --frontend` |
 
 ## Ignored Files
 

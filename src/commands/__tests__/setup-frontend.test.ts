@@ -10,6 +10,7 @@ const fsMocks = vi.hoisted(() => ({
 vi.mock('node:fs', () => ({ default: fsMocks }))
 
 const pathMocks = vi.hoisted(() => ({
+  getBackendFramework: vi.fn(() => 'django'),
   findProjectRoot: vi.fn(),
   getFrontendDir: vi.fn(),
   hasFrontend: vi.fn(() => true),
@@ -18,6 +19,7 @@ vi.mock('../../utils/paths.js', () => pathMocks)
 
 const execMocks = vi.hoisted(() => ({
   exec: vi.fn(),
+  execSilent: vi.fn(async () => 'v20.10.0'),
   commandExists: vi.fn(),
 }))
 vi.mock('../../utils/exec.js', () => execMocks)

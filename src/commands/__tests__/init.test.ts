@@ -9,12 +9,14 @@ import { mockExit } from '../../__tests__/setup.js'
 vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
+  getBackendFramework: vi.fn(() => 'django'),
   getTemplatesDir: vi.fn(),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 
 const templateMocks = vi.hoisted(() => ({
   renderDirectory: vi.fn(),
+  renderToFile: vi.fn(),
 }))
 vi.mock('../../utils/template.js', () => templateMocks)
 
@@ -216,6 +218,115 @@ describe('init', () => {
     const frontendCall = calls.find((c: any[]) => c[0] === '/templates/frontend')
     expect(frontendCall).toBeDefined()
     expect(frontendCall![2]).toMatchObject({ projectName: 'my-app' })
+  })
+
+  it('should record the backend framework in the config', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', {
+      type: 'fullstack',
+      backend: 'express',
+      backendPort: '8000',
+      frontendPort: '5173',
+      themeColor: 'default',
+      ai: false,
+    })
+
+    const config = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, 'my-app', 'blacksmith.config.json'), 'utf-8')
+    )
+    expect(config.backend.framework).toBe('express')
+  })
+
+  it('should default the backend framework to django', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', { type: 'backend', backendPort: '8000', ai: false })
+
+    const config = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, 'my-app', 'blacksmith.config.json'), 'utf-8')
+    )
+    expect(config.backend.framework).toBe('django')
+  })
+
+  it('should exit on an unknown backend framework', async () => {
+    execMocks.commandExists.mockResolvedValue(true)
+
+    await expect(
+      init('my-app', { type: 'backend', backend: 'fastify', backendPort: '8000', ai: false })
+    ).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith(
+      'Invalid backend framework: "fastify". Must be one of: django, express'
+    )
+  })
+
+  it('should render the Express backend templates for an express project', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', {
+      type: 'fullstack',
+      backend: 'express',
+      backendPort: '8000',
+      frontendPort: '5173',
+      themeColor: 'default',
+      ai: false,
+    })
+
+    const calls = templateMocks.renderDirectory.mock.calls
+    expect(calls.find((c: any[]) => c[0] === '/templates/backend-express')).toBeDefined()
+    expect(calls.find((c: any[]) => c[0] === '/templates/backend')).toBeUndefined()
+  })
+
+  it('should not require Python for an Express backend', async () => {
+    setupSuccessfulInit()
+    execMocks.commandExists.mockImplementation(async (cmd: string) => cmd !== 'python3')
+
+    await init('my-app', { type: 'backend', backend: 'express', backendPort: '8000', ai: false })
+
+    expect(mockExit).not.toHaveBeenCalled()
+  })
+
+  it('should install npm dependencies and migrate with Prisma for an Express backend', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', { type: 'backend', backend: 'express', backendPort: '8000', ai: false })
+
+    const backendDir = path.join(fs.realpathSync(tmpDir), 'my-app')
+
+    expect(execMocks.exec).toHaveBeenCalledWith(
+      'npm',
+      ['install'],
+      { cwd: backendDir, silent: true }
+    )
+    expect(execMocks.exec).toHaveBeenCalledWith(
+      'npx',
+      ['prisma', 'generate'],
+      { cwd: backendDir, silent: true }
+    )
+    expect(execMocks.exec).toHaveBeenCalledWith(
+      'npx',
+      ['prisma', 'migrate', 'dev', '--name', 'init', '--skip-seed'],
+      { cwd: backendDir, silent: true }
+    )
+    // No Python toolchain is touched
+    expect(execMocks.execPip).not.toHaveBeenCalled()
+    expect(execMocks.execPython).not.toHaveBeenCalled()
+  })
+
+  it('should write an Express .gitignore that ignores node_modules and the database', async () => {
+    setupSuccessfulInit()
+    pathMocks.getTemplatesDir.mockReturnValue(REAL_TEMPLATES_DIR)
+
+    await init('api-only', { type: 'backend', backend: 'express', backendPort: '8000', ai: false })
+
+    const content = fs.readFileSync(
+      path.join(tmpDir, 'api-only', '.gitignore'),
+      'utf-8'
+    )
+    expect(content).toMatch(/^node_modules\/$/m)
+    expect(content).toMatch(/^prisma\/\*\.db$/m)
+    expect(content).not.toMatch(/^venv\/$/m)
   })
 
   it('should install Python dependencies and run migrations', async () => {

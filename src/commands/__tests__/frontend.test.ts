@@ -5,6 +5,7 @@ import { mockExit } from '../../__tests__/setup.js'
 vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
+  getBackendFramework: vi.fn(() => 'django'),
   findProjectRoot: vi.fn(),
   getFrontendDir: vi.fn(),
   hasFrontend: vi.fn(() => true),
