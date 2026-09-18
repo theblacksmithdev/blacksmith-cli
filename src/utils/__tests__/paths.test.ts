@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { useTmpDir } from '../../__tests__/helpers.js'
-import { findProjectRoot, getBackendDir, getFrontendDir, getProjectType, hasBackend, hasFrontend, loadConfig, dirExists, fileExists } from '../paths.js'
+import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, getProjectType, hasBackend, hasFrontend, loadConfig, dirExists, fileExists } from '../paths.js'
 
 describe('findProjectRoot', () => {
   const getTmpDir = useTmpDir()
@@ -37,6 +37,29 @@ describe('getProjectType', () => {
   it('should return the configured type', () => {
     fs.writeFileSync(path.join(getTmpDir(), 'blacksmith.config.json'), JSON.stringify({ name: 'test', type: 'backend' }))
     expect(getProjectType(getTmpDir())).toBe('backend')
+  })
+})
+
+describe('getBackendFramework', () => {
+  const getTmpDir = useTmpDir()
+
+  function writeConfig(dir: string, config: Record<string, unknown>) {
+    fs.writeFileSync(path.join(dir, 'blacksmith.config.json'), JSON.stringify(config))
+  }
+
+  it('should return "django" when no backend section is set (backward compat)', () => {
+    writeConfig(getTmpDir(), { name: 'test' })
+    expect(getBackendFramework(getTmpDir())).toBe('django')
+  })
+
+  it('should return "django" for a project generated before Express support', () => {
+    writeConfig(getTmpDir(), { name: 'test', backend: { port: 8000 } })
+    expect(getBackendFramework(getTmpDir())).toBe('django')
+  })
+
+  it('should return the configured framework', () => {
+    writeConfig(getTmpDir(), { name: 'test', backend: { port: 8000, framework: 'express' } })
+    expect(getBackendFramework(getTmpDir())).toBe('express')
   })
 })
 

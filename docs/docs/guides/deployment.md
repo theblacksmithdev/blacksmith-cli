@@ -4,6 +4,14 @@ sidebar_position: 6
 
 # Deployment
 
+:::note Express backends
+The Django sections below do not apply to an Express backend. Build it with
+`blacksmith build` (which emits `backend/dist/`), run it with `node dist/index.js`, apply
+migrations with `prisma migrate deploy`, and set `JWT_SECRET`, `DATABASE_URL` and
+`CORS_ALLOWED_ORIGINS` in the environment.
+:::
+
+
 This guide covers preparing your Blacksmith project for production deployment.
 
 ## Build for Production

@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { findProjectRoot, loadConfig } from '../utils/paths.js'
+import { findProjectRoot, getBackendFramework, loadConfig } from '../utils/paths.js'
 import { log } from '../utils/logger.js'
 
 export async function eject() {
@@ -14,6 +14,7 @@ export async function eject() {
 
   const config = loadConfig(root)
   const projectType = config.type || 'fullstack'
+  const backendName = getBackendFramework(root) === 'express' ? 'Express' : 'Django'
   const configPath = path.join(root, 'blacksmith.config.json')
 
   if (fs.existsSync(configPath)) {
@@ -24,9 +25,9 @@ export async function eject() {
   log.blank()
 
   if (projectType === 'fullstack') {
-    log.step('Your project is now a standard Django + React project.')
+    log.step(`Your project is now a standard ${backendName} + React project.`)
   } else if (projectType === 'backend') {
-    log.step('Your project is now a standard Django project.')
+    log.step(`Your project is now a standard ${backendName} project.`)
   } else {
     log.step('Your project is now a standard React project.')
   }
@@ -36,12 +37,15 @@ export async function eject() {
   log.blank()
   log.info('To continue development without Blacksmith:')
 
+  const startBackend =
+    backendName === 'Express' ? 'npm run dev' : './venv/bin/python manage.py runserver'
+
   if (projectType === 'fullstack') {
-    log.step('Backend:  cd backend && ./venv/bin/python manage.py runserver')
+    log.step(`Backend:  cd backend && ${startBackend}`)
     log.step('Frontend: cd frontend && npm run dev')
     log.step('Codegen:  cd frontend && npx openapi-ts')
   } else if (projectType === 'backend') {
-    log.step('Start:    ./venv/bin/python manage.py runserver')
+    log.step(`Start:    ${startBackend}`)
   } else {
     log.step('Start:    npm run dev')
   }

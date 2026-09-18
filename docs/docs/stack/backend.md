@@ -2,7 +2,10 @@
 sidebar_position: 1
 ---
 
-# Backend Stack
+# Django Backend Stack
+
+The default backend. For the TypeScript alternative see [Express Backend](./backend-express.md),
+and [Choosing a Backend](../guides/choosing-a-backend.md) for how to pick.
 
 Blacksmith's backend is built on Django and Django REST Framework, with several carefully chosen packages for a production-ready setup.
 

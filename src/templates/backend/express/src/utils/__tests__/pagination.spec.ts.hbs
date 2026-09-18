@@ -1,0 +1,61 @@
+import { describe, expect, it } from 'vitest'
+import type { Request } from 'express'
+import { pageBounds, paginated, resolvePage } from '../pagination.js'
+
+/** Minimal stand-in for the parts of `Request` that pagination reads. */
+function req(url: string): Request {
+  return {
+    originalUrl: url,
+    protocol: 'http',
+    get: () => 'localhost:{{backendPort}}',
+  } as unknown as Request
+}
+
+describe('resolvePage', () => {
+  it('falls back to page 1 for missing or nonsense values', () => {
+    expect(resolvePage(undefined)).toBe(1)
+    expect(resolvePage('0')).toBe(1)
+    expect(resolvePage('-3')).toBe(1)
+    expect(resolvePage('abc')).toBe(1)
+  })
+
+  it('accepts a positive page number', () => {
+    expect(resolvePage('4')).toBe(4)
+  })
+})
+
+describe('pageBounds', () => {
+  it('maps a page number to Prisma skip/take', () => {
+    expect(pageBounds(1, 20)).toEqual({ skip: 0, take: 20 })
+    expect(pageBounds(3, 20)).toEqual({ skip: 40, take: 20 })
+  })
+})
+
+describe('paginated', () => {
+  it('returns the DRF envelope the frontend hooks read', () => {
+    const page = paginated(req('/api/things/'), ['a'], 45, 1, 20)
+
+    expect(Object.keys(page).sort()).toEqual(['count', 'next', 'previous', 'results'])
+    expect(page.count).toBe(45)
+    expect(page.results).toEqual(['a'])
+  })
+
+  it('links forward and back with absolute urls, omitting page=1', () => {
+    const page = paginated(req('/api/things/?page=2'), [], 45, 2, 20)
+
+    expect(page.next).toBe('http://localhost:{{backendPort}}/api/things/?page=3')
+    expect(page.previous).toBe('http://localhost:{{backendPort}}/api/things/')
+  })
+
+  it('has no next link on the last page', () => {
+    expect(paginated(req('/api/things/?page=3'), [], 45, 3, 20).next).toBeNull()
+    expect(paginated(req('/api/things/'), [], 0, 1, 20).previous).toBeNull()
+  })
+
+  it('preserves other query params when paging', () => {
+    const page = paginated(req('/api/things/?search=hi&ordering=-created_at'), [], 45, 1, 20)
+
+    expect(page.next).toContain('search=hi')
+    expect(page.next).toContain('ordering=-created_at')
+  })
+})

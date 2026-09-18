@@ -10,6 +10,7 @@ const pathMocks = vi.hoisted(() => ({
   getFrontendDir: vi.fn(),
   hasBackend: vi.fn(() => true),
   hasFrontend: vi.fn(() => true),
+  getBackendFramework: vi.fn(() => 'django'),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 
@@ -72,5 +73,21 @@ describe('build', () => {
 
     await expect(build()).rejects.toThrow('process.exit called')
     expect(mockExit).toHaveBeenCalledWith(1)
+  })
+
+  it('should compile an Express backend instead of collecting static files', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.getBackendFramework.mockReturnValue('express')
+    execMocks.exec.mockResolvedValue({})
+
+    await build()
+
+    expect(execMocks.exec).toHaveBeenCalledWith('npm', ['run', 'build'], {
+      cwd: '/project/backend',
+      silent: true,
+    })
+    expect(execMocks.execPython).not.toHaveBeenCalled()
   })
 })

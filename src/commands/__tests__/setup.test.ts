@@ -7,6 +7,8 @@ vi.mock('../../utils/logger.js', () => createLoggerMock())
 const pathMocks = vi.hoisted(() => ({
   findProjectRoot: vi.fn(),
   getProjectType: vi.fn(() => 'fullstack'),
+  getBackendFramework: vi.fn(() => 'django'),
+  loadConfig: vi.fn(() => ({ name: 'my-app', version: '0.1.0', type: 'fullstack' })),
   hasBackend: vi.fn(),
   hasFrontend: vi.fn(),
 }))
@@ -16,6 +18,12 @@ const gitignoreMocks = vi.hoisted(() => ({
   ensureGitignore: vi.fn(() => false),
 }))
 vi.mock('../../utils/gitignore.js', () => gitignoreMocks)
+
+const scaffoldMocks = vi.hoisted(() => ({
+  ensureCiWorkflow: vi.fn(() => false),
+  projectLayout: vi.fn(() => ({ isFullstack: true })),
+}))
+vi.mock('../../utils/scaffold.js', () => scaffoldMocks)
 
 const backendMocks = vi.hoisted(() => ({
   setupBackend: vi.fn(),

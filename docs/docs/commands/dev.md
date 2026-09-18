@@ -4,6 +4,12 @@ sidebar_position: 2
 
 # blacksmith dev
 
+:::note Express backends
+The backend process is `npm run dev` (tsx watch) instead of the Django development server,
+and the OpenAPI watcher follows `.ts` files rather than `.py`. Everything else is the same.
+:::
+
+
 Start the development server with hot reloading and automatic type synchronization.
 
 ## Usage

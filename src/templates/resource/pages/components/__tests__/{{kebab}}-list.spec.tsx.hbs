@@ -1,0 +1,41 @@
+import { screen, renderWithProviders } from '@/__tests__/test-utils'
+import { {{Name}}List } from '../{{kebab}}-list'
+
+const items = [
+  { id: '1', title: 'First {{Name}}', created_at: '2024-01-15T10:00:00Z' },
+  {
+    id: '2',
+    title: 'Second {{Name}}',
+    description: 'With a description.',
+    created_at: '2024-02-20T10:00:00Z',
+  },
+]
+
+describe('{{Name}}List', () => {
+  it('shows loading skeletons while loading', () => {
+    const { container } = renderWithProviders(
+      <{{Name}}List {{names}}={[]} isLoading />
+    )
+
+    expect(container.querySelectorAll('.animate-pulse')).toHaveLength(6)
+  })
+
+  it('shows the empty state when there are no {{names}}', () => {
+    renderWithProviders(<{{Name}}List {{names}}={[]} />)
+
+    expect(screen.getByText(/no {{names}} yet/i)).toBeInTheDocument()
+  })
+
+  it('renders a card per {{name}}', () => {
+    renderWithProviders(<{{Name}}List {{names}}={items} />)
+
+    expect(screen.getByText('First {{Name}}')).toBeInTheDocument()
+    expect(screen.getByText('Second {{Name}}')).toBeInTheDocument()
+  })
+
+  it('prefers the list over the empty state when both could apply', () => {
+    renderWithProviders(<{{Name}}List {{names}}={items} />)
+
+    expect(screen.queryByText(/no {{names}} yet/i)).not.toBeInTheDocument()
+  })
+})

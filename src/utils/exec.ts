@@ -36,7 +36,7 @@ export async function exec(command: string, args: string[], options: ExecOptions
  */
 export async function execSilent(command: string, args: string[], cwd?: string): Promise<string> {
   const result = await exec(command, args, { cwd, silent: true })
-  return result.stdout
+  return result.stdout ?? ''
 }
 
 /**

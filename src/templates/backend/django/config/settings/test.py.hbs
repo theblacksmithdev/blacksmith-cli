@@ -1,0 +1,46 @@
+"""
+Test settings for {{projectName}}.
+
+Used by pytest via DJANGO_SETTINGS_MODULE in pytest.ini. Deliberately
+self-contained: tests must not depend on a local .env file, so CI and a
+fresh clone behave the same as your machine.
+"""
+
+from .base import *  # noqa: F401, F403
+
+DEBUG = False
+
+ALLOWED_HOSTS = ['*']
+
+# Fixed key so tests never read DJANGO_SECRET_KEY from the environment.
+# Long enough to satisfy the HMAC key length SimpleJWT expects for SHA256.
+SECRET_KEY = 'django-insecure-test-key-not-used-outside-the-test-suite'
+
+# In-memory database — faster, and never touches db.sqlite3
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
+}
+
+# Fast hashing: the default PBKDF2 hasher dominates runtime when tests
+# create users, and test passwords do not need to be expensive.
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+]
+
+# Keep sent mail in memory so tests can assert on it
+EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+
+# Don't let missing static files fail a test run
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
+
+CORS_ALLOW_ALL_ORIGINS = True

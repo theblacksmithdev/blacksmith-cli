@@ -1,6 +1,6 @@
 import net from 'node:net'
 import concurrently from 'concurrently'
-import { findProjectRoot, getBackendDir, getFrontendDir, loadConfig, hasBackend, hasFrontend } from '../utils/paths.js'
+import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, loadConfig, hasBackend, hasFrontend } from '../utils/paths.js'
 import path from 'node:path'
 import { log } from '../utils/logger.js'
 
@@ -36,6 +36,7 @@ export async function dev() {
   const config = loadConfig(root)
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
+  const isExpressBackend = projectHasBackend && getBackendFramework(root) === 'express'
 
   let backendPort: number | undefined
   let frontendPort: number | undefined
@@ -61,14 +62,14 @@ export async function dev() {
   log.info('Starting development server' + (projectHasBackend && projectHasFrontend ? 's' : '') + '...')
   log.blank()
   if (projectHasBackend && backendPort) {
-    log.step(`Django      → http://localhost:${backendPort}`)
+    log.step(`${isExpressBackend ? 'Express' : 'Django '}     → http://localhost:${backendPort}`)
     log.step(`Swagger     → http://localhost:${backendPort}/api/docs/`)
   }
   if (projectHasFrontend && frontendPort) {
     log.step(`Vite        → http://localhost:${frontendPort}`)
   }
   if (projectHasBackend && projectHasFrontend) {
-    log.step('OpenAPI sync → watching backend .py files')
+    log.step(`OpenAPI sync → watching backend ${isExpressBackend ? '.ts' : '.py'} files`)
   }
   log.blank()
 
@@ -76,12 +77,24 @@ export async function dev() {
 
   if (projectHasBackend && backendPort) {
     const backendDir = getBackendDir(root)
-    processes.push({
-      command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
-      name: 'django',
-      cwd: backendDir,
-      prefixColor: 'green',
-    })
+    processes.push(
+      isExpressBackend
+        ? {
+            command: 'npm run dev',
+            name: 'express',
+            cwd: backendDir,
+            // The generated server reads PORT, so a port collision resolved
+            // above is respected without editing .env
+            env: { PORT: String(backendPort) },
+            prefixColor: 'green',
+          }
+        : {
+            command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
+            name: 'django',
+            cwd: backendDir,
+            prefixColor: 'green',
+          }
+    )
   }
 
   if (projectHasFrontend && frontendPort) {
@@ -99,12 +112,25 @@ export async function dev() {
     const backendDir = getBackendDir(root)
     const frontendDir = getFrontendDir(root)
     const syncCmd = `${process.execPath} ${path.join(frontendDir, 'node_modules', '.bin', 'openapi-ts')}`
+
+    // Source extension and the paths worth ignoring differ per framework, but
+    // the sync itself does not: openapi-ts reads /api/schema/ off whichever
+    // dev server is running.
+    const watchExt = isExpressBackend ? '.ts' : '.py'
+    const ignoredPrefixes = isExpressBackend
+      ? ['node_modules/', 'dist/', '.git/']
+      : ['venv/']
+    const ignoredFragments = isExpressBackend
+      ? ['/node_modules/', '/dist/']
+      : ['__pycache__', '/migrations/']
+
     const watcherCode = [
       `const{watch}=require("fs"),{exec}=require("child_process");`,
       `let t=null,s=false;`,
+      `const P=${JSON.stringify(ignoredPrefixes)},G=${JSON.stringify(ignoredFragments)};`,
       `watch(${JSON.stringify(backendDir)},{recursive:true},(e,f)=>{`,
-      `if(!f||!f.endsWith(".py"))return;`,
-      `if(f.startsWith("venv/")||f.includes("__pycache__")||f.includes("/migrations/"))return;`,
+      `if(!f||!f.endsWith(${JSON.stringify(watchExt)}))return;`,
+      `if(P.some(p=>f.startsWith(p))||G.some(g=>f.includes(g)))return;`,
       `if(t)clearTimeout(t);`,
       `t=setTimeout(()=>{`,
       `if(s)return;s=true;`,
@@ -115,7 +141,7 @@ export async function dev() {
       `else console.log("OpenAPI types synced");`,
       `})`,
       `},2000)});`,
-      `console.log("Watching for .py changes...");`,
+      `console.log("Watching for ${watchExt} changes...");`,
     ].join('')
 
     processes.push({

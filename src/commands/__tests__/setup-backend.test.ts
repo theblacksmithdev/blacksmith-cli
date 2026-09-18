@@ -13,11 +13,13 @@ const pathMocks = vi.hoisted(() => ({
   findProjectRoot: vi.fn(),
   getBackendDir: vi.fn(),
   hasBackend: vi.fn(() => true),
+  getBackendFramework: vi.fn(() => 'django'),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 
 const execMocks = vi.hoisted(() => ({
   exec: vi.fn(),
+  execSilent: vi.fn(async () => 'Python 3.12.0'),
   execPip: vi.fn(),
   execPython: vi.fn(),
   commandExists: vi.fn(),
@@ -85,7 +87,6 @@ describe('setupBackendPython', () => {
       .mockResolvedValueOnce(false) // pip3
       .mockResolvedValueOnce(false) // pip
     execMocks.exec
-      .mockResolvedValueOnce({ stdout: 'Python 3.12.0' }) // python3 --version
       .mockResolvedValueOnce({}) // ensurepip
 
     await setupBackendPython()
@@ -108,7 +109,6 @@ describe('setupBackendPython', () => {
     Object.defineProperty(process, 'platform', { value: 'linux' })
 
     execMocks.exec
-      .mockResolvedValueOnce({ stdout: 'Python 3.12.0' }) // python3 --version
       .mockRejectedValueOnce(new Error('ensurepip not available')) // ensurepip fails
       .mockResolvedValueOnce({}) // apt-get install
 
@@ -310,5 +310,52 @@ describe('setupBackend', () => {
     expect(log.success).toHaveBeenCalledWith(
       'Backend setup complete! Run "blacksmith dev" to start the server.'
     )
+  })
+})
+
+describe('setup:backend on an Express project', () => {
+  it('refuses the venv subcommand', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('express')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+
+    await expect(setupBackendVenv()).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith(
+      '"setup:backend venv" applies to Django backends. This project uses Express.'
+    )
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+
+  it('refuses the python subcommand', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('express')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+
+    await expect(setupBackendPython()).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith(
+      '"setup:backend python" applies to Django backends. This project uses Express.'
+    )
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+
+  it('installs npm dependencies and applies migrations for deps', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('express')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    fsMocks.existsSync.mockReturnValue(true)
+    execMocks.exec.mockResolvedValue({})
+
+    await setupBackendDeps()
+
+    expect(execMocks.exec).toHaveBeenCalledWith('npm', ['install'], {
+      cwd: '/project/backend',
+      silent: true,
+    })
+    // `migrate deploy` applies committed migrations without prompting
+    expect(execMocks.exec).toHaveBeenCalledWith('npx', ['prisma', 'migrate', 'deploy'], {
+      cwd: '/project/backend',
+      silent: true,
+    })
+    expect(execMocks.execPip).not.toHaveBeenCalled()
+    pathMocks.getBackendFramework.mockReturnValue('django')
   })
 })

@@ -1,11 +1,18 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { findProjectRoot, getBackendDir, hasBackend } from '../utils/paths.js'
-import { exec, execPip, execPython, commandExists } from '../utils/exec.js'
+import { findProjectRoot, getBackendDir, getBackendFramework, hasBackend } from '../utils/paths.js'
+import type { BackendFramework } from '../utils/paths.js'
+import { exec, execPip, execPython, execSilent, commandExists } from '../utils/exec.js'
 import { ensureGitignore } from '../utils/gitignore.js'
 import { log, spinner } from '../utils/logger.js'
 
-function ensureBackendProject(): string {
+interface BackendProject {
+  dir: string
+  framework: BackendFramework
+  isExpress: boolean
+}
+
+function ensureBackendProject(): BackendProject {
   let root: string
   try {
     root = findProjectRoot()
@@ -19,15 +26,50 @@ function ensureBackendProject(): string {
     process.exit(1)
   }
 
-  return getBackendDir(root)
+  return describeBackend(root)
+}
+
+/** The backend project we are inside, or null when there is none. */
+function findBackendProject(): BackendProject | null {
+  let root: string
+  try {
+    root = findProjectRoot()
+  } catch {
+    return null
+  }
+  return hasBackend(root) ? describeBackend(root) : null
+}
+
+function describeBackend(root: string): BackendProject {
+  const framework = getBackendFramework(root)
+  return { dir: getBackendDir(root), framework, isExpress: framework === 'express' }
+}
+
+/**
+ * Stop a Python-only subcommand from running against an Express backend.
+ *
+ * Without this the venv step would silently create a `venv/` directory inside
+ * a Node project.
+ */
+function rejectOnExpress(project: BackendProject, command: string): void {
+  if (!project.isExpress) return
+  log.error(`"${command}" applies to Django backends. This project uses Express.`)
+  log.step('Run "blacksmith setup:backend" to set up the Express backend instead.')
+  process.exit(1)
 }
 
 export async function setupBackendPython() {
+  // Installing Python needs no project — this is the one backend subcommand a
+  // user can run on a bare machine before `init`. Only reject when there IS a
+  // project and it is an Express one.
+  const project = findBackendProject()
+  if (project) rejectOnExpress(project, 'setup:backend python')
+
   const hasPython = await commandExists('python3')
   if (hasPython) {
     log.success('Python 3 is already installed')
-    const result = await exec('python3', ['--version'], { silent: true })
-    log.step(`Version: ${result.stdout.trim()}`)
+    const version = await execSilent('python3', ['--version'])
+    log.step(`Version: ${version.trim()}`)
   } else {
     log.info('Python 3 is not installed. Attempting to install...')
 
@@ -120,12 +162,15 @@ async function ensurePip() {
 }
 
 export async function setupBackendVenv() {
-  const backendDir = ensureBackendProject()
+  const project = ensureBackendProject()
+  rejectOnExpress(project, 'setup:backend venv')
+
+  const backendDir = project.dir
   const venvPath = path.join(backendDir, 'venv')
 
   // venv/ must be ignored before the venv exists, otherwise it lands in git.
   // Projects generated before .gitignore shipped correctly are healed here.
-  if (ensureGitignore(backendDir, 'backend')) {
+  if (ensureGitignore(backendDir, 'backend/django')) {
     log.step('Added backend/.gitignore (ignores venv/)')
   }
 
@@ -170,7 +215,13 @@ export async function setupBackendVenv() {
 }
 
 export async function setupBackendDeps() {
-  const backendDir = ensureBackendProject()
+  const project = ensureBackendProject()
+  if (project.isExpress) {
+    await setupExpressDeps(project.dir)
+    return
+  }
+
+  const backendDir = project.dir
   const venvPath = path.join(backendDir, 'venv')
   const requirementsPath = path.join(backendDir, 'requirements.txt')
 
@@ -206,9 +257,74 @@ export async function setupBackendDeps() {
   }
 }
 
+/**
+ * Install dependencies and bring the database up to date for an Express
+ * backend — the counterpart to pip install + migrate.
+ */
+async function setupExpressDeps(backendDir: string) {
+  if (!fs.existsSync(path.join(backendDir, 'package.json'))) {
+    log.error('package.json not found in backend directory.')
+    process.exit(1)
+  }
+
+  // node_modules/ must be ignored before npm install runs. Projects generated
+  // before .gitignore shipped correctly are healed here.
+  if (ensureGitignore(backendDir, 'backend/express')) {
+    log.step('Added backend/.gitignore (ignores node_modules/)')
+  }
+
+  const npmSpinner = spinner('Installing backend dependencies...')
+  try {
+    await exec('npm', ['install'], { cwd: backendDir, silent: true })
+    npmSpinner.succeed('Backend dependencies installed')
+  } catch (error: any) {
+    npmSpinner.fail('Failed to install backend dependencies')
+    log.error(error.message)
+    process.exit(1)
+  }
+
+  const prismaSpinner = spinner('Applying database migrations...')
+  try {
+    await exec('npx', ['prisma', 'generate'], { cwd: backendDir, silent: true })
+    // `migrate deploy` applies committed migrations without prompting, which
+    // is what a setup step on an existing project needs.
+    await exec('npx', ['prisma', 'migrate', 'deploy'], { cwd: backendDir, silent: true })
+    prismaSpinner.succeed('Database migrated')
+  } catch (error: any) {
+    prismaSpinner.fail('Failed to apply database migrations')
+    log.error(error.message)
+    process.exit(1)
+  }
+}
+
+async function setupExpressBackend(backendDir: string) {
+  const hasNode = await commandExists('node')
+  const hasNpm = await commandExists('npm')
+  if (!hasNode || !hasNpm) {
+    log.error('Node.js and npm are required but not found. Install from https://nodejs.org')
+    process.exit(1)
+  }
+
+  const nodeVersion = await execSilent('node', ['--version'])
+  log.success('Node.js is installed')
+  log.step(`Version: ${nodeVersion.trim()}`)
+  log.blank()
+
+  await setupExpressDeps(backendDir)
+  log.blank()
+}
+
 export async function setupBackend() {
   log.info('Setting up backend project...')
   log.blank()
+
+  const project = ensureBackendProject()
+
+  if (project.isExpress) {
+    await setupExpressBackend(project.dir)
+    log.success('Backend setup complete! Run "blacksmith dev" to start the server.')
+    return
+  }
 
   await setupBackendPython()
   log.blank()

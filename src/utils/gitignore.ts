@@ -2,7 +2,15 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { getTemplatesDir } from './paths.js'
 
-export type GitignoreKind = 'project' | 'backend' | 'frontend'
+/**
+ * Which template directory to take a `.gitignore` from. Backend kinds are
+ * paths into the template tree, so they match `backendTemplateDir()`.
+ */
+export type GitignoreKind =
+  | 'project'
+  | 'frontend'
+  | 'backend/django'
+  | 'backend/express'
 
 /**
  * Write the `.gitignore` for a generated directory if one is not already there.

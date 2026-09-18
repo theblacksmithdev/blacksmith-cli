@@ -104,4 +104,71 @@ describe('setupAiDev', () => {
     expect(content).toContain('.claude/skills/')
     expect(content).toContain('AI Skills')
   })
+
+  describe('backend framework selection', () => {
+    async function skillIds(backendFramework: 'django' | 'express') {
+      await setupAiDev({
+        projectDir: getTmpDir(),
+        projectName: 'test-project',
+        includeChakraUiSkill: true,
+        backendFramework,
+      })
+      return fs.readdirSync(path.join(getTmpDir(), '.claude', 'skills'))
+    }
+
+    it('writes the Express skills and none of the Django ones', async () => {
+      const ids = await skillIds('express')
+
+      expect(ids).toContain('express')
+      expect(ids).toContain('express-prisma')
+      expect(ids).toContain('express-openapi')
+      // Django conventions in an Express project are worse than no guidance
+      expect(ids).not.toContain('django')
+      expect(ids).not.toContain('django-rest-advanced')
+      expect(ids).not.toContain('backend-modularization')
+    })
+
+    it('still writes the Django skills by default', async () => {
+      const ids = await skillIds('django')
+
+      expect(ids).toContain('django')
+      expect(ids).toContain('backend-modularization')
+      expect(ids).not.toContain('express')
+    })
+
+    it('describes the Express layout in the project overview, not the Django one', async () => {
+      await setupAiDev({
+        projectDir: getTmpDir(),
+        projectName: 'test-project',
+        includeChakraUiSkill: true,
+        backendFramework: 'express',
+      })
+
+      const overview = fs.readFileSync(
+        path.join(getTmpDir(), '.claude', 'skills', 'project-overview', 'SKILL.md'),
+        'utf-8'
+      )
+      expect(overview).toContain('Express backend + React frontend')
+      expect(overview).toContain('prisma/')
+      expect(overview).not.toContain('Python virtual environment')
+      expect(overview).not.toContain('manage.py')
+    })
+
+    it('describes Express commands in the CLI skill', async () => {
+      await setupAiDev({
+        projectDir: getTmpDir(),
+        projectName: 'test-project',
+        includeChakraUiSkill: true,
+        backendFramework: 'express',
+      })
+
+      const cli = fs.readFileSync(
+        path.join(getTmpDir(), '.claude', 'skills', 'blacksmith-cli', 'SKILL.md'),
+        'utf-8'
+      )
+      expect(cli).toContain('"framework": "express"')
+      expect(cli).toContain('prisma migrate dev')
+      expect(cli).not.toContain('makemigrations')
+    })
+  })
 })

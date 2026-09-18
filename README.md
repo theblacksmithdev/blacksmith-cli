@@ -1,15 +1,19 @@
 # Blacksmith CLI
 
-**Django + React framework — one command, one codebase, one mental model.**
+**Django or Express + React framework — one command, one codebase, one mental model.**
 
-Blacksmith scaffolds production-ready web applications with Django, React, or both — wired together through automatic OpenAPI synchronization. Choose your project type and Blacksmith handles the rest.
+Blacksmith scaffolds production-ready web applications with a Django or Express backend, a React
+frontend, or both — wired together through automatic OpenAPI synchronization. Choose your project
+type and Blacksmith handles the rest.
 
 ## Why Blacksmith?
 
 Building web apps usually means gluing together separate projects, manually keeping types in sync, and writing boilerplate. Blacksmith eliminates that friction:
 
-- **Flexible project types** — scaffold a fullstack Django + React app, a standalone Django API, or a standalone React frontend
-- **Automatic API sync** — change a Django serializer, get updated TypeScript types and API client instantly (fullstack)
+- **Flexible project types** — scaffold a fullstack app, a standalone API, or a standalone React frontend
+- **Two backends, one API** — Django (Python, DRF) or Express (TypeScript, Prisma). Both expose the
+  same HTTP contract, so the generated frontend is identical either way
+- **Automatic API sync** — change a serializer or Zod schema, get updated TypeScript types and API client instantly (fullstack)
 - **Resource scaffolding** — `make:resource BlogPost` creates everything you need for the resource based on your project type
 - **AI-ready** — generates `CLAUDE.md` and skill files so AI coding assistants understand your entire stack
 - **Clean ejection** — remove Blacksmith at any time and keep a standard project
@@ -18,9 +22,8 @@ Building web apps usually means gluing together separate projects, manually keep
 
 ### Prerequisites
 
-- **Node.js** >= 20.5.0
-- **Python 3** (for backend and fullstack projects)
-- **npm**
+- **Node.js** >= 20.5.0 and **npm**
+- **Python 3** — only for a Django backend
 
 ### Installation
 
@@ -37,17 +40,20 @@ blacksmith init my-app
 You'll be prompted for project type and configuration, or pass flags to skip prompts:
 
 ```bash
-# Fullstack (Django + React)
+# Fullstack with the default Django backend
 blacksmith init my-app --type fullstack
 
-# Backend only (Django API)
-blacksmith init my-app --type backend
+# Fullstack with an Express + Prisma backend
+blacksmith init my-app --type fullstack --backend express
+
+# Backend only
+blacksmith init my-app --type backend --backend django
 
 # Frontend only (React)
 blacksmith init my-app --type frontend
 
 # With all options
-blacksmith init my-app --type fullstack -b 8000 -f 5173 --theme-color blue --ai
+blacksmith init my-app --type fullstack --backend express -b 8000 -f 5173 --theme-color blue --ai
 ```
 
 ### Start Developing
@@ -58,8 +64,8 @@ blacksmith dev
 ```
 
 What starts depends on your project type:
-- **Fullstack**: Django + Vite + OpenAPI watcher (auto-syncs types on backend changes)
-- **Backend**: Django development server
+- **Fullstack**: backend + Vite + OpenAPI watcher (auto-syncs types on backend changes)
+- **Backend**: the backend development server
 - **Frontend**: Vite dev server with HMR
 
 ## Commands
@@ -68,7 +74,7 @@ What starts depends on your project type:
 |---|---|
 | `blacksmith init [name]` | Create a new project (interactive or via flags) |
 | `blacksmith dev` | Start development server(s) |
-| `blacksmith sync` | Regenerate frontend API client from Django schema (fullstack only) |
+| `blacksmith sync` | Regenerate frontend API client from the backend schema (fullstack only) |
 | `blacksmith make:resource <Name>` | Scaffold a resource (scope depends on project type) |
 | `blacksmith build` | Production build |
 | `blacksmith eject` | Remove Blacksmith, keep a clean project |
@@ -77,7 +83,7 @@ What starts depends on your project type:
 | `blacksmith setup:backend` | Set up the backend (install Python, create venv, install deps) |
 | `blacksmith setup:frontend` | Set up the frontend (install Node.js, install deps) |
 | `blacksmith skills` | List available AI skills |
-| `blacksmith backend <cmd>` | Run a Django management command |
+| `blacksmith backend <cmd>` | Run a backend command (`manage.py` for Django, `npm` for Express) |
 | `blacksmith frontend <cmd>` | Run an npm command in the frontend |
 
 ## Project Structures
@@ -86,7 +92,7 @@ What starts depends on your project type:
 
 ```
 my-app/
-├── backend/                  # Django project
+├── backend/                  # Django project (Express projects use src/ + prisma/)
 │   ├── config/               # Settings, URLs, WSGI/ASGI
 │   ├── apps/                 # Django apps (one per resource)
 │   │   └── users/            # Built-in user app with JWT auth
@@ -137,6 +143,9 @@ my-app/
 - **drf-spectacular** for OpenAPI schema generation
 - **SimpleJWT** for token-based authentication
 - **django-environ** for environment variable management
+
+With `--backend express` the backend is instead **Express 5** + **Prisma** + **Zod** +
+**zod-to-openapi**, in TypeScript, exposing the same HTTP API.
 
 ### Frontend
 - **React 19** with TypeScript (strict mode)

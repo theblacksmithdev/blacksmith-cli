@@ -7,6 +7,7 @@ import { mockExit } from '../../__tests__/setup.js'
 vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
+  getBackendFramework: vi.fn(() => 'django'),
   findProjectRoot: vi.fn(),
   getBackendDir: vi.fn(),
   getFrontendDir: vi.fn(),
@@ -18,6 +19,7 @@ vi.mock('../../utils/paths.js', () => pathMocks)
 
 const templateMocks = vi.hoisted(() => ({
   renderDirectory: vi.fn(),
+  renderTemplateFile: vi.fn(() => 'model Product {}'),
   appendAfterMarker: vi.fn(),
   insertBeforeMarker: vi.fn(),
 }))
@@ -46,7 +48,7 @@ describe('makeResource', () => {
     await makeResource('BlogPost')
 
     expect(templateMocks.renderDirectory).toHaveBeenCalledWith(
-      '/templates/resource/backend',
+      path.join('/templates', 'resource', 'backend', 'django'),
       path.join(getTmpDir(), 'backend', 'apps', 'blog_posts'),
       expect.objectContaining({
         Name: 'BlogPost',
@@ -132,5 +134,91 @@ describe('makeResource', () => {
 
     await expect(makeResource('Post')).rejects.toThrow('process.exit called')
     expect(log.error).toHaveBeenCalledWith('Frontend page "posts" already exists.')
+  })
+
+  describe('on an Express backend', () => {
+    function setupExpress() {
+      pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+      pathMocks.getBackendDir.mockReturnValue(path.join(getTmpDir(), 'backend'))
+      pathMocks.getFrontendDir.mockReturnValue(path.join(getTmpDir(), 'frontend'))
+      pathMocks.getTemplatesDir.mockReturnValue('/templates')
+      pathMocks.getBackendFramework.mockReturnValue('express')
+      execMocks.exec.mockResolvedValue({})
+      execMocks.execPython.mockResolvedValue({})
+    }
+
+    it('renders the module into src/modules and not into apps/', async () => {
+      setupExpress()
+
+      await makeResource('Product')
+
+      const calls = templateMocks.renderDirectory.mock.calls
+      const moduleCall = calls.find((c: any[]) => c[0] === path.join('/templates', 'resource', 'backend', 'express'))
+      expect(moduleCall).toBeDefined()
+      expect(moduleCall![1]).toBe(
+        path.join(getTmpDir(), 'backend', 'src', 'modules', 'products')
+      )
+      expect(calls.find((c: any[]) => c[0] === path.join('/templates', 'resource', 'backend', 'django'))).toBeUndefined()
+    })
+
+    it('adds the Prisma model and the User back-relation it needs', async () => {
+      setupExpress()
+
+      await makeResource('Product')
+
+      const schemaPath = path.join(getTmpDir(), 'backend', 'prisma', 'schema.prisma')
+      expect(templateMocks.appendAfterMarker).toHaveBeenCalledWith(
+        schemaPath,
+        '// blacksmith:models',
+        'model Product {}'
+      )
+      // Prisma rejects a relation declared on only one side
+      expect(templateMocks.appendAfterMarker).toHaveBeenCalledWith(
+        schemaPath,
+        '// blacksmith:user-relations',
+        '  products Product[]'
+      )
+    })
+
+    it('mounts the router in src/modules/index.ts', async () => {
+      setupExpress()
+
+      await makeResource('Product')
+
+      const routerPath = path.join(getTmpDir(), 'backend', 'src', 'modules', 'index.ts')
+      expect(templateMocks.insertBeforeMarker).toHaveBeenCalledWith(
+        routerPath,
+        '// blacksmith:import',
+        "import { productsRouter } from './products/products.routes.js'"
+      )
+      expect(templateMocks.insertBeforeMarker).toHaveBeenCalledWith(
+        routerPath,
+        '// blacksmith:routes',
+        "apiRouter.use('/products', productsRouter)"
+      )
+    })
+
+    it('creates a Prisma migration instead of running makemigrations', async () => {
+      setupExpress()
+
+      await makeResource('Product')
+
+      expect(execMocks.exec).toHaveBeenCalledWith(
+        'npx',
+        ['prisma', 'migrate', 'dev', '--name', 'add_products', '--skip-seed'],
+        { cwd: path.join(getTmpDir(), 'backend'), silent: true }
+      )
+      expect(execMocks.execPython).not.toHaveBeenCalled()
+    })
+
+    it('refuses to overwrite an existing module', async () => {
+      setupExpress()
+      const moduleDir = path.join(getTmpDir(), 'backend', 'src', 'modules', 'products')
+      fs.mkdirSync(moduleDir, { recursive: true })
+
+      await expect(makeResource('Product')).rejects.toThrow('process.exit called')
+
+      expect(log.error).toHaveBeenCalledWith('Backend module "products" already exists.')
+    })
   })
 })

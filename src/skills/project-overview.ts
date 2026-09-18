@@ -6,6 +6,34 @@ export const projectOverviewSkill: Skill = {
   description: 'Overview of the project structure, commands, and development workflow.',
 
   render(ctx: SkillContext): string {
+    const isExpress = ctx.backendFramework === 'express'
+    const backendName = isExpress ? 'Express' : 'Django'
+
+    const backendTree = isExpress
+      ? `│   ├── src/
+│   │   ├── config/       # env, Zod, OpenAPI registry
+│   │   ├── db/           # Prisma client
+│   │   ├── middleware/   # auth, validation, error handling
+│   │   ├── modules/      # one folder per resource
+│   │   └── utils/        # errors, pagination, tokens
+│   ├── prisma/           # schema.prisma and migrations
+│   └── package.json`
+      : `│   ├── apps/             # Django apps (one per resource)
+│   ├── config/           # Django settings, urls, wsgi/asgi
+│   ├── utils/            # Shared backend utilities
+│   ├── manage.py
+│   └── venv/             # Python virtual environment`
+
+    const backendOnlyTree = isExpress
+      ? `├── src/
+├── prisma/
+├── package.json`
+      : `├── apps/
+├── config/
+├── utils/
+├── manage.py
+├── venv/`
+
     return `# ${ctx.projectName}
 
 A web application scaffolded by **Blacksmith CLI**. Check \`blacksmith.config.json\` at the project root for the project type (\`fullstack\`, \`backend\`, or \`frontend\`) and configuration.
@@ -14,15 +42,11 @@ A web application scaffolded by **Blacksmith CLI**. Check \`blacksmith.config.js
 
 The structure depends on the project type configured in \`blacksmith.config.json\`:
 
-**Fullstack** (\`type: "fullstack"\`) — Django backend + React frontend in subdirectories:
+**Fullstack** (\`type: "fullstack"\`) — ${backendName} backend + React frontend in subdirectories:
 \`\`\`
 ${ctx.projectName}/
-├── backend/              # Django project
-│   ├── apps/             # Django apps (one per resource)
-│   ├── config/           # Django settings, urls, wsgi/asgi
-│   ├── utils/            # Shared backend utilities
-│   ├── manage.py
-│   └── venv/             # Python virtual environment
+├── backend/              # ${backendName} project
+${backendTree}
 ├── frontend/             # React + Vite project
 │   ├── src/
 │   │   ├── api/          # API client and hooks
@@ -35,14 +59,10 @@ ${ctx.projectName}/
 └── CLAUDE.md
 \`\`\`
 
-**Backend-only** (\`type: "backend"\`) — Django project at root:
+**Backend-only** (\`type: "backend"\`) — ${backendName} project at root:
 \`\`\`
 ${ctx.projectName}/
-├── apps/
-├── config/
-├── utils/
-├── manage.py
-├── venv/
+${backendOnlyTree}
 └── blacksmith.config.json
 \`\`\`
 
@@ -62,21 +82,21 @@ ${ctx.projectName}/
 
 | Command | Fullstack | Backend | Frontend |
 |---|---|---|---|
-| \`blacksmith dev\` | Django + Vite + sync | Django only | Vite only |
+| \`blacksmith dev\` | ${backendName} + Vite + sync | ${backendName} only | Vite only |
 | \`blacksmith sync\` | Regenerate frontend types | N/A | N/A |
 | \`blacksmith make:resource <Name>\` | Both ends | Backend only | Frontend only |
-| \`blacksmith build\` | Both | collectstatic | Vite build |
+| \`blacksmith build\` | Both | ${isExpress ? 'tsc build' : 'collectstatic'} | Vite build |
 | \`blacksmith eject\` | Remove Blacksmith | Remove Blacksmith | Remove Blacksmith |
 
 ## Development Workflow
 
 **Fullstack:**
-1. Define models, serializers, and viewsets in the backend
+1. ${isExpress ? 'Define the Prisma model, Zod schemas, service, and routes' : 'Define models, serializers, and viewsets'} in the backend
 2. Run \`blacksmith sync\` to generate TypeScript types and API client
 3. Build frontend features using the generated hooks and types
 
 **Backend-only:**
-1. Define models, serializers, and viewsets
+1. ${isExpress ? 'Define the Prisma model, Zod schemas, service, and routes' : 'Define models, serializers, and viewsets'}
 2. Run migrations and test endpoints
 
 **Frontend-only:**

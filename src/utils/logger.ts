@@ -100,7 +100,13 @@ export function banner() {
   console.log()
 }
 
-export function printNextSteps(projectName: string, projectType: string = 'fullstack', backendPort?: number, frontendPort?: number) {
+export function printNextSteps(
+  projectName: string,
+  projectType: string = 'fullstack',
+  backendPort?: number,
+  frontendPort?: number,
+  backendFramework: string = 'django'
+) {
   log.blank()
   log.success('Project created successfully!')
   log.blank()
@@ -111,9 +117,12 @@ export function printNextSteps(projectName: string, projectType: string = 'fulls
   console.log()
 
   if (backendPort !== undefined) {
-    console.log(chalk.dim(`  Django:   http://localhost:${backendPort}`))
+    const label = backendFramework === 'express' ? 'Express:' : 'Django: '
+    console.log(chalk.dim(`  ${label}  http://localhost:${backendPort}`))
     console.log(chalk.dim(`  Swagger:  http://localhost:${backendPort}/api/docs/`))
-    console.log(chalk.dim(`  ReDoc:    http://localhost:${backendPort}/api/redoc/`))
+    if (backendFramework !== 'express') {
+      console.log(chalk.dim(`  ReDoc:    http://localhost:${backendPort}/api/redoc/`))
+    }
   }
 
   if (frontendPort !== undefined) {

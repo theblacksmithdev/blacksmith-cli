@@ -5,6 +5,7 @@ import { mockExit } from '../../__tests__/setup.js'
 vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
+  getBackendFramework: vi.fn(() => 'django'),
   findProjectRoot: vi.fn(),
   getBackendDir: vi.fn(),
   hasBackend: vi.fn(() => true),
@@ -12,6 +13,7 @@ const pathMocks = vi.hoisted(() => ({
 vi.mock('../../utils/paths.js', () => pathMocks)
 
 const execMocks = vi.hoisted(() => ({
+  exec: vi.fn(),
   execPython: vi.fn(),
 }))
 vi.mock('../../utils/exec.js', () => execMocks)
@@ -71,5 +73,28 @@ describe('backend', () => {
 
     await expect(backend(['bad-command'])).rejects.toThrow('process.exit called')
     expect(mockExit).toHaveBeenCalledWith(1)
+  })
+
+  it('should run an npm command on an Express backend', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getBackendFramework.mockReturnValue('express')
+    execMocks.exec.mockResolvedValue({})
+
+    await backend(['run', 'migrate'])
+
+    expect(execMocks.exec).toHaveBeenCalledWith('npm', ['run', 'migrate'], {
+      cwd: '/project/backend',
+    })
+    expect(execMocks.execPython).not.toHaveBeenCalled()
+  })
+
+  it('should show Express usage when no command is given', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendFramework.mockReturnValue('express')
+
+    await expect(backend([])).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith('Please provide an npm command.')
   })
 })

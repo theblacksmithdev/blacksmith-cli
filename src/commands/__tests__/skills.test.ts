@@ -7,9 +7,11 @@ import { mockExit } from '../../__tests__/setup.js'
 vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
+  getBackendFramework: vi.fn(() => 'django'),
   findProjectRoot: vi.fn(),
   loadConfig: vi.fn(),
   getProjectType: vi.fn(() => 'fullstack'),
+  hasBackend: vi.fn(() => true),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 
@@ -34,6 +36,7 @@ describe('setupSkills', () => {
       projectName: 'my-project',
       includeChakraUiSkill: true,
       projectType: 'fullstack',
+      backendFramework: 'django',
     })
     expect(log.success).toHaveBeenCalled()
   })
@@ -97,5 +100,36 @@ describe('listSkills', () => {
 
     expect(() => listSkills()).toThrow('process.exit called')
     expect(mockExit).toHaveBeenCalledWith(1)
+  })
+
+  it('lists the Express backend skills on an Express project', () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+    pathMocks.getBackendFramework.mockReturnValue('express')
+
+    listSkills()
+
+    const listed = (log.step as any).mock.calls.map((c: any[]) => c[0]).join('\n')
+    expect(listed).toContain('express/SKILL.md')
+    expect(listed).toContain('express-prisma/SKILL.md')
+    expect(listed).toContain('express-openapi/SKILL.md')
+    // Django conventions would be actively misleading here
+    expect(listed).not.toContain('django/SKILL.md')
+    expect(listed).not.toContain('backend-modularization/SKILL.md')
+
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+
+  it('omits backend skills entirely on a frontend-only project', () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+    pathMocks.hasBackend.mockReturnValue(false)
+
+    listSkills()
+
+    const listed = (log.step as any).mock.calls.map((c: any[]) => c[0]).join('\n')
+    expect(listed).not.toContain('django/SKILL.md')
+    expect(listed).not.toContain('express/SKILL.md')
+    expect(listed).toContain('react/SKILL.md')
+
+    pathMocks.hasBackend.mockReturnValue(true)
   })
 })

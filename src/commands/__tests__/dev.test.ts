@@ -13,6 +13,7 @@ const pathMocks = vi.hoisted(() => ({
   hasBackend: vi.fn(() => true),
   hasFrontend: vi.fn(() => true),
   getProjectType: vi.fn(() => 'fullstack'),
+  getBackendFramework: vi.fn(() => 'django'),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 
@@ -95,5 +96,33 @@ describe('dev', () => {
     } finally {
       await new Promise<void>((resolve) => server.close(() => resolve()))
     }
+  })
+
+  it('should run the Express dev server and watch .ts files', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.getBackendFramework.mockReturnValue('express')
+    pathMocks.loadConfig.mockReturnValue({
+      name: 'test',
+      backend: { port: 8100, framework: 'express' },
+      frontend: { port: 5273 },
+    })
+    concurrentlyMocks.default.mockReturnValue({ result: Promise.resolve() })
+
+    await dev()
+
+    const commands = concurrentlyMocks.default.mock.calls.at(-1)![0]
+    const backendCmd = commands.find((c: any) => c.name === 'express')
+    expect(backendCmd).toBeDefined()
+    expect(backendCmd.command).toBe('npm run dev')
+    // The resolved port reaches the server through PORT, not a CLI argument
+    expect(backendCmd.env).toEqual({ PORT: '8100' })
+    expect(commands.find((c: any) => c.name === 'django')).toBeUndefined()
+
+    const watcher = commands.find((c: any) => c.name === 'sync')
+    expect(watcher.command).toContain('.ts')
+    expect(watcher.command).toContain('node_modules/')
+    expect(watcher.command).not.toContain('__pycache__')
   })
 })
