@@ -3,6 +3,7 @@ import path from 'node:path'
 import { findProjectRoot, getBackendDir, getBackendFramework, hasBackend } from '../utils/paths.js'
 import type { BackendFramework } from '../utils/paths.js'
 import { exec, execPip, execPython, execSilent, commandExists } from '../utils/exec.js'
+import { ensureEnvFile } from '../utils/env-file.js'
 import { ensureGitignore } from '../utils/gitignore.js'
 import { log, spinner } from '../utils/logger.js'
 
@@ -235,6 +236,12 @@ export async function setupBackendDeps() {
     process.exit(1)
   }
 
+  // Settings read the environment, and .env is gitignored — restore it for a
+  // cloned checkout rather than silently falling back to the defaults.
+  if (ensureEnvFile(backendDir)) {
+    log.step('Created backend/.env from .env.example')
+  }
+
   const pipSpinner = spinner('Installing Python dependencies...')
   try {
     await execPip(['install', '-r', 'requirements.txt'], backendDir, true)
@@ -271,6 +278,12 @@ async function setupExpressDeps(backendDir: string) {
   // before .gitignore shipped correctly are healed here.
   if (ensureGitignore(backendDir, 'backend/express')) {
     log.step('Added backend/.gitignore (ignores node_modules/)')
+  }
+
+  // Prisma resolves env("DATABASE_URL") while parsing the schema, so .env has
+  // to exist before generate or migrate runs. A cloned checkout has none.
+  if (ensureEnvFile(backendDir)) {
+    log.step('Created backend/.env from .env.example')
   }
 
   const npmSpinner = spinner('Installing backend dependencies...')
