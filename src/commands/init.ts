@@ -2,6 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { spawn } from 'node:child_process'
 import { renderDirectory } from '../utils/template.js'
+import { ensureEnvFile } from '../utils/env-file.js'
 import { ensureGitignore } from '../utils/gitignore.js'
 import type { GitignoreKind } from '../utils/gitignore.js'
 import { backendTemplateDir, ensureCiWorkflow, projectLayout } from '../utils/scaffold.js'
@@ -200,10 +201,7 @@ export async function init(name: string | undefined, options: InitOptions) {
       )
 
       // Copy .env.example to .env for development
-      fs.copyFileSync(
-        path.join(backendDir, '.env.example'),
-        path.join(backendDir, '.env')
-      )
+      ensureEnvFile(backendDir)
 
       // Safety net: the dependency directory (venv/ or node_modules/) must be
       // ignored before it is created
