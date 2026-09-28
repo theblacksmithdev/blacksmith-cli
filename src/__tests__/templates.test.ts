@@ -173,6 +173,23 @@ describe('generated test files', () => {
     expect(specs.length).toBeGreaterThan(0)
   })
 
+  it('gives the FastAPI backend pytest tests that exercise the API', () => {
+    const dest = path.join(getTmpDir(), 'backend-fastapi')
+    renderDirectory(path.join(TEMPLATES_DIR, 'backend', 'fastapi'), dest, FASTAPI_CONTEXT)
+
+    const testFile = path.join(dest, 'tests', 'test_auth.py')
+    expect(fs.existsSync(testFile)).toBe(true)
+
+    // A real API exercise through TestClient, not an empty placeholder — so
+    // `blacksmith test` has something to run and to fail on.
+    const tests = fs.readFileSync(testFile, 'utf-8')
+    expect(tests).toContain('from fastapi.testclient import TestClient')
+    expect(tests).toContain('def test_register_login_and_me')
+    expect(tests).toContain('def test_login_rejects_wrong_password')
+    expect(tests).toContain('assert register.status_code == 201')
+    expect(tests).toContain('assert bad.status_code == 401')
+  })
+
   it('keeps the markers make:resource writes into', () => {
     const dest = path.join(getTmpDir(), 'backend-express')
     renderDirectory(path.join(TEMPLATES_DIR, 'backend', 'express'), dest, EXPRESS_CONTEXT)
