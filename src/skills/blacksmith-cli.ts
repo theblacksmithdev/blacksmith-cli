@@ -7,29 +7,8 @@ export const blacksmithCliSkill: Skill = {
 
   render(ctx: SkillContext): string {
     const isExpress = ctx.backendFramework === 'express'
-    const isFastapi = ctx.backendFramework === 'fastapi'
-    const backendName = isExpress ? 'Express' : isFastapi ? 'FastAPI' : 'Django'
+    const backendName = isExpress ? 'Express' : 'Django'
     const sourceExt = isExpress ? '.ts' : '.py'
-    const framework = ctx.backendFramework ?? 'django'
-
-    const makeResourceBackendSteps = isExpress
-      ? `- \`src/modules/blog-posts/\` — schemas, service, controller, routes, tests
-- Adds the Prisma model and the User back-relation to \`prisma/schema.prisma\`
-- Mounts the router in \`src/modules/index.ts\`
-- Runs \`prisma migrate dev\``
-      : isFastapi
-        ? `- \`app/routers/blog_posts/\` — SQLAlchemy model, Pydantic schemas, CRUD router
-- Mounts the router in \`app/main.py\`
-- Runs \`python scripts.py init-db\` to create the table`
-        : `- \`apps/blog_posts/\` — model, serializer, viewset, urls, admin, tests
-- Wires the app into \`INSTALLED_APPS\` and \`config/urls.py\`
-- Runs \`makemigrations\` and \`migrate\``
-
-    const syncStep = isExpress
-      ? 'npm run openapi'
-      : isFastapi
-        ? 'python scripts.py export-openapi'
-        : 'manage.py spectacular'
 
     return `## Blacksmith CLI
 
@@ -57,7 +36,7 @@ Project settings are stored in \`blacksmith.config.json\` at the project root:
   "name": "my-app",
   "version": "0.1.0",
   "type": "fullstack",
-  "backend": { "port": 8000, "framework": "${framework}" },
+  "backend": { "port": 8000, "framework": "${isExpress ? 'express' : 'django'}" },
   "frontend": { "port": 5173 }
 }
 \`\`\`
@@ -83,7 +62,16 @@ All processes are managed by \`concurrently\` and stop together on Ctrl+C.
 Given a PascalCase name (e.g. \`BlogPost\`), it scaffolds based on project type:
 
 **Backend (fullstack and backend projects):**
-${makeResourceBackendSteps}
+${
+  isExpress
+    ? `- \`src/modules/blog-posts/\` — schemas, service, controller, routes, tests
+- Adds the Prisma model and the User back-relation to \`prisma/schema.prisma\`
+- Mounts the router in \`src/modules/index.ts\`
+- Runs \`prisma migrate dev\``
+    : `- \`apps/blog_posts/\` — model, serializer, viewset, urls, admin, tests
+- Wires the app into \`INSTALLED_APPS\` and \`config/urls.py\`
+- Runs \`makemigrations\` and \`migrate\``
+}
 
 **Frontend (fullstack and frontend projects):**
 - \`src/api/hooks/blog-posts/\` — query and mutation hooks
@@ -94,7 +82,7 @@ ${makeResourceBackendSteps}
 
 ### How \`blacksmith sync\` Works (Fullstack Only)
 
-1. Generates the OpenAPI schema offline using \`${syncStep}\` — no server needs to be running
+1. Generates the OpenAPI schema offline using \`${isExpress ? 'npm run openapi' : 'manage.py spectacular'}\` — no server needs to be running
 2. Runs \`openapi-ts\` to generate TypeScript types, Zod schemas, SDK functions, and TanStack Query hooks
 3. Output goes to \`frontend/src/api/generated/\` — never edit these files manually
 
@@ -107,7 +95,7 @@ ${makeResourceBackendSteps}
 blacksmith init
 
 # Skip prompts with flags
-blacksmith init my-app --type fullstack --backend ${framework} -b 9000 -f 3000 --ai
+blacksmith init my-app --type fullstack --backend ${isExpress ? 'express' : 'django'} -b 9000 -f 3000 --ai
 \`\`\`
 
 | Flag | Description |

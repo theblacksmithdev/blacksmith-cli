@@ -50,31 +50,6 @@ jobs:
       - name: Build
         run: npm run build
 {{else}}
-{{#if isFastapi}}
-  backend:
-    name: Backend (pytest)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: {{backendPath}}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: {{backendPath}}/requirements.txt
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run tests
-        run: pytest --cov --cov-report=term-missing
-{{else}}
   backend:
     name: Backend (pytest)
     runs-on: ubuntu-latest
@@ -103,7 +78,6 @@ jobs:
 
       - name: Run tests
         run: pytest --cov --cov-report=term-missing
-{{/if}}
 {{/if}}
 {{/if}}
 {{#if needsFrontend}}
@@ -148,36 +122,6 @@ jobs:
       - name: Export OpenAPI schema
         run: npm run openapi -- ../{{frontendPath}}/{{schemaFile}}
         working-directory: {{backendPath}}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: {{frontendPath}}/package-lock.json
-{{else}}
-{{#if isFastapi}}
-
-      # src/api/generated/ is git-ignored, so the typed client is rebuilt from
-      # the FastAPI schema before the frontend is type-checked or built.
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: {{backendPath}}/requirements.txt
-
-      - name: Install backend dependencies
-        run: pip install -r requirements.txt
-        working-directory: {{backendPath}}
-
-      - name: Export OpenAPI schema
-        run: python scripts.py export-openapi ../{{frontendPath}}/{{schemaFile}}
-        working-directory: {{backendPath}}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: {{frontendPath}}/package-lock.json
 {{else}}
 
       # src/api/generated/ is git-ignored, so the typed client is rebuilt from
@@ -203,7 +147,6 @@ jobs:
           node-version: '20'
           cache: npm
           cache-dependency-path: {{frontendPath}}/package-lock.json
-{{/if}}
 {{/if}}
 {{else}}
 

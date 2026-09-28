@@ -87,7 +87,16 @@ export async function init(name: string | undefined, options: InitOptions) {
     }
   }
   const isExpressBackend = needsBackend && backendFramework === 'express'
-  const isFastapiBackend = needsBackend && backendFramework === 'fastapi'
+
+  // FastAPI is a recognised choice on the surface, but generating a FastAPI
+  // project ships in the next release — fail up front rather than silently
+  // treating the choice as Django (or dying on a missing template directory).
+  if (needsBackend && backendFramework === 'fastapi') {
+    log.error(
+      'FastAPI project generation is not available yet (it ships in the next release). Use --backend django or --backend express.'
+    )
+    process.exit(1)
+  }
 
   if (needsBackend && !options.backendPort) {
     options.backendPort = await promptText('Backend port', '8000')
@@ -275,30 +284,16 @@ export async function init(name: string | undefined, options: InitOptions) {
         process.exit(1)
       }
 
-      if (isFastapiBackend) {
-        // 5. Create the database tables (SQLAlchemy create_all — the app also
-        // creates missing tables on startup, so this is a convenience step)
-        const dbSpinner = spinner('Creating database tables...')
-        try {
-          await execPython(['scripts.py', 'init-db'], backendDir, true)
-          dbSpinner.succeed('Database ready')
-        } catch (error: any) {
-          dbSpinner.fail('Failed to create database tables')
-          log.error(error.message)
-          process.exit(1)
-        }
-      } else {
-        // 5. Run Django migrations
-        const migrateSpinner = spinner('Running initial migrations...')
-        try {
-          await execPython(['manage.py', 'makemigrations', 'users'], backendDir, true)
-          await execPython(['manage.py', 'migrate'], backendDir, true)
-          migrateSpinner.succeed('Database migrated')
-        } catch (error: any) {
-          migrateSpinner.fail('Failed to run migrations')
-          log.error(error.message)
-          process.exit(1)
-        }
+      // 5. Run Django migrations
+      const migrateSpinner = spinner('Running initial migrations...')
+      try {
+        await execPython(['manage.py', 'makemigrations', 'users'], backendDir, true)
+        await execPython(['manage.py', 'migrate'], backendDir, true)
+        migrateSpinner.succeed('Database migrated')
+      } catch (error: any) {
+        migrateSpinner.fail('Failed to run migrations')
+        log.error(error.message)
+        process.exit(1)
       }
     }
   }
@@ -338,11 +333,11 @@ export async function init(name: string | undefined, options: InitOptions) {
   // 8. First OpenAPI sync (only for fullstack projects)
   if (backendDir && frontendDir) {
     const syncSpinner = spinner('Running initial OpenAPI sync...')
-    if (isExpressBackend || isFastapiBackend) {
-      // Express and FastAPI can export their schema without booting, so there
-      // is no server to start, wait for, and kill here.
+    if (isExpressBackend) {
+      // The Express backend can export its schema without booting, so there is
+      // no server to start, wait for, and kill here.
       try {
-        await syncFrontendClient(backendDir, frontendDir, backendFramework)
+        await syncFrontendClient(backendDir, frontendDir, true)
         syncSpinner.succeed('OpenAPI types synced')
       } catch {
         syncSpinner.warn('OpenAPI sync skipped (run "blacksmith sync" to retry)')
