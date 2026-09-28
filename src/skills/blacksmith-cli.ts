@@ -44,7 +44,7 @@ Project settings are stored in \`blacksmith.config.json\` at the project root:
 - **\`type\`** — \`"fullstack"\`, \`"backend"\`, or \`"frontend"\`. Determines which commands and steps are available
 - **\`backend\`** — present for fullstack and backend projects. Absent for frontend-only
 - **\`frontend\`** — present for fullstack and frontend projects. Absent for backend-only
-- **\`backend.framework\`** — \`"django"\` or \`"express"\`. Absent means Django, for projects generated before Express support
+- **\`backend.framework\`** — \`"django"\`, \`"express"\`, or \`"fastapi"\`. Absent means Django, for projects generated before Express support
 - **Ports** are read by \`blacksmith dev\` — change them here, not in code
 - The CLI finds the project root by walking up directories looking for this file
 
@@ -101,7 +101,7 @@ blacksmith init my-app --type fullstack --backend ${isExpress ? 'express' : 'dja
 | Flag | Description |
 |---|---|
 | \`--type <type>\` | Project type: fullstack, backend, or frontend (default: fullstack) |
-| \`--backend <framework>\` | Backend framework: django or express (default: django) |
+| \`--backend <framework>\` | Backend framework: django, express, or fastapi (default: django) |
 | \`-b, --backend-port <port>\` | Backend port (default: 8000) |
 | \`-f, --frontend-port <port>\` | Vite port (default: 5173) |
 | \`--ai\` | Generate CLAUDE.md with project skills |

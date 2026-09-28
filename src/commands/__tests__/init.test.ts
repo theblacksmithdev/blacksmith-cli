@@ -257,8 +257,32 @@ describe('init', () => {
     ).rejects.toThrow('process.exit called')
 
     expect(log.error).toHaveBeenCalledWith(
-      'Invalid backend framework: "fastify". Must be one of: django, express'
+      'Invalid backend framework: "fastify". Must be one of: django, express, fastapi'
     )
+  })
+
+  it('should recognise fastapi but defer generation to the next release', async () => {
+    await expect(
+      init('my-app', { type: 'backend', backend: 'fastapi', backendPort: '8000', ai: false })
+    ).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith(
+      'FastAPI project generation is not available yet (it ships in the next release). Use --backend django or --backend express.'
+    )
+  })
+
+  it('should ignore a fastapi backend choice on a frontend-only project', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', {
+      type: 'frontend',
+      backend: 'fastapi',
+      frontendPort: '5173',
+      themeColor: 'default',
+      ai: false,
+    })
+
+    expect(mockExit).not.toHaveBeenCalled()
   })
 
   it('should render the Express backend templates for an express project', async () => {
