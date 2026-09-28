@@ -125,4 +125,37 @@ describe('dev', () => {
     expect(watcher.command).toContain('node_modules/')
     expect(watcher.command).not.toContain('__pycache__')
   })
+
+  it('should run the FastAPI dev server with uvicorn and watch .py files', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.loadConfig.mockReturnValue({
+      name: 'test',
+      backend: { port: 8200, framework: 'fastapi' },
+      frontend: { port: 5273 },
+    })
+    concurrentlyMocks.default.mockReturnValue({ result: Promise.resolve() })
+
+    await dev()
+
+    const commands = concurrentlyMocks.default.mock.calls.at(-1)![0]
+    const backendCmd = commands.find((c: any) => c.name === 'fastapi')
+    expect(backendCmd).toBeDefined()
+    expect(backendCmd.cwd).toBe('/project/backend')
+    expect(backendCmd.command).toContain('uvicorn')
+    expect(backendCmd.command).toContain('--port 8200')
+    expect(commands.find((c: any) => c.name === 'django')).toBeUndefined()
+    expect(commands.find((c: any) => c.name === 'express')).toBeUndefined()
+
+    // The startup output names FastAPI and shows the service's URL
+    expect(log.step).toHaveBeenCalledWith(expect.stringContaining('FastAPI'))
+    expect(log.step).toHaveBeenCalledWith(expect.stringContaining('http://localhost:8200'))
+
+    const watcher = commands.find((c: any) => c.name === 'sync')
+    expect(watcher.command).toContain('.py')
+    expect(watcher.command).toContain('venv/')
+    expect(watcher.command).not.toContain('node_modules/')
+  })
 })
