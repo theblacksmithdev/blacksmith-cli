@@ -36,7 +36,11 @@ export async function dev() {
   const config = loadConfig(root)
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
-  const isExpressBackend = projectHasBackend && getBackendFramework(root) === 'express'
+  const backendFramework = projectHasBackend ? getBackendFramework(root) : 'django'
+  const isExpressBackend = backendFramework === 'express'
+  const isFastapiBackend = backendFramework === 'fastapi'
+  // The label column is 7 characters wide; Django's trailing space pads it.
+  const backendName = isExpressBackend ? 'Express' : isFastapiBackend ? 'FastAPI' : 'Django '
 
   let backendPort: number | undefined
   let frontendPort: number | undefined
@@ -62,7 +66,7 @@ export async function dev() {
   log.info('Starting development server' + (projectHasBackend && projectHasFrontend ? 's' : '') + '...')
   log.blank()
   if (projectHasBackend && backendPort) {
-    log.step(`${isExpressBackend ? 'Express' : 'Django '}     → http://localhost:${backendPort}`)
+    log.step(`${backendName}     → http://localhost:${backendPort}`)
     log.step(`Swagger     → http://localhost:${backendPort}/api/docs/`)
   }
   if (projectHasFrontend && frontendPort) {
@@ -77,24 +81,35 @@ export async function dev() {
 
   if (projectHasBackend && backendPort) {
     const backendDir = getBackendDir(root)
-    processes.push(
-      isExpressBackend
-        ? {
-            command: 'npm run dev',
-            name: 'express',
-            cwd: backendDir,
-            // The generated server reads PORT, so a port collision resolved
-            // above is respected without editing .env
-            env: { PORT: String(backendPort) },
-            prefixColor: 'green',
-          }
-        : {
-            command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
-            name: 'django',
-            cwd: backendDir,
-            prefixColor: 'green',
-          }
-    )
+    let backendProcess: Parameters<typeof concurrently>[0][number]
+    if (isExpressBackend) {
+      backendProcess = {
+        command: 'npm run dev',
+        name: 'express',
+        cwd: backendDir,
+        // The generated server reads PORT, so a port collision resolved
+        // above is respected without editing .env
+        env: { PORT: String(backendPort) },
+        prefixColor: 'green',
+      }
+    } else if (isFastapiBackend) {
+      // uvicorn runs from the venv created by `blacksmith init`; --reload
+      // matches the hot reload the Django and Express dev servers provide.
+      backendProcess = {
+        command: `./venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${backendPort} --reload`,
+        name: 'fastapi',
+        cwd: backendDir,
+        prefixColor: 'green',
+      }
+    } else {
+      backendProcess = {
+        command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
+        name: 'django',
+        cwd: backendDir,
+        prefixColor: 'green',
+      }
+    }
+    processes.push(backendProcess)
   }
 
   if (projectHasFrontend && frontendPort) {

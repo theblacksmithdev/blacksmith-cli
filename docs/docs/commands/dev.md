@@ -9,6 +9,12 @@ The backend process is `npm run dev` (tsx watch) instead of the Django developme
 and the OpenAPI watcher follows `.ts` files rather than `.py`. Everything else is the same.
 :::
 
+:::note FastAPI backends
+The backend process is `./venv/bin/uvicorn app.main:app --reload` instead of the Django
+development server. Swagger UI stays at `/api/docs/` and the OpenAPI watcher follows `.py`
+files, so everything else is the same.
+:::
+
 
 Start the development server with hot reloading and automatic type synchronization.
 
