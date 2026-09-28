@@ -1,0 +1,57 @@
+"""API tests for the auth endpoints."""
+
+import os
+import tempfile
+
+# Configure a throwaway database before the app (and its settings) is imported.
+_tmp = tempfile.mkdtemp()
+os.environ["DATABASE_URL"] = f"sqlite:///{os.path.join(_tmp, 'test.db')}"
+os.environ["SECRET_KEY"] = "test-secret"
+
+from fastapi.testclient import TestClient  # noqa: E402
+
+from app.main import app  # noqa: E402
+
+
+def test_register_login_and_me():
+    with TestClient(app) as client:
+        register = client.post(
+            "/api/auth/register/",
+            json={
+                "email": "ada@example.com",
+                "password": "secret123",
+                "first_name": "Ada",
+                "last_name": "Lovelace",
+            },
+        )
+        assert register.status_code == 201
+        tokens = register.json()
+        assert "access" in tokens and "refresh" in tokens
+
+        login = client.post(
+            "/api/auth/login/",
+            json={"email": "ada@example.com", "password": "secret123"},
+        )
+        assert login.status_code == 200
+
+        headers = {"Authorization": f"Bearer {tokens['access']}"}
+        me = client.get("/api/auth/me/", headers=headers)
+        assert me.status_code == 200
+        body = me.json()
+        assert body["email"] == "ada@example.com"
+        assert body["first_name"] == "Ada"
+        assert body["last_name"] == "Lovelace"
+
+
+def test_login_rejects_wrong_password():
+    with TestClient(app) as client:
+        client.post(
+            "/api/auth/register/",
+            json={"email": "ada@example.com", "password": "secret123"},
+        )
+
+        bad = client.post(
+            "/api/auth/login/",
+            json={"email": "ada@example.com", "password": "wrong"},
+        )
+        assert bad.status_code == 401

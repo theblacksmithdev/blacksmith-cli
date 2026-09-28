@@ -25,6 +25,11 @@ function parsePort(value: string, label: string): number {
 const THEME_PRESETS = ['default', 'blue', 'green', 'violet', 'red', 'neutral']
 const PROJECT_TYPES: ProjectType[] = ['fullstack', 'backend', 'frontend']
 const BACKEND_FRAMEWORKS: BackendFramework[] = ['django', 'express', 'fastapi']
+const FRAMEWORK_LABELS: Record<BackendFramework, string> = {
+  django: 'Django',
+  express: 'Express',
+  fastapi: 'FastAPI',
+}
 
 interface InitOptions {
   type?: string
@@ -63,7 +68,7 @@ export async function init(name: string | undefined, options: InitOptions) {
   // A bad --backend value is an error even on a frontend-only project, where
   // the flag is otherwise ignored — silently accepting a typo helps nobody.
   if (options.backend && !BACKEND_FRAMEWORKS.includes(options.backend as BackendFramework)) {
-    log.error(`Invalid backend framework: "${options.backend}". Must be one of: django, express, fastapi`)
+    log.error(`Invalid backend framework: "${options.backend}". Must be one of: ${BACKEND_FRAMEWORKS.join(', ')}`)
     process.exit(1)
   }
 
@@ -82,6 +87,7 @@ export async function init(name: string | undefined, options: InitOptions) {
     }
   }
   const isExpressBackend = needsBackend && backendFramework === 'express'
+  const isFastapiBackend = needsBackend && backendFramework === 'fastapi'
 
   if (needsBackend && !options.backendPort) {
     options.backendPort = await promptText('Backend port', '8000')
@@ -107,8 +113,7 @@ export async function init(name: string | undefined, options: InitOptions) {
 
   const configDisplay: Record<string, string> = { 'Project': name, 'Type': projectType }
   if (needsBackend) {
-    const label = backendFramework === 'express' ? 'Express' : 'Django'
-    configDisplay['Backend'] = `${label} on :${backendPort}`
+    configDisplay['Backend'] = `${FRAMEWORK_LABELS[backendFramework]} on :${backendPort}`
   }
   if (needsFrontend) configDisplay['Frontend'] = `React on :${frontendPort}`
   if (needsFrontend) configDisplay['Theme'] = themePreset
@@ -133,6 +138,8 @@ export async function init(name: string | undefined, options: InitOptions) {
   // Check prerequisites
   const checkSpinner = spinner('Checking prerequisites...')
 
+  // Both Python frameworks share the Python 3 requirement; Express brings its
+  // own Node.js requirement instead.
   if (needsBackend && !isExpressBackend) {
     const hasPython = await commandExists('python3')
     if (!hasPython) {
@@ -191,7 +198,7 @@ export async function init(name: string | undefined, options: InitOptions) {
 
   // 2. Generate backend
   if (backendDir) {
-    const frameworkLabel = isExpressBackend ? 'Express' : 'Django'
+    const frameworkLabel = FRAMEWORK_LABELS[backendFramework]
     const backendSpinner = spinner(`Generating ${frameworkLabel} backend...`)
     try {
       renderDirectory(
@@ -268,16 +275,30 @@ export async function init(name: string | undefined, options: InitOptions) {
         process.exit(1)
       }
 
-      // 5. Run Django migrations
-      const migrateSpinner = spinner('Running initial migrations...')
-      try {
-        await execPython(['manage.py', 'makemigrations', 'users'], backendDir, true)
-        await execPython(['manage.py', 'migrate'], backendDir, true)
-        migrateSpinner.succeed('Database migrated')
-      } catch (error: any) {
-        migrateSpinner.fail('Failed to run migrations')
-        log.error(error.message)
-        process.exit(1)
+      if (isFastapiBackend) {
+        // 5. Create the database tables (SQLAlchemy create_all — the app also
+        // creates missing tables on startup, so this is a convenience step)
+        const dbSpinner = spinner('Creating database tables...')
+        try {
+          await execPython(['scripts.py', 'init-db'], backendDir, true)
+          dbSpinner.succeed('Database ready')
+        } catch (error: any) {
+          dbSpinner.fail('Failed to create database tables')
+          log.error(error.message)
+          process.exit(1)
+        }
+      } else {
+        // 5. Run Django migrations
+        const migrateSpinner = spinner('Running initial migrations...')
+        try {
+          await execPython(['manage.py', 'makemigrations', 'users'], backendDir, true)
+          await execPython(['manage.py', 'migrate'], backendDir, true)
+          migrateSpinner.succeed('Database migrated')
+        } catch (error: any) {
+          migrateSpinner.fail('Failed to run migrations')
+          log.error(error.message)
+          process.exit(1)
+        }
       }
     }
   }
@@ -317,11 +338,11 @@ export async function init(name: string | undefined, options: InitOptions) {
   // 8. First OpenAPI sync (only for fullstack projects)
   if (backendDir && frontendDir) {
     const syncSpinner = spinner('Running initial OpenAPI sync...')
-    if (isExpressBackend) {
-      // The Express backend can export its schema without booting, so there is
-      // no server to start, wait for, and kill here.
+    if (isExpressBackend || isFastapiBackend) {
+      // Express and FastAPI can export their schema without booting, so there
+      // is no server to start, wait for, and kill here.
       try {
-        await syncFrontendClient(backendDir, frontendDir, true)
+        await syncFrontendClient(backendDir, frontendDir, backendFramework)
         syncSpinner.succeed('OpenAPI types synced')
       } catch {
         syncSpinner.warn('OpenAPI sync skipped (run "blacksmith sync" to retry)')
@@ -378,7 +399,7 @@ export async function init(name: string | undefined, options: InitOptions) {
           ' *',
           ' * This is a stub file that allows the app to boot before',
           ' * the first OpenAPI sync. Run `blacksmith sync` or `blacksmith dev`',
-          ' * to generate the real client from your Django API schema.',
+          ' * to generate the real client from your backend\'s OpenAPI schema.',
           ' *',
           ' * Generated by Blacksmith. This file will be overwritten by openapi-ts.',
           ' */',

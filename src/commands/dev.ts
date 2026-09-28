@@ -36,7 +36,9 @@ export async function dev() {
   const config = loadConfig(root)
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
-  const isExpressBackend = projectHasBackend && getBackendFramework(root) === 'express'
+  const framework = projectHasBackend ? getBackendFramework(root) : 'django'
+  const isExpressBackend = framework === 'express'
+  const isPythonBackend = framework === 'django' || framework === 'fastapi'
 
   let backendPort: number | undefined
   let frontendPort: number | undefined
@@ -62,7 +64,8 @@ export async function dev() {
   log.info('Starting development server' + (projectHasBackend && projectHasFrontend ? 's' : '') + '...')
   log.blank()
   if (projectHasBackend && backendPort) {
-    log.step(`${isExpressBackend ? 'Express' : 'Django '}     → http://localhost:${backendPort}`)
+    const label = framework === 'express' ? 'Express' : framework === 'fastapi' ? 'FastAPI' : 'Django '
+    log.step(`${label}     → http://localhost:${backendPort}`)
     log.step(`Swagger     → http://localhost:${backendPort}/api/docs/`)
   }
   if (projectHasFrontend && frontendPort) {
@@ -77,24 +80,31 @@ export async function dev() {
 
   if (projectHasBackend && backendPort) {
     const backendDir = getBackendDir(root)
-    processes.push(
-      isExpressBackend
-        ? {
-            command: 'npm run dev',
-            name: 'express',
-            cwd: backendDir,
-            // The generated server reads PORT, so a port collision resolved
-            // above is respected without editing .env
-            env: { PORT: String(backendPort) },
-            prefixColor: 'green',
-          }
-        : {
-            command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
-            name: 'django',
-            cwd: backendDir,
-            prefixColor: 'green',
-          }
-    )
+    if (isExpressBackend) {
+      processes.push({
+        command: 'npm run dev',
+        name: 'express',
+        cwd: backendDir,
+        // The generated server reads PORT, so a port collision resolved
+        // above is respected without editing .env
+        env: { PORT: String(backendPort) },
+        prefixColor: 'green',
+      })
+    } else if (framework === 'fastapi') {
+      processes.push({
+        command: `./venv/bin/python -m uvicorn app.main:app --reload --host 0.0.0.0 --port ${backendPort}`,
+        name: 'fastapi',
+        cwd: backendDir,
+        prefixColor: 'green',
+      })
+    } else {
+      processes.push({
+        command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
+        name: 'django',
+        cwd: backendDir,
+        prefixColor: 'green',
+      })
+    }
   }
 
   if (projectHasFrontend && frontendPort) {
@@ -122,7 +132,9 @@ export async function dev() {
       : ['venv/']
     const ignoredFragments = isExpressBackend
       ? ['/node_modules/', '/dist/']
-      : ['__pycache__', '/migrations/']
+      : isPythonBackend && framework === 'django'
+        ? ['__pycache__', '/migrations/']
+        : ['__pycache__']
 
     const watcherCode = [
       `const{watch}=require("fs"),{exec}=require("child_process");`,

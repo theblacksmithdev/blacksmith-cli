@@ -1,6 +1,7 @@
 import path from 'node:path'
 import fs from 'node:fs'
 import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, getTemplatesDir, hasBackend, hasFrontend } from '../utils/paths.js'
+import type { BackendFramework } from '../utils/paths.js'
 import { generateNames } from '../utils/names.js'
 import { renderDirectory, renderTemplateFile, appendAfterMarker, insertBeforeMarker } from '../utils/template.js'
 import { exec, execPython } from '../utils/exec.js'
@@ -102,6 +103,74 @@ async function generateExpressResource({
   }
 }
 
+interface FastapiResourceArgs {
+  backendDir: string
+  moduleDir: string
+  templatesDir: string
+  names: ReturnType<typeof generateNames>
+  context: Record<string, unknown>
+}
+
+/**
+ * Scaffold a FastAPI resource: a router module (model, schemas, endpoints), a
+ * mounted router in `app/main.py`, and the table creation step.
+ */
+async function generateFastapiResource({
+  backendDir,
+  moduleDir,
+  templatesDir,
+  names,
+  context,
+}: FastapiResourceArgs) {
+  // 1. Router module (model, schemas, CRUD endpoints)
+  const moduleSpinner = spinner(`Creating backend module: app/routers/${names.snakes}/`)
+  try {
+    renderDirectory(
+      path.join(templatesDir, resourceTemplateDir('fastapi')),
+      moduleDir,
+      context
+    )
+    moduleSpinner.succeed(`Created app/routers/${names.snakes}/`)
+  } catch (error: any) {
+    moduleSpinner.fail('Failed to create backend module')
+    log.error(error.message)
+    process.exit(1)
+  }
+
+  // 2. Mount the router in app/main.py
+  const routeSpinner = spinner('Registering API routes...')
+  try {
+    const mainPath = path.join(backendDir, 'app', 'main.py')
+    insertBeforeMarker(
+      mainPath,
+      '# blacksmith:import',
+      `from app.routers.${names.snakes}.router import router as ${names.snakes}_router`
+    )
+    insertBeforeMarker(
+      mainPath,
+      '# blacksmith:routers',
+      `app.include_router(${names.snakes}_router, prefix="/api/${names.snakes}", tags=["${names.snakes}"])`
+    )
+    routeSpinner.succeed(`Registered /api/${names.snakes}/`)
+  } catch (error: any) {
+    routeSpinner.fail('Failed to register API routes')
+    log.error(error.message)
+    process.exit(1)
+  }
+
+  // 3. Create the new table (create_all is idempotent; the app also creates
+  // missing tables on startup)
+  const dbSpinner = spinner('Creating database tables...')
+  try {
+    await execPython(['scripts.py', 'init-db'], backendDir, true)
+    dbSpinner.succeed('Database tables created')
+  } catch (error: any) {
+    dbSpinner.fail('Failed to create database tables')
+    log.error(error.message)
+    process.exit(1)
+  }
+}
+
 export async function makeResource(name: string) {
   let root: string
   try {
@@ -115,7 +184,9 @@ export async function makeResource(name: string) {
   const templatesDir = getTemplatesDir()
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
-  const isExpressBackend = projectHasBackend && getBackendFramework(root) === 'express'
+  const framework: BackendFramework = projectHasBackend ? getBackendFramework(root) : 'django'
+  const isExpressBackend = projectHasBackend && framework === 'express'
+  const isFastapiBackend = projectHasBackend && framework === 'fastapi'
 
   const context = { ...names, projectName: name }
 
@@ -124,14 +195,18 @@ export async function makeResource(name: string) {
   const backendResourceDir = projectHasBackend
     ? isExpressBackend
       ? path.join(getBackendDir(root), 'src', 'modules', names.kebabs)
-      : path.join(getBackendDir(root), 'apps', names.snakes)
+      : isFastapiBackend
+        ? path.join(getBackendDir(root), 'app', 'routers', names.snakes)
+        : path.join(getBackendDir(root), 'apps', names.snakes)
     : null
 
   if (backendResourceDir && fs.existsSync(backendResourceDir)) {
     log.error(
       isExpressBackend
         ? `Backend module "${names.kebabs}" already exists.`
-        : `Backend app "${names.snakes}" already exists.`
+        : isFastapiBackend
+          ? `Backend module "${names.snakes}" already exists.`
+          : `Backend app "${names.snakes}" already exists.`
     )
     process.exit(1)
   }
@@ -148,6 +223,14 @@ export async function makeResource(name: string) {
   // Backend resource generation
   if (projectHasBackend && backendResourceDir && isExpressBackend) {
     await generateExpressResource({
+      backendDir: getBackendDir(root),
+      moduleDir: backendResourceDir,
+      templatesDir,
+      names,
+      context,
+    })
+  } else if (projectHasBackend && backendResourceDir && isFastapiBackend) {
+    await generateFastapiResource({
       backendDir: getBackendDir(root),
       moduleDir: backendResourceDir,
       templatesDir,
@@ -224,7 +307,7 @@ export async function makeResource(name: string) {
     const frontendDir = getFrontendDir(root)
     const syncSpinner = spinner('Syncing OpenAPI schema...')
     try {
-      await syncFrontendClient(backendDir, frontendDir, isExpressBackend)
+      await syncFrontendClient(backendDir, frontendDir, framework)
       syncSpinner.succeed('Frontend types and hooks regenerated')
     } catch {
       syncSpinner.warn('Could not sync OpenAPI. Run "blacksmith sync" manually.')

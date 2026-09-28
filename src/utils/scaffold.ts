@@ -26,8 +26,9 @@ export function projectLayout(
     backendFramework,
     isDjango: backendFramework === 'django',
     isExpress: backendFramework === 'express',
+    isFastapi: backendFramework === 'fastapi',
     // Filename the CI workflow exports the OpenAPI document to
-    schemaFile: schemaFileName(backendFramework === 'express'),
+    schemaFile: schemaFileName(backendFramework),
     // Paths relative to the project root, as CI working directories
     backendPath: isFullstack ? 'backend' : '.',
     frontendPath: isFullstack ? 'frontend' : '.',
@@ -36,7 +37,7 @@ export function projectLayout(
 
 /**
  * Directory under the templates root holding a backend framework's project
- * templates: `backend/django` or `backend/express`.
+ * templates: `backend/django`, `backend/express`, or `backend/fastapi`.
  *
  * This is a path into the template tree, not the generated layout — a project
  * always gets a plain `backend/` directory whichever framework it uses.

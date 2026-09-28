@@ -1,15 +1,17 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import type { BackendFramework } from './paths.js'
 import { exec, execPython } from './exec.js'
 
 /**
  * Name of the schema file a backend exports.
  *
- * drf-spectacular writes YAML; the Express generator writes JSON. CI and the
- * `sync` command both read this so the two can never disagree.
+ * drf-spectacular writes YAML; the Express generator and FastAPI's
+ * `scripts.py export-openapi` write JSON. CI and the `sync` command both read
+ * this so the two can never disagree.
  */
-export function schemaFileName(isExpress: boolean): string {
-  return isExpress ? '_schema.json' : '_schema.yml'
+export function schemaFileName(framework: BackendFramework): string {
+  return framework === 'django' ? '_schema.yml' : '_schema.json'
 }
 
 /** Path to the frontend's local openapi-ts binary. */
@@ -60,18 +62,20 @@ export async function generateClientFromSchema(
 /**
  * Export the backend's OpenAPI document to `schemaPath` without starting a
  * server. Django does this through drf-spectacular, Express through its own
- * `openapi` script.
+ * `openapi` script, FastAPI through `scripts.py export-openapi`.
  */
 export async function exportBackendSchema(
   backendDir: string,
   schemaPath: string,
-  isExpress: boolean
+  framework: BackendFramework
 ): Promise<void> {
-  if (isExpress) {
+  if (framework === 'express') {
     await exec('npm', ['run', 'openapi', '--', schemaPath], {
       cwd: backendDir,
       silent: true,
     })
+  } else if (framework === 'fastapi') {
+    await execPython(['scripts.py', 'export-openapi', schemaPath], backendDir, true)
   } else {
     await execPython(['manage.py', 'spectacular', '--file', schemaPath], backendDir, true)
   }
@@ -80,14 +84,14 @@ export async function exportBackendSchema(
 /**
  * Regenerate the frontend's typed client from the backend's current schema.
  *
- * Fully offline for both frameworks — nothing has to be listening.
+ * Fully offline for all three frameworks — nothing has to be listening.
  */
 export async function syncFrontendClient(
   backendDir: string,
   frontendDir: string,
-  isExpress: boolean
+  framework: BackendFramework
 ): Promise<void> {
-  const schemaPath = path.join(frontendDir, schemaFileName(isExpress))
-  await exportBackendSchema(backendDir, schemaPath, isExpress)
+  const schemaPath = path.join(frontendDir, schemaFileName(framework))
+  await exportBackendSchema(backendDir, schemaPath, framework)
   await generateClientFromSchema(frontendDir, schemaPath)
 }
