@@ -115,7 +115,8 @@ export async function makeResource(name: string) {
   const templatesDir = getTemplatesDir()
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
-  const isExpressBackend = projectHasBackend && getBackendFramework(root) === 'express'
+  const backendFramework = projectHasBackend ? getBackendFramework(root) : 'django'
+  const isExpressBackend = backendFramework === 'express'
 
   const context = { ...names, projectName: name }
 
@@ -224,7 +225,7 @@ export async function makeResource(name: string) {
     const frontendDir = getFrontendDir(root)
     const syncSpinner = spinner('Syncing OpenAPI schema...')
     try {
-      await syncFrontendClient(backendDir, frontendDir, isExpressBackend)
+      await syncFrontendClient(backendDir, frontendDir, backendFramework)
       syncSpinner.succeed('Frontend types and hooks regenerated')
     } catch {
       syncSpinner.warn('Could not sync OpenAPI. Run "blacksmith sync" manually.')

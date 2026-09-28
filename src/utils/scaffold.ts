@@ -26,8 +26,9 @@ export function projectLayout(
     backendFramework,
     isDjango: backendFramework === 'django',
     isExpress: backendFramework === 'express',
+    isFastapi: backendFramework === 'fastapi',
     // Filename the CI workflow exports the OpenAPI document to
-    schemaFile: schemaFileName(backendFramework === 'express'),
+    schemaFile: schemaFileName(backendFramework),
     // Paths relative to the project root, as CI working directories
     backendPath: isFullstack ? 'backend' : '.',
     frontendPath: isFullstack ? 'frontend' : '.',
