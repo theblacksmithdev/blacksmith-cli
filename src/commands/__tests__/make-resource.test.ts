@@ -136,6 +136,22 @@ describe('makeResource', () => {
     expect(log.error).toHaveBeenCalledWith('Frontend page "posts" already exists.')
   })
 
+  it('refuses on a FastAPI backend rather than falling into the Django path', async () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+    pathMocks.getBackendDir.mockReturnValue(path.join(getTmpDir(), 'backend'))
+    pathMocks.getFrontendDir.mockReturnValue(path.join(getTmpDir(), 'frontend'))
+    pathMocks.getTemplatesDir.mockReturnValue('/templates')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+
+    await expect(makeResource('Product')).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith(
+      'make:resource is not available yet for FastAPI backends (it ships in a later release).'
+    )
+    expect(templateMocks.renderDirectory).not.toHaveBeenCalled()
+    expect(execMocks.execPython).not.toHaveBeenCalled()
+  })
+
   describe('on an Express backend', () => {
     function setupExpress() {
       pathMocks.findProjectRoot.mockReturnValue(getTmpDir())

@@ -117,7 +117,10 @@ export function printNextSteps(
   console.log()
 
   if (backendPort !== undefined) {
-    const label = backendFramework === 'express' ? 'Express:' : 'Django: '
+    const label =
+      backendFramework === 'express' ? 'Express:' :
+      backendFramework === 'fastapi' ? 'FastAPI:' :
+      'Django: '
     console.log(chalk.dim(`  ${label}  http://localhost:${backendPort}`))
     console.log(chalk.dim(`  Swagger:  http://localhost:${backendPort}/api/docs/`))
     if (backendFramework !== 'express') {

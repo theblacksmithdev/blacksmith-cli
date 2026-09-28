@@ -81,12 +81,22 @@ describe('projectLayout', () => {
     expect(layout.isExpress).toBe(true)
     expect(layout.isDjango).toBe(false)
   })
+
+  it('flags a FastAPI backend and exports its schema as JSON', () => {
+    const layout = projectLayout('fullstack', 'fastapi')
+
+    expect(layout.isFastapi).toBe(true)
+    expect(layout.isExpress).toBe(false)
+    expect(layout.isDjango).toBe(false)
+    expect(layout.schemaFile).toBe('_schema.json')
+  })
 })
 
 describe('backendTemplateDir', () => {
   it('resolves each framework to its own directory under backend/', () => {
     expect(backendTemplateDir('django')).toBe(path.join('backend', 'django'))
     expect(backendTemplateDir('express')).toBe(path.join('backend', 'express'))
+    expect(backendTemplateDir('fastapi')).toBe(path.join('backend', 'fastapi'))
   })
 })
 
@@ -145,19 +155,69 @@ describe('CI workflow for an Express backend', () => {
   })
 })
 
+describe('CI workflow for a FastAPI backend', () => {
+  const getTmpDir = useTmpDir()
+
+  function renderIn(type: ProjectType) {
+    const dir = path.join(getTmpDir(), type)
+    fs.mkdirSync(dir, { recursive: true })
+    return render(dir, type, 'fastapi')
+  }
+
+  it('leaves no unrendered Handlebars behind', () => {
+    for (const type of ['fullstack', 'backend', 'frontend'] as ProjectType[]) {
+      const yaml = renderIn(type)
+      expect(yaml, type).not.toMatch(/(?<!\$)\{\{\s*[#/]?[a-zA-Z_][\w.]*\s*\}\}/)
+      expect(yaml, type).not.toContain('BLACKSMITH_')
+    }
+  })
+
+  it('runs the Python toolchain for the backend, never Node or Django', () => {
+    const yaml = renderIn('backend')
+
+    expect(yaml).toContain('name: Backend (pytest)')
+    expect(yaml).toContain('run: pytest --cov --cov-report=term-missing')
+    expect(yaml).not.toContain('setup-node')
+    expect(yaml).not.toContain('prisma')
+    expect(yaml).not.toContain('manage.py')
+    expect(yaml).not.toContain('DJANGO_SETTINGS_MODULE')
+  })
+
+  it('exports the schema with scripts.py on a fullstack project', () => {
+    const yaml = renderIn('fullstack')
+
+    expect(yaml).toContain('python scripts.py export-openapi ../frontend/_schema.json')
+    expect(yaml).toContain('npx openapi-ts --input _schema.json')
+    // The JSON schema name and the Django YAML one must not be mixed up
+    expect(yaml).not.toContain('_schema.yml')
+    expect(yaml).not.toContain('spectacular')
+  })
+
+  it('omits the backend job entirely for a frontend-only project', () => {
+    const yaml = renderIn('frontend')
+
+    expect(yaml).not.toContain('Backend (pytest)')
+    expect(yaml).toContain('Frontend (vitest)')
+    expect(yaml).not.toContain('scripts.py')
+  })
+})
+
 describe('CI workflow schema filenames', () => {
   const getTmpDir = useTmpDir()
 
   // The exported filename comes from one helper, so the workflow and the
   // `sync` command cannot drift apart.
-  it('uses the YAML name for Django and the JSON name for Express', () => {
+  it('uses the YAML name for Django and the JSON name for Express and FastAPI', () => {
     const django = path.join(getTmpDir(), 'dj')
     const express = path.join(getTmpDir(), 'ex')
+    const fastapi = path.join(getTmpDir(), 'fa')
     fs.mkdirSync(django, { recursive: true })
     fs.mkdirSync(express, { recursive: true })
+    fs.mkdirSync(fastapi, { recursive: true })
 
     expect(render(django, 'fullstack', 'django')).toContain('_schema.yml')
     expect(render(express, 'fullstack', 'express')).toContain('_schema.json')
+    expect(render(fastapi, 'fullstack', 'fastapi')).toContain('_schema.json')
   })
 })
 
@@ -172,10 +232,13 @@ describe('generated CI workflow is valid YAML', () => {
   const combinations: Array<[ProjectType, BackendFramework, string[]]> = [
     ['fullstack', 'django', ['backend', 'frontend']],
     ['fullstack', 'express', ['backend', 'frontend']],
+    ['fullstack', 'fastapi', ['backend', 'frontend']],
     ['backend', 'django', ['backend']],
     ['backend', 'express', ['backend']],
+    ['backend', 'fastapi', ['backend']],
     ['frontend', 'django', ['frontend']],
     ['frontend', 'express', ['frontend']],
+    ['frontend', 'fastapi', ['frontend']],
   ]
 
   it.each(combinations)('parses for %s / %s', (type, framework, expectedJobs) => {

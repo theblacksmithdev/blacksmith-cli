@@ -11,6 +11,7 @@ export type GitignoreKind =
   | 'frontend'
   | 'backend/django'
   | 'backend/express'
+  | 'backend/fastapi'
 
 /**
  * Write the `.gitignore` for a generated directory if one is not already there.

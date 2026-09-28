@@ -115,7 +115,18 @@ export async function makeResource(name: string) {
   const templatesDir = getTemplatesDir()
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
-  const isExpressBackend = projectHasBackend && getBackendFramework(root) === 'express'
+  const backendFramework = projectHasBackend ? getBackendFramework(root) : 'django'
+  const isExpressBackend = backendFramework === 'express'
+
+  // FastAPI resource generation is out of scope for this ticket and gets its
+  // own planning and review later. Refuse up front rather than falling into
+  // the Django resource path, which would corrupt a FastAPI project.
+  if (projectHasBackend && backendFramework === 'fastapi') {
+    log.error(
+      'make:resource is not available yet for FastAPI backends (it ships in a later release).'
+    )
+    process.exit(1)
+  }
 
   const context = { ...names, projectName: name }
 
@@ -224,7 +235,7 @@ export async function makeResource(name: string) {
     const frontendDir = getFrontendDir(root)
     const syncSpinner = spinner('Syncing OpenAPI schema...')
     try {
-      await syncFrontendClient(backendDir, frontendDir, isExpressBackend)
+      await syncFrontendClient(backendDir, frontendDir, backendFramework)
       syncSpinner.succeed('Frontend types and hooks regenerated')
     } catch {
       syncSpinner.warn('Could not sync OpenAPI. Run "blacksmith sync" manually.')

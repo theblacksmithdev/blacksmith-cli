@@ -102,6 +102,7 @@ describe('gitignore templates', () => {
       'frontend',
       'backend/django',
       'backend/express',
+      'backend/fastapi',
     ]
 
     for (const kind of kinds) {

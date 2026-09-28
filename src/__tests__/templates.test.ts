@@ -32,6 +32,13 @@ const EXPRESS_CONTEXT = {
   isExpress: true,
 }
 
+const FASTAPI_CONTEXT = {
+  ...PROJECT_CONTEXT,
+  backendFramework: 'fastapi',
+  isDjango: false,
+  isExpress: false,
+}
+
 const RESOURCE_CONTEXT = { ...generateNames('product'), projectName: 'my-app' }
 
 function walkFiles(dir: string): string[] {
@@ -52,6 +59,7 @@ function walkFiles(dir: string): string[] {
 describe.each([
   ['backend/django', path.join('backend', 'django'), PROJECT_CONTEXT],
   ['backend/express', path.join('backend', 'express'), EXPRESS_CONTEXT],
+  ['backend/fastapi', path.join('backend', 'fastapi'), FASTAPI_CONTEXT],
   ['frontend', 'frontend', PROJECT_CONTEXT],
   ['resource/backend/django', path.join('resource', 'backend', 'django'), RESOURCE_CONTEXT],
   ['resource/backend/express', path.join('resource', 'backend', 'express'), RESOURCE_CONTEXT],

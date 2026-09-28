@@ -261,14 +261,99 @@ describe('init', () => {
     )
   })
 
-  it('should recognise fastapi but defer generation to the next release', async () => {
-    await expect(
-      init('my-app', { type: 'backend', backend: 'fastapi', backendPort: '8000', ai: false })
-    ).rejects.toThrow('process.exit called')
+  it('should record fastapi as the backend framework in the config', async () => {
+    setupSuccessfulInit()
 
-    expect(log.error).toHaveBeenCalledWith(
-      'FastAPI project generation is not available yet (it ships in the next release). Use --backend django or --backend express.'
+    await init('my-app', { type: 'backend', backend: 'fastapi', backendPort: '8000', ai: false })
+
+    const config = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, 'my-app', 'blacksmith.config.json'), 'utf-8')
     )
+    expect(config.backend.framework).toBe('fastapi')
+  })
+
+  it('should render the FastAPI backend templates for a fastapi project', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', {
+      type: 'fullstack',
+      backend: 'fastapi',
+      backendPort: '8000',
+      frontendPort: '5173',
+      themeColor: 'default',
+      ai: false,
+    })
+
+    const calls = templateMocks.renderDirectory.mock.calls
+    expect(calls.find((c: any[]) => c[0] === path.join('/templates', 'backend', 'fastapi'))).toBeDefined()
+    expect(calls.find((c: any[]) => c[0] === path.join('/templates', 'backend', 'django'))).toBeUndefined()
+    expect(calls.find((c: any[]) => c[0] === path.join('/templates', 'backend', 'express'))).toBeUndefined()
+  })
+
+  it('should install Python dependencies and create tables for a FastAPI backend', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', { type: 'backend', backend: 'fastapi', backendPort: '8000', ai: false })
+
+    const realTmpDir = fs.realpathSync(tmpDir)
+    const backendDir = path.join(realTmpDir, 'my-app')
+
+    expect(execMocks.exec).toHaveBeenCalledWith(
+      'python3',
+      ['-m', 'venv', 'venv'],
+      { cwd: backendDir, silent: true }
+    )
+
+    expect(execMocks.execPip).toHaveBeenCalledWith(
+      ['install', '-r', 'requirements.txt'],
+      backendDir,
+      true
+    )
+
+    expect(execMocks.execPython).toHaveBeenCalledWith(
+      ['scripts.py', 'init-db'],
+      backendDir,
+      true
+    )
+
+    // No Node.js or Django steps are attempted
+    expect(execMocks.exec).not.toHaveBeenCalledWith('npm', expect.anything(), expect.anything())
+    expect(execMocks.exec).not.toHaveBeenCalledWith('npx', expect.anything(), expect.anything())
+    expect(execMocks.execPython).not.toHaveBeenCalledWith(
+      ['manage.py', 'makemigrations', 'users'],
+      backendDir,
+      true
+    )
+    expect(execMocks.execPython).not.toHaveBeenCalledWith(
+      ['manage.py', 'migrate'],
+      backendDir,
+      true
+    )
+  })
+
+  it('should require Python but not Node for a FastAPI backend', async () => {
+    setupSuccessfulInit()
+    execMocks.commandExists.mockImplementation(async (cmd: string) => cmd !== 'node' && cmd !== 'npm')
+
+    await init('my-app', { type: 'backend', backend: 'fastapi', backendPort: '8000', ai: false })
+
+    expect(mockExit).not.toHaveBeenCalled()
+  })
+
+  it('should write a FastAPI .gitignore that ignores venv and the database', async () => {
+    setupSuccessfulInit()
+    pathMocks.getTemplatesDir.mockReturnValue(REAL_TEMPLATES_DIR)
+
+    await init('api-only', { type: 'backend', backend: 'fastapi', backendPort: '8000', ai: false })
+
+    const content = fs.readFileSync(
+      path.join(tmpDir, 'api-only', '.gitignore'),
+      'utf-8'
+    )
+    expect(content).toMatch(/^venv\/$/m)
+    expect(content).toMatch(/^db\.sqlite3$/m)
+    expect(content).not.toMatch(/^node_modules\/$/m)
+    expect(content).not.toMatch(/^backend\/venv\/$/m)
   })
 
   it('should ignore a fastapi backend choice on a frontend-only project', async () => {

@@ -20,11 +20,11 @@ export async function sync() {
 
   const backendDir = getBackendDir(root)
   const frontendDir = getFrontendDir(root)
-  const isExpress = getBackendFramework(root) === 'express'
+  const backendFramework = getBackendFramework(root)
   const s = spinner('Syncing OpenAPI schema to frontend...')
 
   try {
-    await syncFrontendClient(backendDir, frontendDir, isExpress)
+    await syncFrontendClient(backendDir, frontendDir, backendFramework)
 
     s.succeed('Frontend types, schemas, and hooks synced from OpenAPI spec')
     log.blank()
