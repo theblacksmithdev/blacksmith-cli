@@ -8,7 +8,7 @@ import { resourcePrismaTemplate, resourceTemplateDir } from '../utils/scaffold.j
 import { syncFrontendClient } from '../utils/openapi.js'
 import { log, spinner } from '../utils/logger.js'
 
-interface ExpressResourceArgs {
+interface FrameworkResourceArgs {
   backendDir: string
   moduleDir: string
   templatesDir: string
@@ -26,7 +26,7 @@ async function generateExpressResource({
   templatesDir,
   names,
   context,
-}: ExpressResourceArgs) {
+}: FrameworkResourceArgs) {
   // 1. Module (schemas, service, controller, routes, tests)
   const moduleSpinner = spinner(`Creating backend module: src/modules/${names.kebabs}/`)
   try {
@@ -102,6 +102,67 @@ async function generateExpressResource({
   }
 }
 
+/**
+ * Scaffold a FastAPI resource: a router module under `app/routers/` holding
+ * the SQLAlchemy model, Pydantic schemas, and CRUD endpoints, registered in
+ * `app/main.py`.
+ */
+async function generateFastapiResource({
+  backendDir,
+  moduleDir,
+  templatesDir,
+  names,
+  context,
+}: FrameworkResourceArgs) {
+  // 1. Router module (model, schemas, endpoints)
+  const moduleSpinner = spinner(`Creating backend router: app/routers/${names.snakes}/`)
+  try {
+    renderDirectory(
+      path.join(templatesDir, resourceTemplateDir('fastapi')),
+      moduleDir,
+      context
+    )
+    moduleSpinner.succeed(`Created app/routers/${names.snakes}/`)
+  } catch (error: any) {
+    moduleSpinner.fail('Failed to create backend router')
+    log.error(error.message)
+    process.exit(1)
+  }
+
+  // 2. Register the router in app/main.py
+  const routeSpinner = spinner('Registering API routes...')
+  try {
+    const mainPath = path.join(backendDir, 'app', 'main.py')
+    insertBeforeMarker(
+      mainPath,
+      '# blacksmith:import',
+      `from app.routers.${names.snakes}.router import router as ${names.snakes}_router`
+    )
+    insertBeforeMarker(
+      mainPath,
+      '# blacksmith:routers',
+      `app.include_router(${names.snakes}_router, prefix="/api/${names.snakes}")`
+    )
+    routeSpinner.succeed(`Registered /api/${names.snakes}/`)
+  } catch (error: any) {
+    routeSpinner.fail('Failed to register API routes')
+    log.error(error.message)
+    process.exit(1)
+  }
+
+  // 3. Create the table. scripts.py imports app.main, which imports the
+  // router registered above, so Base.metadata sees the new model.
+  const dbSpinner = spinner('Setting up the database...')
+  try {
+    await execPython(['scripts.py', 'init-db'], backendDir, true)
+    dbSpinner.succeed('Database tables created')
+  } catch (error: any) {
+    dbSpinner.fail('Failed to set up the database')
+    log.error(error.message)
+    process.exit(1)
+  }
+}
+
 export async function makeResource(name: string) {
   let root: string
   try {
@@ -117,6 +178,7 @@ export async function makeResource(name: string) {
   const projectHasFrontend = hasFrontend(root)
   const backendFramework = projectHasBackend ? getBackendFramework(root) : 'django'
   const isExpressBackend = backendFramework === 'express'
+  const isFastapiBackend = backendFramework === 'fastapi'
 
   const context = { ...names, projectName: name }
 
@@ -125,14 +187,18 @@ export async function makeResource(name: string) {
   const backendResourceDir = projectHasBackend
     ? isExpressBackend
       ? path.join(getBackendDir(root), 'src', 'modules', names.kebabs)
-      : path.join(getBackendDir(root), 'apps', names.snakes)
+      : isFastapiBackend
+        ? path.join(getBackendDir(root), 'app', 'routers', names.snakes)
+        : path.join(getBackendDir(root), 'apps', names.snakes)
     : null
 
   if (backendResourceDir && fs.existsSync(backendResourceDir)) {
     log.error(
       isExpressBackend
         ? `Backend module "${names.kebabs}" already exists.`
-        : `Backend app "${names.snakes}" already exists.`
+        : isFastapiBackend
+          ? `Backend router "${names.snakes}" already exists.`
+          : `Backend app "${names.snakes}" already exists.`
     )
     process.exit(1)
   }
@@ -149,6 +215,14 @@ export async function makeResource(name: string) {
   // Backend resource generation
   if (projectHasBackend && backendResourceDir && isExpressBackend) {
     await generateExpressResource({
+      backendDir: getBackendDir(root),
+      moduleDir: backendResourceDir,
+      templatesDir,
+      names,
+      context,
+    })
+  } else if (projectHasBackend && backendResourceDir && isFastapiBackend) {
+    await generateFastapiResource({
       backendDir: getBackendDir(root),
       moduleDir: backendResourceDir,
       templatesDir,
