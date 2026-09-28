@@ -49,7 +49,7 @@ export type BackendFramework = 'django' | 'express'
 `getBackendFramework()` returns that value from the config (absent → `django`).
 But almost no consumer switches on the value. Each consumer converts it into a
 boolean — `isExpress = framework === 'express'` — and every else-branch means
-Django. That is the assumption this record inventories: 8 commands, 4 utils, 2
+Django. That is the assumption this record inventories: 12 commands, 5 utils, 2
 skill generators, 2 templates, and a handful of shared frontend templates that
 carry Django-flavoured copy, plus CLI-facing docs.
 
