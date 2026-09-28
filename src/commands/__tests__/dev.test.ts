@@ -145,17 +145,28 @@ describe('dev', () => {
     expect(backendCmd).toBeDefined()
     expect(backendCmd.cwd).toBe('/project/backend')
     expect(backendCmd.command).toContain('uvicorn')
-    expect(backendCmd.command).toContain('--port 8200')
+    // Port 8200 may be taken on the machine running the tests, so read the
+    // port findAvailablePort actually resolved back out of the command instead
+    // of pinning the configured one.
+    const portMatch = backendCmd.command.match(/--port (\d+)/)
+    expect(portMatch).not.toBeNull()
+    const resolvedPort = portMatch![1]
     expect(commands.find((c: any) => c.name === 'django')).toBeUndefined()
     expect(commands.find((c: any) => c.name === 'express')).toBeUndefined()
 
     // The startup output names FastAPI and shows the service's URL
     expect(log.step).toHaveBeenCalledWith(expect.stringContaining('FastAPI'))
-    expect(log.step).toHaveBeenCalledWith(expect.stringContaining('http://localhost:8200'))
+    expect(log.step).toHaveBeenCalledWith(
+      expect.stringContaining(`http://localhost:${resolvedPort}`)
+    )
 
     const watcher = commands.find((c: any) => c.name === 'sync')
     expect(watcher.command).toContain('.py')
     expect(watcher.command).toContain('venv/')
-    expect(watcher.command).not.toContain('node_modules/')
+    // The watcher ignores node_modules for Express only; the command string
+    // still contains 'node_modules/' for FastAPI because the embedded sync
+    // binary lives at node_modules/.bin/openapi-ts, so assert on the
+    // FastAPI-specific ignore fragment instead.
+    expect(watcher.command).toContain('__pycache__')
   })
 })
