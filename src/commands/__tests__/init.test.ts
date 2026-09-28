@@ -257,8 +257,21 @@ describe('init', () => {
     ).rejects.toThrow('process.exit called')
 
     expect(log.error).toHaveBeenCalledWith(
-      'Invalid backend framework: "fastify". Must be one of: django, express'
+      'Invalid backend framework: "fastify". Must be one of: django, express, fastapi'
     )
+  })
+
+  it('should accept fastapi as a backend framework', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', { type: 'backend', backend: 'fastapi', backendPort: '8000', ai: false })
+
+    expect(mockExit).not.toHaveBeenCalled()
+
+    const config = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, 'my-app', 'blacksmith.config.json'), 'utf-8')
+    )
+    expect(config.backend.framework).toBe('fastapi')
   })
 
   it('should render the Express backend templates for an express project', async () => {

@@ -19,7 +19,7 @@ const program = new Command()
 
 program
   .name('blacksmith')
-  .description('Fullstack Django or Express + React framework')
+  .description('Fullstack Django, Express, or FastAPI + React framework')
   .version('0.1.0')
   .hook('preAction', () => {
     banner()
@@ -29,7 +29,7 @@ program
   .command('init')
   .argument('[name]', 'Project name')
   .option('--type <type>', 'Project type: fullstack, backend, or frontend (default: fullstack)')
-  .option('--backend <framework>', 'Backend framework: django or express (default: django)')
+  .option('--backend <framework>', 'Backend framework: django, express, or fastapi (default: django)')
   .option('--ai', 'Set up AI development skills and documentation (CLAUDE.md)')
   .option('--no-chakra-ui-skill', 'Disable Chakra UI skill when using --ai')
   .option('-b, --backend-port <port>', 'Backend port (default: 8000)')

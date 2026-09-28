@@ -24,7 +24,7 @@ function parsePort(value: string, label: string): number {
 
 const THEME_PRESETS = ['default', 'blue', 'green', 'violet', 'red', 'neutral']
 const PROJECT_TYPES: ProjectType[] = ['fullstack', 'backend', 'frontend']
-const BACKEND_FRAMEWORKS: BackendFramework[] = ['django', 'express']
+const BACKEND_FRAMEWORKS: BackendFramework[] = ['django', 'express', 'fastapi']
 
 interface InitOptions {
   type?: string
@@ -63,7 +63,7 @@ export async function init(name: string | undefined, options: InitOptions) {
   // A bad --backend value is an error even on a frontend-only project, where
   // the flag is otherwise ignored — silently accepting a typo helps nobody.
   if (options.backend && !BACKEND_FRAMEWORKS.includes(options.backend as BackendFramework)) {
-    log.error(`Invalid backend framework: "${options.backend}". Must be one of: django, express`)
+    log.error(`Invalid backend framework: "${options.backend}". Must be one of: django, express, fastapi`)
     process.exit(1)
   }
 

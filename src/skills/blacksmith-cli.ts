@@ -101,7 +101,7 @@ blacksmith init my-app --type fullstack --backend ${isExpress ? 'express' : 'dja
 | Flag | Description |
 |---|---|
 | \`--type <type>\` | Project type: fullstack, backend, or frontend (default: fullstack) |
-| \`--backend <framework>\` | Backend framework: django or express (default: django) |
+| \`--backend <framework>\` | Backend framework: django, express, or fastapi (default: django) |
 | \`-b, --backend-port <port>\` | Backend port (default: 8000) |
 | \`-f, --frontend-port <port>\` | Vite port (default: 5173) |
 | \`--ai\` | Generate CLAUDE.md with project skills |
