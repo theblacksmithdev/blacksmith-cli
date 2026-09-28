@@ -11,13 +11,6 @@ On an Express project the backend half of the command creates
 `src/modules/index.ts`, and runs `prisma migrate dev`. The frontend half is identical.
 :::
 
-:::note FastAPI backends
-On a FastAPI project the backend half of the command creates
-`app/routers/<name>/` (a router module holding the SQLAlchemy model, Pydantic
-schemas, and CRUD endpoints), registers it in `app/main.py`, and runs
-`scripts.py init-db` to create the table. The frontend half is identical.
-:::
-
 
 Generate a CRUD resource. The generated files depend on your project type.
 

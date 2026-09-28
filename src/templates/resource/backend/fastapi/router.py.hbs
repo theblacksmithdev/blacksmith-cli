@@ -50,6 +50,13 @@ class {{Name}}In(BaseModel):
     description: str = ""
 
 
+class {{Name}}Update(BaseModel):
+    """Every field optional, so a PATCH can send any subset of fields."""
+
+    title: str | None = None
+    description: str | None = None
+
+
 class {{Name}}Out(BaseModel):
     id: int
     title: str
@@ -196,7 +203,7 @@ def update_{{snake}}(
 )
 def partial_update_{{snake}}(
     id: int,
-    body: {{Name}}In,
+    body: {{Name}}Update,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

@@ -63,7 +63,6 @@ describe.each([
   ['frontend', 'frontend', PROJECT_CONTEXT],
   ['resource/backend/django', path.join('resource', 'backend', 'django'), RESOURCE_CONTEXT],
   ['resource/backend/express', path.join('resource', 'backend', 'express'), RESOURCE_CONTEXT],
-  ['resource/backend/fastapi', path.join('resource', 'backend', 'fastapi'), RESOURCE_CONTEXT],
   ['resource/pages', path.join('resource', 'pages'), RESOURCE_CONTEXT],
   ['resource/api-hooks', path.join('resource', 'api-hooks'), RESOURCE_CONTEXT],
   ['resource/frontend', path.join('resource', 'frontend'), RESOURCE_CONTEXT],
@@ -227,26 +226,6 @@ describe('generated test files', () => {
     expect(routes).toContain("operationId: 'products_partial_update'")
     expect(routes).toContain("const DETAIL_PATH = '/api/products/{id}/'")
     expect(routes).toContain('export const productsRouter')
-  })
-
-  it('renders the FastAPI resource router with substituted names', () => {
-    const dest = path.join(getTmpDir(), 'router')
-    renderDirectory(
-      path.join(TEMPLATES_DIR, 'resource', 'backend', 'fastapi'),
-      dest,
-      RESOURCE_CONTEXT
-    )
-
-    expect(fs.existsSync(path.join(dest, '__init__.py'))).toBe(true)
-
-    const router = fs.readFileSync(path.join(dest, 'router.py'), 'utf-8')
-    // Operation ids must match what drf-spectacular emits, or the generated
-    // React hooks come out under different names.
-    expect(router).toContain('operation_id="products_list"')
-    expect(router).toContain('operation_id="products_partial_update"')
-    expect(router).toContain('class Product(Base)')
-    expect(router).toContain('__tablename__ = "products"')
-    expect(router).not.toMatch(/\{\{/)
   })
 
   it('renders the Prisma model for a resource', () => {

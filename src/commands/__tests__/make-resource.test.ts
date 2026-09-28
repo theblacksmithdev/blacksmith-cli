@@ -136,6 +136,22 @@ describe('makeResource', () => {
     expect(log.error).toHaveBeenCalledWith('Frontend page "posts" already exists.')
   })
 
+  it('refuses on a FastAPI backend rather than falling into the Django path', async () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+    pathMocks.getBackendDir.mockReturnValue(path.join(getTmpDir(), 'backend'))
+    pathMocks.getFrontendDir.mockReturnValue(path.join(getTmpDir(), 'frontend'))
+    pathMocks.getTemplatesDir.mockReturnValue('/templates')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+
+    await expect(makeResource('Product')).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith(
+      'make:resource is not available yet for FastAPI backends (it ships in a later release).'
+    )
+    expect(templateMocks.renderDirectory).not.toHaveBeenCalled()
+    expect(execMocks.execPython).not.toHaveBeenCalled()
+  })
+
   describe('on an Express backend', () => {
     function setupExpress() {
       pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
@@ -219,86 +235,6 @@ describe('makeResource', () => {
       await expect(makeResource('Product')).rejects.toThrow('process.exit called')
 
       expect(log.error).toHaveBeenCalledWith('Backend module "products" already exists.')
-    })
-  })
-
-  describe('on a FastAPI backend', () => {
-    function setupFastapi() {
-      pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
-      pathMocks.getBackendDir.mockReturnValue(path.join(getTmpDir(), 'backend'))
-      pathMocks.getFrontendDir.mockReturnValue(path.join(getTmpDir(), 'frontend'))
-      pathMocks.getTemplatesDir.mockReturnValue('/templates')
-      pathMocks.getBackendFramework.mockReturnValue('fastapi')
-      execMocks.exec.mockResolvedValue({})
-      execMocks.execPython.mockResolvedValue({})
-    }
-
-    it('renders the router into app/routers and not into apps/ or src/modules/', async () => {
-      setupFastapi()
-
-      await makeResource('Product')
-
-      const calls = templateMocks.renderDirectory.mock.calls
-      const moduleCall = calls.find(
-        (c: any[]) => c[0] === path.join('/templates', 'resource', 'backend', 'fastapi')
-      )
-      expect(moduleCall).toBeDefined()
-      expect(moduleCall![1]).toBe(
-        path.join(getTmpDir(), 'backend', 'app', 'routers', 'products')
-      )
-      expect(
-        calls.find((c: any[]) => c[0] === path.join('/templates', 'resource', 'backend', 'django'))
-      ).toBeUndefined()
-      expect(
-        calls.find((c: any[]) => c[0] === path.join('/templates', 'resource', 'backend', 'express'))
-      ).toBeUndefined()
-    })
-
-    it('registers the router in app/main.py', async () => {
-      setupFastapi()
-
-      await makeResource('Product')
-
-      const mainPath = path.join(getTmpDir(), 'backend', 'app', 'main.py')
-      expect(templateMocks.insertBeforeMarker).toHaveBeenCalledWith(
-        mainPath,
-        '# blacksmith:import',
-        'from app.routers.products.router import router as products_router'
-      )
-      expect(templateMocks.insertBeforeMarker).toHaveBeenCalledWith(
-        mainPath,
-        '# blacksmith:routers',
-        'app.include_router(products_router, prefix="/api/products")'
-      )
-    })
-
-    it('creates the table with scripts.py instead of running migrations', async () => {
-      setupFastapi()
-
-      await makeResource('Product')
-
-      expect(execMocks.execPython).toHaveBeenCalledWith(
-        ['scripts.py', 'init-db'],
-        path.join(getTmpDir(), 'backend'),
-        true
-      )
-      expect(execMocks.execPython).not.toHaveBeenCalledWith(
-        ['manage.py', 'makemigrations', 'products'],
-        path.join(getTmpDir(), 'backend'),
-        true
-      )
-      // No Prisma step exists for FastAPI
-      expect(execMocks.exec).not.toHaveBeenCalledWith('npx', expect.anything(), expect.anything())
-    })
-
-    it('refuses to overwrite an existing router', async () => {
-      setupFastapi()
-      const routerDir = path.join(getTmpDir(), 'backend', 'app', 'routers', 'products')
-      fs.mkdirSync(routerDir, { recursive: true })
-
-      await expect(makeResource('Product')).rejects.toThrow('process.exit called')
-
-      expect(log.error).toHaveBeenCalledWith('Backend router "products" already exists.')
     })
   })
 })
