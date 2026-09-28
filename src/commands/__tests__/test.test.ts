@@ -197,4 +197,50 @@ describe('blacksmith test', () => {
       'Dependencies not installed. Run "blacksmith setup:backend" first.'
     )
   })
+
+  it('runs the pytest suite for a FastAPI backend', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.hasFrontend.mockReturnValue(false)
+
+    await runTests({})
+
+    expect(execMocks.execPython).toHaveBeenCalledWith(['-m', 'pytest'], '/project/backend')
+    expect(execMocks.exec).not.toHaveBeenCalled()
+    expect(log.success).toHaveBeenCalledWith('All tests passed.')
+  })
+
+  it('passes coverage through to the FastAPI pytest run', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.hasFrontend.mockReturnValue(false)
+
+    await runTests({ coverage: true })
+
+    expect(execMocks.execPython).toHaveBeenCalledWith(
+      ['-m', 'pytest', '--cov', '--cov-report=term-missing'],
+      '/project/backend'
+    )
+  })
+
+  it('exits non-zero when the FastAPI suite fails', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.hasFrontend.mockReturnValue(false)
+    execMocks.execPython.mockRejectedValue(new Error('pytest failed'))
+
+    await expect(runTests({})).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith('Tests failed: backend')
+    expect(mockExit).toHaveBeenCalledWith(1)
+  })
+
+  it('tells the user to run setup when the FastAPI venv is missing', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.hasFrontend.mockReturnValue(false)
+    fsMocks.existsSync.mockReturnValue(false)
+
+    await expect(runTests({ backend: true })).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith(
+      'Virtual environment not found. Run "blacksmith setup:backend" first.'
+    )
+  })
 })

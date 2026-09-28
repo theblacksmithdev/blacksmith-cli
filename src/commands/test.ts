@@ -12,11 +12,16 @@ export interface TestOptions {
 }
 
 /**
- * Run pytest through the project's virtual environment.
+ * Run the Python backend's pytest suite — Django and FastAPI share this
+ * runner, which is why it carries no framework flag.
  *
  * pytest lives in venv/bin, but invoking it as `python -m pytest` also puts the
- * backend directory on sys.path, which is what lets `conftest.py` and the
- * `apps.*` imports resolve the same way they do under manage.py.
+ * backend directory on sys.path: for Django that is what lets `conftest.py`
+ * and the `apps.*` imports resolve the same way they do under manage.py, and
+ * for FastAPI it is what makes the `app.*` package importable. FastAPI's
+ * generated tests point DATABASE_URL at a throwaway sqlite file and create
+ * their tables through the app's lifespan, so — like Django's test settings —
+ * no database setup is needed before pytest starts.
  */
 async function runBackendTests(backendDir: string, options: TestOptions): Promise<boolean> {
   if (!fs.existsSync(path.join(backendDir, 'venv'))) {
@@ -116,9 +121,15 @@ export async function test(options: TestOptions = {}) {
 
   if (runBackend) {
     const backendDir = getBackendDir(root)
-    const ok = getBackendFramework(root) === 'express'
-      ? await runExpressBackendTests(backendDir, options)
-      : await runBackendTests(backendDir, options)
+    let ok: boolean
+    if (getBackendFramework(root) === 'express') {
+      ok = await runExpressBackendTests(backendDir, options)
+    } else {
+      // Django and FastAPI: both run pytest through the project venv. The
+      // FastAPI suite is the same shape as Django's — a real API exercise,
+      // not a placeholder — so the same runner is the right one for it.
+      ok = await runBackendTests(backendDir, options)
+    }
     if (!ok) failed.push('backend')
     log.blank()
   }
