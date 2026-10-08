@@ -230,6 +230,7 @@ Project settings live in `blacksmith.config.json`:
 
 If you outgrow Blacksmith or want full control, eject cleanly:
 
+
 ```bash
 blacksmith eject
 ```
