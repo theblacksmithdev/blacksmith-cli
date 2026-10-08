@@ -20,7 +20,7 @@ Omit the flag and `init` asks.
 
 | | Django | Express | FastAPI |
 |---|--------|---------|---------|
-| Language | Python 3.12+ | TypeScript (Node 20+) | Python 3.12+ |
+| Language | Python 3.8+ | TypeScript (Node 20+) | Python 3.8+ |
 | Framework | Django + Django REST Framework | Express 5 | FastAPI |
 | ORM | Django ORM | Prisma | SQLAlchemy 2.0 |
 | Validation | DRF serializers | Zod | Pydantic |

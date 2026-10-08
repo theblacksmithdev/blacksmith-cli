@@ -10,8 +10,11 @@ There is no `collectstatic` step.
 :::
 
 :::note FastAPI backends
-The backend step (`manage.py collectstatic`) is Django-only for now — a FastAPI project
-has no static-file collection step. The frontend build works exactly as described.
+`blacksmith build` is not usable on a FastAPI project yet. The backend step still runs
+Django's `manage.py collectstatic` on any non-Express backend, and a FastAPI project has
+no `manage.py` — the command exits 1 with "Failed to collect static files". Build the
+frontend directly with `blacksmith frontend build` (or `npm run build` in `frontend/`);
+a FastAPI backend has no build step of its own.
 :::
 
 
