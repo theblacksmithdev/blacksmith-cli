@@ -188,6 +188,17 @@ describe('generated test files', () => {
     expect(tests).toContain('def test_login_rejects_wrong_password')
     expect(tests).toContain('assert register.status_code == 201')
     expect(tests).toContain('assert bad.status_code == 401')
+
+    // All tests share one session-scoped sqlite database, so each test must
+    // register its own email — a reused one would make the second test's setup
+    // registration a silent duplicate-email 400 no-op.
+    const emails = [...tests.matchAll(/"email": "([^"]+)"/g)].map((m) => m[1])
+    expect(new Set(emails).size).toBeGreaterThanOrEqual(2)
+
+    // And each test asserts its own registration succeeded, so a broken
+    // register endpoint fails the test instead of passing for the wrong reason.
+    const registerAsserts = tests.match(/assert register\.status_code == 201/g) ?? []
+    expect(registerAsserts.length).toBeGreaterThanOrEqual(2)
   })
 
   it('gives the FastAPI backend a conftest so bare pytest finds the app package', () => {
