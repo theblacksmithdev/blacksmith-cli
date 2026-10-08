@@ -188,6 +188,37 @@ describe('generated test files', () => {
     expect(tests).toContain('def test_login_rejects_wrong_password')
     expect(tests).toContain('assert register.status_code == 201')
     expect(tests).toContain('assert bad.status_code == 401')
+
+    // All tests share one session-scoped sqlite database, so each test must
+    // register its own email — a reused one would make the second test's setup
+    // registration a silent duplicate-email 400 no-op.
+    const emails = [...tests.matchAll(/"email": "([^"]+)"/g)].map((m) => m[1])
+    expect(new Set(emails).size).toBeGreaterThanOrEqual(2)
+
+    // And each test asserts its own registration succeeded, so a broken
+    // register endpoint fails the test instead of passing for the wrong reason.
+    const registerAsserts = tests.match(/assert register\.status_code == 201/g) ?? []
+    expect(registerAsserts.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('gives the FastAPI backend a conftest so bare pytest finds the app package', () => {
+    const dest = path.join(getTmpDir(), 'backend-fastapi-conftest')
+    renderDirectory(path.join(TEMPLATES_DIR, 'backend', 'fastapi'), dest, FASTAPI_CONTEXT)
+
+    // CI runs plain `pytest` (no `python -m`), which does not put the backend
+    // directory on sys.path by itself — the root conftest.py is what makes
+    // `import app` resolve, exactly as it does for the Django backend.
+    const conftestFile = path.join(dest, 'conftest.py')
+    expect(fs.existsSync(conftestFile)).toBe(true)
+    const conftest = fs.readFileSync(conftestFile, 'utf-8')
+    expect(conftest).toContain('import os')
+    expect(conftest).toContain('os.environ["DATABASE_URL"]')
+    expect(conftest).toContain('os.environ["SECRET_KEY"]')
+
+    // The env setup must live in one place, loaded before any test module, so
+    // test files stay free of import-order tricks.
+    const tests = fs.readFileSync(path.join(dest, 'tests', 'test_auth.py'), 'utf-8')
+    expect(tests).not.toContain('os.environ')
   })
 
   it('keeps the markers make:resource writes into', () => {

@@ -1,16 +1,14 @@
-"""API tests for the auth endpoints."""
+"""API tests for the auth endpoints.
 
-import os
-import tempfile
+The throwaway DATABASE_URL and SECRET_KEY come from the project-level
+conftest.py, which pytest loads before this module. That database lasts the
+whole test session, so each test registers its own user and asserts the
+registration succeeded — no test may rely on, or collide with, another's data.
+"""
 
-# Configure a throwaway database before the app (and its settings) is imported.
-_tmp = tempfile.mkdtemp()
-os.environ["DATABASE_URL"] = f"sqlite:///{os.path.join(_tmp, 'test.db')}"
-os.environ["SECRET_KEY"] = "test-secret"
+from fastapi.testclient import TestClient
 
-from fastapi.testclient import TestClient  # noqa: E402
-
-from app.main import app  # noqa: E402
+from app.main import app
 
 
 def test_register_login_and_me():
@@ -45,13 +43,17 @@ def test_register_login_and_me():
 
 def test_login_rejects_wrong_password():
     with TestClient(app) as client:
-        client.post(
+        # Register this test's own user: the session-wide database keeps rows
+        # from every test, so reusing ada@example.com would make this a
+        # duplicate-email 400 no-op when run after test_register_login_and_me.
+        register = client.post(
             "/api/auth/register/",
-            json={"email": "ada@example.com", "password": "secret123"},
+            json={"email": "grace@example.com", "password": "secret123"},
         )
+        assert register.status_code == 201
 
         bad = client.post(
             "/api/auth/login/",
-            json={"email": "ada@example.com", "password": "wrong"},
+            json={"email": "grace@example.com", "password": "wrong"},
         )
         assert bad.status_code == 401
