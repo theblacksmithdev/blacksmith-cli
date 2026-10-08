@@ -4,6 +4,12 @@ sidebar_position: 4
 
 # Creating Resources
 
+:::note FastAPI backends
+`make:resource` is not available for FastAPI projects yet — the command exits with an
+error rather than generating Django files. The Django walkthrough below applies to Django
+projects; for the Express layout see the [make:resource command](/docs/commands/make-resource).
+:::
+
 The `blacksmith make:resource` command is the primary way to add new features to your project. This guide walks through the full workflow of creating and customizing a resource.
 
 ## Step 1: Generate the Resource

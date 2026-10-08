@@ -11,6 +11,11 @@ On an Express project the backend half of the command creates
 `src/modules/index.ts`, and runs `prisma migrate dev`. The frontend half is identical.
 :::
 
+:::note FastAPI backends
+The command is not available for FastAPI projects yet — it exits with an error rather
+than generating Django files into a FastAPI project (it ships in a later release).
+:::
+
 
 Generate a CRUD resource. The generated files depend on your project type.
 

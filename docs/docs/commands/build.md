@@ -9,6 +9,14 @@ The backend step runs `npm run build` (Prisma generate + `tsc`) and emits `backe
 There is no `collectstatic` step.
 :::
 
+:::note FastAPI backends
+`blacksmith build` is not usable on a FastAPI project yet. The backend step still runs
+Django's `manage.py collectstatic` on any non-Express backend, and a FastAPI project has
+no `manage.py` — the command exits 1 with "Failed to collect static files". Build the
+frontend directly with `blacksmith frontend build` (or `npm run build` in `frontend/`);
+a FastAPI backend has no build step of its own.
+:::
+
 
 Build the project for production deployment.
 

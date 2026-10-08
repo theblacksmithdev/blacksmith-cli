@@ -6,7 +6,8 @@ sidebar_position: 3
 
 An alternative to the Django backend, selected with `blacksmith init --backend express`.
 It is TypeScript end to end, and it speaks exactly the same HTTP contract as the
-Django backend — the React frontend is byte-for-byte identical either way.
+Django backend — the React frontend is byte-for-byte identical either way. FastAPI is the
+third option — see [Choosing a Backend](../guides/choosing-a-backend.md).
 
 ## Stack
 

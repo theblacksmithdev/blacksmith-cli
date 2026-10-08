@@ -16,6 +16,12 @@ moment they are rotated or a user signs out, persist issued refresh tokens and r
 rotated ones. See [Express Backend](../stack/backend-express.md).
 :::
 
+:::note FastAPI backends
+The endpoints, request bodies and token shapes described here are identical on a FastAPI
+backend — it reproduces SimpleJWT's request/response contract too. Like the Express
+backend, its tokens are stateless: logout does not invalidate anything server-side.
+:::
+
 
 Blacksmith generates a complete JWT-based authentication system across both the backend and frontend.
 

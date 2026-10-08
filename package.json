@@ -1,7 +1,7 @@
 {
   "name": "blacksmith-cli",
   "version": "0.1.19",
-  "description": "Fullstack Django or Express + React framework — one command, one codebase, one mental model",
+  "description": "Fullstack Django, Express, or FastAPI + React framework — one command, one codebase, one mental model",
   "type": "module",
   "bin": {
     "blacksmith": "./bin/blacksmith.js"
@@ -27,6 +27,7 @@
   "keywords": [
     "django",
     "express",
+    "fastapi",
     "prisma",
     "react",
     "fullstack",

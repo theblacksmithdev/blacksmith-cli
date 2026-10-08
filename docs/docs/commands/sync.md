@@ -9,8 +9,14 @@ The schema is exported with the backend's `npm run openapi` script instead of
 `manage.py spectacular`. Both run offline — no server needs to be listening.
 :::
 
+:::note FastAPI backends
+The schema is exported with `scripts.py export-openapi` and FastAPI serves it at the same
+URLs (`/api/schema/`, `/api/docs/`, `/api/redoc/`). Like Express, the export runs
+offline — no server needs to be listening.
+:::
 
-Synchronize the OpenAPI schema between Django backend and React frontend.
+
+Synchronize the OpenAPI schema between the backend and the React frontend.
 
 :::info Fullstack Only
 This command is only available for fullstack projects. Backend-only and frontend-only projects will receive an error.
@@ -28,7 +34,7 @@ The `sync` command performs a two-step process:
 
 ### Step 1: Generate OpenAPI Schema
 
-Uses Django's `drf-spectacular` to generate an OpenAPI 3.0 schema from your Django REST Framework serializers and viewsets.
+Uses Django's `drf-spectacular` to generate an OpenAPI 3.0 schema from your Django REST Framework serializers and viewsets. (Express exports the same schema from its OpenAPI registry, and FastAPI from its built-in schema.)
 
 ### Step 2: Generate Frontend Code
 

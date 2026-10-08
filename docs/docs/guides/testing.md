@@ -10,6 +10,14 @@ Backend tests use Vitest + Supertest rather than pytest. Specs live beside the c
 between tests. `blacksmith test` works the same either way.
 :::
 
+:::note FastAPI backends
+Backend tests also use pytest, through the project venv. The generated suite points
+`DATABASE_URL` at a throwaway SQLite file and creates its tables through the app's
+lifespan, so no database setup is needed before the first run. The Django-specific stack
+below (`pytest-django`, the test settings module, `manage.py` fixtures) does not apply;
+the workflow and `blacksmith test` usage are the same.
+:::
+
 
 Blacksmith projects ship with a working test suite on both sides: **pytest** for the
 Django backend and **Vitest** with React Testing Library for the React frontend. A

@@ -60,7 +60,7 @@ Every Blacksmith project has a `blacksmith.config.json` file in the project root
 | `type` | string | Yes | Project type: `fullstack`, `backend`, or `frontend` |
 | `backend` | object | No | Present for fullstack and backend projects |
 | `backend.port` | number | — | Port for the backend development server |
-| `backend.framework` | string | No | `django` or `express`. Absent means `django` |
+| `backend.framework` | string | No | `django`, `express`, or `fastapi`. Absent means `django` |
 | `frontend` | object | No | Present for fullstack and frontend projects |
 | `frontend.port` | number | — | Port for the Vite development server |
 
