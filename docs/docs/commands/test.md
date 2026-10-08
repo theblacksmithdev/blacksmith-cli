@@ -9,6 +9,13 @@ Backend tests run with Vitest and Supertest instead of pytest. `--coverage` and 
 work the same. The suite rebuilds a SQLite database from `schema.prisma` on each run.
 :::
 
+:::note FastAPI backends
+Backend tests run with pytest through the project venv, exactly like Django. The
+generated suite points `DATABASE_URL` at a throwaway SQLite file and creates its tables
+through the app's lifespan, so no database setup is needed before the first run.
+`--coverage` works the same.
+:::
+
 
 Run the project's test suites — pytest on the backend, Vitest on the frontend.
 
