@@ -6,6 +6,12 @@ sidebar_position: 7
 
 Generate AI development documentation for AI coding assistants.
 
+:::note FastAPI backends
+`setup:ai` is not available on a FastAPI project yet and exits with an error naming
+FastAPI — it never writes the Django skill set onto a FastAPI project. FastAPI AI skills
+ship in a later release.
+:::
+
 ## Usage
 
 ```bash

@@ -11,13 +11,18 @@ project's backend framework:
 |-----------|------|
 | Django | `manage.py <args>` inside the virtual environment |
 | Express | `npm <args>` in the backend directory |
-| FastAPI | not available yet (see the note below) |
+| FastAPI | `scripts.py <args>` inside the virtual environment |
 
 :::note FastAPI backends
-The `backend` passthrough is not available for FastAPI projects yet — it still assumes
-Django's `manage.py`. The generated `scripts.py` covers maintenance (`init-db`,
-`export-openapi`); run it through the virtual environment with
-`./venv/bin/python scripts.py <command>`.
+The generated `scripts.py` is FastAPI's `manage.py` counterpart. It covers database setup
+(`init-db`) and OpenAPI export (`export-openapi`):
+
+```bash
+blacksmith backend init-db
+blacksmith backend export-openapi openapi.json
+```
+
+`manage.py` never runs on a FastAPI project, and `scripts.py` never runs on a Django one.
 :::
 
 **Express examples:**

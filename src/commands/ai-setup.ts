@@ -47,6 +47,14 @@ export async function setupAiDev({
   const needsBackend = projectType === 'fullstack' || projectType === 'backend'
   const needsFrontend = projectType === 'fullstack' || projectType === 'frontend'
 
+  // No FastAPI skill set exists yet, and the Django set would be actively
+  // misleading on a FastAPI project. `setup:ai` refuses up front; this guard
+  // keeps `init --ai` from writing the Django set onto a FastAPI project.
+  if (needsBackend && backendFramework === 'fastapi') {
+    aiSpinner.fail('AI skills are not available yet for FastAPI backends (they ship in a later release).')
+    return
+  }
+
   try {
     const skills: Skill[] = [
       coreRulesSkill,

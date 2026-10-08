@@ -13,7 +13,9 @@ export async function build() {
 
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
-  const isExpressBackend = projectHasBackend && getBackendFramework(root) === 'express'
+  const backendFramework = projectHasBackend ? getBackendFramework(root) : 'django'
+  const isExpressBackend = backendFramework === 'express'
+  const isFastapiBackend = backendFramework === 'fastapi'
 
   // Build frontend
   if (projectHasFrontend) {
@@ -45,6 +47,10 @@ export async function build() {
         log.error(error.message || error)
         process.exit(1)
       }
+    } else if (isFastapiBackend) {
+      // A FastAPI app ships as Python source — there is nothing to compile or
+      // collect, so the backend has no build step of its own.
+      log.step('FastAPI backend needs no build step — app/ runs from source.')
     } else {
       const backendSpinner = spinner('Collecting static files...')
       try {

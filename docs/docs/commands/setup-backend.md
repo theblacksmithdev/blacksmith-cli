@@ -13,9 +13,9 @@ Python-backend steps (Django and FastAPI) and exit with an error on an Express p
 
 :::note FastAPI backends
 On a FastAPI project, `setup:backend` runs the same Python flow: check Python, create the
-virtual environment, and `pip install -r requirements.txt`. The migration step in `deps`
-still assumes Django's `manage.py` and fails on FastAPI for now — create the tables with
-`./venv/bin/python scripts.py init-db` instead.
+virtual environment, and `pip install -r requirements.txt`. The database step in `deps`
+then runs `scripts.py init-db` — FastAPI's counterpart to `manage.py migrate` — instead
+of Django's migrations.
 :::
 
 
@@ -61,7 +61,8 @@ Requires Python 3 to be installed first.
 
 ### `setup:backend deps`
 
-Installs Python dependencies from `requirements.txt` using pip, then runs Django database migrations.
+Installs Python dependencies from `requirements.txt` using pip, then brings the database
+up to date: `manage.py migrate` on Django, `scripts.py init-db` on FastAPI.
 
 Requires the virtual environment to exist first. If the venv was created without pip (common on some Linux distributions), it will be installed automatically via `ensurepip`.
 
@@ -71,7 +72,7 @@ Running `blacksmith setup:backend` without a subcommand executes all three steps
 
 1. Install/verify Python 3 and pip
 2. Create virtual environment (with pip)
-3. Install dependencies and run migrations
+3. Install dependencies and bring the database up to date
 
 ## Examples
 

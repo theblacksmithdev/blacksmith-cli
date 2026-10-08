@@ -97,4 +97,44 @@ describe('backend', () => {
 
     expect(log.error).toHaveBeenCalledWith('Please provide an npm command.')
   })
+
+  it('should run a scripts.py command on a FastAPI backend', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    execMocks.execPython.mockResolvedValue({})
+
+    await backend(['init-db'])
+
+    expect(execMocks.execPython).toHaveBeenCalledWith(
+      ['scripts.py', 'init-db'],
+      '/project/backend'
+    )
+    // FastAPI has no manage.py and no npm toolchain — neither may run
+    expect(execMocks.exec).not.toHaveBeenCalled()
+  })
+
+  it('should pass multiple arguments through on a FastAPI backend', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    execMocks.execPython.mockResolvedValue({})
+
+    await backend(['export-openapi', 'openapi.json'])
+
+    expect(execMocks.execPython).toHaveBeenCalledWith(
+      ['scripts.py', 'export-openapi', 'openapi.json'],
+      '/project/backend'
+    )
+  })
+
+  it('should show FastAPI usage when no command is given', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+
+    await expect(backend([])).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith('Please provide a scripts.py command.')
+    expect(log.error).not.toHaveBeenCalledWith('Please provide a Django management command.')
+  })
 })

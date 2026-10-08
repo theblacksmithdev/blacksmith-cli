@@ -90,4 +90,25 @@ describe('build', () => {
     })
     expect(execMocks.execPython).not.toHaveBeenCalled()
   })
+
+  it('skips the backend step for a FastAPI project, which has nothing to build', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    execMocks.exec.mockResolvedValue({})
+
+    await build()
+
+    // The frontend still builds; the backend runs neither npm nor manage.py
+    expect(execMocks.exec).toHaveBeenCalledWith('npm', ['run', 'build'], {
+      cwd: '/project/frontend',
+      silent: true,
+    })
+    expect(execMocks.execPython).not.toHaveBeenCalled()
+    expect(log.step).toHaveBeenCalledWith(
+      'FastAPI backend needs no build step — app/ runs from source.'
+    )
+    expect(log.success).toHaveBeenCalledWith('Production build complete!')
+  })
 })

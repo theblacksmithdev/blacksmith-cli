@@ -5,9 +5,11 @@ import { exec, execPython } from '../utils/exec.js'
 /**
  * Run a command against the backend's own toolchain.
  *
- * Django projects get `manage.py <args>`. Express projects have no management
- * commands, so they get `npm <args>` — the same passthrough the `frontend`
- * command provides, which covers scripts, installs and `npm exec prisma ...`.
+ * Django projects get `manage.py <args>`, FastAPI projects get
+ * `scripts.py <args>` (the manage.py counterpart that holds `init-db` and
+ * `export-openapi`), and Express projects get `npm <args>` — the same
+ * passthrough the `frontend` command provides, which covers scripts, installs
+ * and `npm exec prisma ...`.
  */
 export async function backend(args: string[]) {
   let root: string
@@ -22,7 +24,9 @@ export async function backend(args: string[]) {
     process.exit(1)
   }
 
-  const isExpress = getBackendFramework(root) === 'express'
+  const framework = getBackendFramework(root)
+  const isExpress = framework === 'express'
+  const isFastapi = framework === 'fastapi'
 
   if (args.length === 0) {
     if (isExpress) {
@@ -30,6 +34,10 @@ export async function backend(args: string[]) {
       log.step('Usage: blacksmith backend <command> [args...]')
       log.step('Example: blacksmith backend run migrate')
       log.step('Example: blacksmith backend exec prisma studio')
+    } else if (isFastapi) {
+      log.error('Please provide a scripts.py command.')
+      log.step('Usage: blacksmith backend <command> [args...]')
+      log.step('Example: blacksmith backend init-db')
     } else {
       log.error('Please provide a Django management command.')
       log.step('Usage: blacksmith backend <command> [args...]')
@@ -43,6 +51,8 @@ export async function backend(args: string[]) {
   try {
     if (isExpress) {
       await exec('npm', args, { cwd: backendDir })
+    } else if (isFastapi) {
+      await execPython(['scripts.py', ...args], backendDir)
     } else {
       await execPython(['manage.py', ...args], backendDir)
     }

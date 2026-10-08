@@ -47,4 +47,30 @@ describe('eject', () => {
     expect(log.error).toHaveBeenCalledWith('Not inside a Blacksmith project.')
     expect(mockExit).toHaveBeenCalledWith(1)
   })
+
+  it('names FastAPI and its uvicorn start command on a FastAPI project', async () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+
+    await eject()
+
+    const steps = (log.step as any).mock.calls.map((c: any[]) => c[0]).join('\n')
+    expect(steps).toContain('FastAPI + React project')
+    expect(steps).toContain('./venv/bin/uvicorn app.main:app')
+    // A FastAPI project has no manage.py — never suggest the Django command
+    expect(steps).not.toContain('manage.py runserver')
+
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+
+  it('keeps Django instructions on a Django project', async () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+
+    await eject()
+
+    const steps = (log.step as any).mock.calls.map((c: any[]) => c[0]).join('\n')
+    expect(steps).toContain('Django + React project')
+    expect(steps).toContain('./venv/bin/python manage.py runserver')
+    expect(steps).not.toContain('uvicorn')
+  })
 })

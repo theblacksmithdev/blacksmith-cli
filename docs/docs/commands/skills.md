@@ -6,6 +6,12 @@ sidebar_position: 10
 
 List all available AI development skills and their generation status.
 
+:::note FastAPI backends
+`skills` is not available on a FastAPI project yet and exits with an error naming
+FastAPI, rather than listing the Django skill set as available. FastAPI AI skills ship
+in a later release.
+:::
+
 ## Usage
 
 ```bash

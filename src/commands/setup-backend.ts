@@ -5,12 +5,15 @@ import type { BackendFramework } from '../utils/paths.js'
 import { exec, execPip, execPython, execSilent, commandExists } from '../utils/exec.js'
 import { ensureEnvFile } from '../utils/env-file.js'
 import { ensureGitignore } from '../utils/gitignore.js'
+import type { GitignoreKind } from '../utils/gitignore.js'
+import { backendTemplateDir } from '../utils/scaffold.js'
 import { log, spinner } from '../utils/logger.js'
 
 interface BackendProject {
   dir: string
   framework: BackendFramework
   isExpress: boolean
+  isFastapi: boolean
 }
 
 function ensureBackendProject(): BackendProject {
@@ -43,18 +46,23 @@ function findBackendProject(): BackendProject | null {
 
 function describeBackend(root: string): BackendProject {
   const framework = getBackendFramework(root)
-  return { dir: getBackendDir(root), framework, isExpress: framework === 'express' }
+  return {
+    dir: getBackendDir(root),
+    framework,
+    isExpress: framework === 'express',
+    isFastapi: framework === 'fastapi',
+  }
 }
 
 /**
  * Stop a Python-only subcommand from running against an Express backend.
  *
  * Without this the venv step would silently create a `venv/` directory inside
- * a Node project.
+ * a Node project. FastAPI is a Python backend, so these steps apply to it.
  */
 function rejectOnExpress(project: BackendProject, command: string): void {
   if (!project.isExpress) return
-  log.error(`"${command}" applies to Django backends. This project uses Express.`)
+  log.error(`"${command}" applies to Python backends (Django or FastAPI). This project uses Express.`)
   log.step('Run "blacksmith setup:backend" to set up the Express backend instead.')
   process.exit(1)
 }
@@ -170,8 +178,9 @@ export async function setupBackendVenv() {
   const venvPath = path.join(backendDir, 'venv')
 
   // venv/ must be ignored before the venv exists, otherwise it lands in git.
-  // Projects generated before .gitignore shipped correctly are healed here.
-  if (ensureGitignore(backendDir, 'backend/django')) {
+  // Projects generated before .gitignore shipped correctly are healed here,
+  // with the ignores matching the project's own framework.
+  if (ensureGitignore(backendDir, backendTemplateDir(project.framework) as GitignoreKind)) {
     log.step('Added backend/.gitignore (ignores venv/)')
   }
 
@@ -250,6 +259,22 @@ export async function setupBackendDeps() {
     pipSpinner.fail('Failed to install Python dependencies')
     log.error(error.message)
     process.exit(1)
+  }
+
+  if (project.isFastapi) {
+    // scripts.py init-db creates the tables for every imported model — the
+    // FastAPI counterpart to Django's manage.py migrate. Both run after the
+    // dependencies are installed, through the project venv.
+    const dbSpinner = spinner('Creating database tables...')
+    try {
+      await execPython(['scripts.py', 'init-db'], backendDir, true)
+      dbSpinner.succeed('Database tables created')
+    } catch (error: any) {
+      dbSpinner.fail('Failed to create database tables')
+      log.error(error.message)
+      process.exit(1)
+    }
+    return
   }
 
   // Run migrations

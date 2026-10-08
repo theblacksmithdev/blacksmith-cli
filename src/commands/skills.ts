@@ -77,6 +77,13 @@ export async function setupSkills(options: SetupOptions) {
     process.exit(1)
   }
 
+  // No FastAPI skill set exists yet; writing the Django set onto a FastAPI
+  // project would be actively misleading, so refuse instead of guessing.
+  if (getBackendFramework(root) === 'fastapi' && hasBackend(root)) {
+    log.error('AI skills are not available yet for FastAPI backends (they ship in a later release).')
+    process.exit(1)
+  }
+
   const config = loadConfig(root)
 
   await setupAiDev({
@@ -99,6 +106,13 @@ export function listSkills() {
     root = findProjectRoot()
   } catch {
     log.error('Not inside a Blacksmith project. Run "blacksmith init <name>" first.')
+    process.exit(1)
+  }
+
+  // Listing would show the Django set as available on a FastAPI project —
+  // refuse with the same message as setup:ai.
+  if (getBackendFramework(root) === 'fastapi' && hasBackend(root)) {
+    log.error('AI skills are not available yet for FastAPI backends (they ship in a later release).')
     process.exit(1)
   }
 

@@ -61,7 +61,7 @@ program
 
 program
   .command('eject')
-  .description('Remove Blacksmith, keep a clean Django + React project')
+  .description('Remove Blacksmith, keep a clean Django, Express, or FastAPI + React project')
   .action(eject)
 
 program
@@ -98,7 +98,7 @@ setupBackendCmd
 
 setupBackendCmd
   .command('deps')
-  .description('Install Python dependencies and run migrations')
+  .description('Install dependencies and bring the database up to date')
   .action(setupBackendDeps)
 
 // Frontend setup commands
@@ -133,8 +133,8 @@ program
 
 program
   .command('backend')
-  .argument('[args...]', 'Django management command and arguments')
-  .description('Run a Django management command (e.g. blacksmith backend createsuperuser)')
+  .argument('[args...]', 'Backend command and arguments (manage.py, scripts.py, or npm)')
+  .description('Run a command on the backend (e.g. blacksmith backend createsuperuser)')
   .allowUnknownOption()
   .action(backend)
 

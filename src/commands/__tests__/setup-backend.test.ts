@@ -321,7 +321,7 @@ describe('setup:backend on an Express project', () => {
     await expect(setupBackendVenv()).rejects.toThrow('process.exit called')
 
     expect(log.error).toHaveBeenCalledWith(
-      '"setup:backend venv" applies to Django backends. This project uses Express.'
+      '"setup:backend venv" applies to Python backends (Django or FastAPI). This project uses Express.'
     )
     pathMocks.getBackendFramework.mockReturnValue('django')
   })
@@ -333,7 +333,7 @@ describe('setup:backend on an Express project', () => {
     await expect(setupBackendPython()).rejects.toThrow('process.exit called')
 
     expect(log.error).toHaveBeenCalledWith(
-      '"setup:backend python" applies to Django backends. This project uses Express.'
+      '"setup:backend python" applies to Python backends (Django or FastAPI). This project uses Express.'
     )
     pathMocks.getBackendFramework.mockReturnValue('django')
   })
@@ -356,6 +356,75 @@ describe('setup:backend on an Express project', () => {
       silent: true,
     })
     expect(execMocks.execPip).not.toHaveBeenCalled()
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+})
+
+describe('setup:backend on a FastAPI project', () => {
+  it('creates a venv with the FastAPI gitignore', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    fsMocks.existsSync
+      .mockReturnValueOnce(false) // venv doesn't exist (initial check)
+      .mockReturnValueOnce(true)  // venv/bin/pip exists (post-creation check)
+    execMocks.commandExists.mockResolvedValue(true)
+    execMocks.exec.mockResolvedValue({})
+
+    await setupBackendVenv()
+
+    expect(execMocks.exec).toHaveBeenCalledWith(
+      'python3',
+      ['-m', 'venv', 'venv'],
+      { cwd: '/project/backend', silent: true }
+    )
+    expect(gitignoreMocks.ensureGitignore).toHaveBeenCalledWith(
+      '/project/backend',
+      'backend/fastapi'
+    )
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+
+  it('installs Python dependencies and creates tables for deps', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    fsMocks.existsSync.mockReturnValue(true) // venv and requirements.txt exist
+    execMocks.execPip.mockResolvedValue({})
+    execMocks.execPython.mockResolvedValue({})
+
+    await setupBackendDeps()
+
+    expect(execMocks.execPip).toHaveBeenCalledWith(
+      ['install', '-r', 'requirements.txt'],
+      '/project/backend',
+      true
+    )
+    expect(execMocks.execPython).toHaveBeenCalledWith(
+      ['scripts.py', 'init-db'],
+      '/project/backend',
+      true
+    )
+    // manage.py is Django's entry point — it must never run on FastAPI
+    expect(execMocks.execPython).not.toHaveBeenCalledWith(
+      ['manage.py', 'migrate'],
+      '/project/backend',
+      true
+    )
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+
+  it('exits when table creation fails', async () => {
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    fsMocks.existsSync.mockReturnValue(true)
+    execMocks.execPip.mockResolvedValue({})
+    execMocks.execPython.mockRejectedValue(new Error('init-db failed'))
+
+    await expect(setupBackendDeps()).rejects.toThrow('process.exit called')
+    expect(mockExit).toHaveBeenCalledWith(1)
+
     pathMocks.getBackendFramework.mockReturnValue('django')
   })
 })

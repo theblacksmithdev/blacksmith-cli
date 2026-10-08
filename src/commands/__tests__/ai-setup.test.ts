@@ -170,5 +170,17 @@ describe('setupAiDev', () => {
       expect(cli).toContain('prisma migrate dev')
       expect(cli).not.toContain('makemigrations')
     })
+
+    it('writes nothing on a FastAPI backend rather than the Django skills', async () => {
+      await setupAiDev({
+        projectDir: getTmpDir(),
+        projectName: 'test-project',
+        includeChakraUiSkill: true,
+        backendFramework: 'fastapi',
+      })
+
+      expect(fs.existsSync(path.join(getTmpDir(), '.claude', 'skills'))).toBe(false)
+      expect(fs.existsSync(path.join(getTmpDir(), 'CLAUDE.md'))).toBe(false)
+    })
   })
 })

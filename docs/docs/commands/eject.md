@@ -7,9 +7,9 @@ sidebar_position: 6
 Remove Blacksmith CLI dependency and convert to a standalone project. The post-eject instructions are tailored to your project type (fullstack, backend-only, or frontend-only).
 
 :::note FastAPI backends
-Ejection removes the config file the same way. The post-eject instructions the CLI prints
-currently assume Django or Express — on a FastAPI project, start the backend with
-`./venv/bin/uvicorn app.main:app` instead of `manage.py runserver`.
+Ejection removes the config file the same way. The printed instructions name the right
+backend — on a FastAPI project they say "FastAPI" and start the backend with
+`./venv/bin/uvicorn app.main:app`, never `manage.py runserver`.
 :::
 
 ## Usage

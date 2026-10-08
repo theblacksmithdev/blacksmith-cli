@@ -63,6 +63,20 @@ describe('setupSkills', () => {
     await expect(setupSkills({})).rejects.toThrow('process.exit called')
     expect(mockExit).toHaveBeenCalledWith(1)
   })
+
+  it('refuses on a FastAPI backend instead of writing the Django skills', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+
+    await expect(setupSkills({})).rejects.toThrow('process.exit called')
+    expect(log.error).toHaveBeenCalledWith(
+      'AI skills are not available yet for FastAPI backends (they ship in a later release).'
+    )
+    expect(aiMocks.setupAiDev).not.toHaveBeenCalled()
+    expect(mockExit).toHaveBeenCalledWith(1)
+
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
 })
 
 describe('listSkills', () => {
@@ -131,5 +145,18 @@ describe('listSkills', () => {
     expect(listed).toContain('react/SKILL.md')
 
     pathMocks.hasBackend.mockReturnValue(true)
+  })
+
+  it('refuses on a FastAPI backend instead of listing the Django skills', () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+
+    expect(() => listSkills()).toThrow('process.exit called')
+    expect(log.error).toHaveBeenCalledWith(
+      'AI skills are not available yet for FastAPI backends (they ship in a later release).'
+    )
+    expect(mockExit).toHaveBeenCalledWith(1)
+
+    pathMocks.getBackendFramework.mockReturnValue('django')
   })
 })

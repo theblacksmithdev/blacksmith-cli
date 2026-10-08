@@ -14,7 +14,9 @@ export async function eject() {
 
   const config = loadConfig(root)
   const projectType = config.type || 'fullstack'
-  const backendName = getBackendFramework(root) === 'express' ? 'Express' : 'Django'
+  const framework = getBackendFramework(root)
+  const backendName =
+    framework === 'express' ? 'Express' : framework === 'fastapi' ? 'FastAPI' : 'Django'
   const configPath = path.join(root, 'blacksmith.config.json')
 
   if (fs.existsSync(configPath)) {
@@ -38,7 +40,11 @@ export async function eject() {
   log.info('To continue development without Blacksmith:')
 
   const startBackend =
-    backendName === 'Express' ? 'npm run dev' : './venv/bin/python manage.py runserver'
+    backendName === 'Express'
+      ? 'npm run dev'
+      : backendName === 'FastAPI'
+        ? './venv/bin/uvicorn app.main:app'
+        : './venv/bin/python manage.py runserver'
 
   if (projectType === 'fullstack') {
     log.step(`Backend:  cd backend && ${startBackend}`)
