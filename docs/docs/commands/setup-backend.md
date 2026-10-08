@@ -7,7 +7,15 @@ sidebar_position: 11
 :::note Express backends
 On an Express project, `blacksmith setup:backend` installs npm dependencies and applies
 Prisma migrations with `prisma migrate deploy`. The `python` and `venv` subcommands are
-Django-only and exit with an error; `deps` works on both.
+Python-backend steps (Django and FastAPI) and exit with an error on an Express project;
+`deps` works on both.
+:::
+
+:::note FastAPI backends
+On a FastAPI project, `setup:backend` runs the same Python flow: check Python, create the
+virtual environment, and `pip install -r requirements.txt`. The migration step in `deps`
+still assumes Django's `manage.py` and fails on FastAPI for now — create the tables with
+`./venv/bin/python scripts.py init-db` instead.
 :::
 
 

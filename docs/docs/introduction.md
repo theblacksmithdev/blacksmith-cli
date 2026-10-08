@@ -5,15 +5,15 @@ slug: /
 
 # Introduction
 
-**Blacksmith CLI** is a development framework that scaffolds production-ready web applications with **Django**, **Express**, **React**, or a combination. Choose the project type that fits your needs:
+**Blacksmith CLI** is a development framework that scaffolds production-ready web applications with **Django**, **Express**, **FastAPI**, **React**, or a combination. Choose the project type that fits your needs:
 
 - **Fullstack** — backend + React frontend, wired together through automatic OpenAPI synchronization
 - **Backend** — standalone REST API
 - **Frontend** — standalone React application with Vite
 
-The backend is either **Django** (Python, DRF) or **Express** (TypeScript, Prisma), chosen
-with `--backend`. Both expose exactly the same HTTP API, so the generated frontend is
-identical either way — see [Choosing a Backend](./guides/choosing-a-backend.md).
+The backend is **Django** (Python, DRF), **Express** (TypeScript, Prisma), or **FastAPI**
+(Python, Pydantic), chosen with `--backend`. All three expose exactly the same HTTP API, so
+the generated frontend is identical whichever you pick — see [Choosing a Backend](./guides/choosing-a-backend.md).
 
 Blacksmith eliminates the friction of project setup by providing:
 
@@ -29,7 +29,7 @@ Blacksmith eliminates the friction of project setup by providing:
 
 Blacksmith uses **OpenAPI** as the bridge between your backend and React frontend. When you define your models and schemas, Blacksmith generates:
 
-1. An **OpenAPI schema** from your backend — DRF serializers via `drf-spectacular`, or Zod schemas via `zod-to-openapi`
+1. An **OpenAPI schema** from your backend — DRF serializers via `drf-spectacular`, Zod schemas via `zod-to-openapi`, or FastAPI's built-in schema
 2. **TypeScript types** matching your API exactly
 3. **Zod validation schemas** for runtime validation
 4. **API client functions** for calling your endpoints

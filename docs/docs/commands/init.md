@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # blacksmith init
 
-Scaffold a new backend, React, or fullstack project. The backend is either Django or Express —
+Scaffold a new backend, React, or fullstack project. The backend is Django, Express, or FastAPI —
 see [Choosing a Backend](../guides/choosing-a-backend.md).
 
 ## Usage
@@ -24,7 +24,7 @@ blacksmith init <project-name> [options]
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--type <type>` | `fullstack` | Project type: `fullstack`, `backend`, or `frontend` |
-| `--backend <framework>` | `django` | Backend framework: `django` or `express` |
+| `--backend <framework>` | `django` | Backend framework: `django`, `express`, or `fastapi` |
 | `--backend-port <port>` | `8000` | Port for the backend development server |
 | `--frontend-port <port>` | `5173` | Port for the Vite development server |
 | `--theme-color <color>` | `default` | UI theme color preset |
@@ -44,8 +44,9 @@ blacksmith init <project-name> [options]
 |-----------|-------------|
 | `django` | Django + DRF + drf-spectacular + SimpleJWT, with a Python virtual environment |
 | `express` | Express 5 + Prisma + Zod + zod-to-openapi, in TypeScript |
+| `fastapi` | FastAPI + Pydantic + SQLAlchemy + PyJWT, with a Python virtual environment |
 
-Both expose the same HTTP API, so the generated frontend is identical. Omit the
+All three expose the same HTTP API, so the generated frontend is identical. Omit the
 flag and `init` prompts for it. The flag is ignored for `--type frontend`.
 
 ### Theme Color Options
@@ -64,7 +65,7 @@ flag and `init` prompts for it. The flag is ignored for `--type frontend`.
 The `init` command performs the following steps based on the selected project type:
 
 ### All project types
-1. **Validates prerequisites** — Checks that required tools are installed (Python 3 for a Django backend, Node.js/npm for an Express backend or any frontend)
+1. **Validates prerequisites** — Checks that required tools are installed (Python 3 for a Django or FastAPI backend, Node.js/npm for an Express backend or any frontend)
 2. **Creates project directory** and `blacksmith.config.json`
 3. **Optionally generates AI files** (`CLAUDE.md` and `.claude/skills/`) with skills tailored to the project type
 
@@ -72,15 +73,16 @@ The `init` command performs the following steps based on the selected project ty
 4. **Scaffolds the backend** —
    - *Django*: split settings, users app, DRF, drf-spectacular, SimpleJWT, environment management
    - *Express*: app and module layout, Prisma schema, JWT auth, Zod validation, OpenAPI registry
-5. **Creates Python virtual environment** and installs dependencies
-6. **Runs initial database migrations**
+   - *FastAPI*: `app/` package (main, config, db, routers), SQLAlchemy models, JWT auth, Pydantic validation, built-in OpenAPI
+5. **Creates Python virtual environment** and installs dependencies (Django and FastAPI)
+6. **Runs initial database setup** — Django migrations, Prisma migrate for Express, `scripts.py init-db` for FastAPI
 
 ### Frontend steps (fullstack and frontend)
 7. **Scaffolds React project** — Vite, TypeScript, React Router, TanStack React Query, React Hook Form + Zod, Chakra UI, auth pages
 8. **Installs frontend npm packages**
 
 ### Fullstack only
-9. **Performs first OpenAPI sync** to generate TypeScript types from the Django schema
+9. **Performs first OpenAPI sync** to generate TypeScript types from the backend's OpenAPI schema
 
 ## Examples
 

@@ -9,6 +9,11 @@ The backend step runs `npm run build` (Prisma generate + `tsc`) and emits `backe
 There is no `collectstatic` step.
 :::
 
+:::note FastAPI backends
+The backend step (`manage.py collectstatic`) is Django-only for now — a FastAPI project
+has no static-file collection step. The frontend build works exactly as described.
+:::
+
 
 Build the project for production deployment.
 

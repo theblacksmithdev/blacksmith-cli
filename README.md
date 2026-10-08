@@ -1,8 +1,8 @@
 # Blacksmith CLI
 
-**Django or Express + React framework — one command, one codebase, one mental model.**
+**Django, Express, or FastAPI + React framework — one command, one codebase, one mental model.**
 
-Blacksmith scaffolds production-ready web applications with a Django or Express backend, a React
+Blacksmith scaffolds production-ready web applications with a Django, Express, or FastAPI backend, a React
 frontend, or both — wired together through automatic OpenAPI synchronization. Choose your project
 type and Blacksmith handles the rest.
 
@@ -11,8 +11,9 @@ type and Blacksmith handles the rest.
 Building web apps usually means gluing together separate projects, manually keeping types in sync, and writing boilerplate. Blacksmith eliminates that friction:
 
 - **Flexible project types** — scaffold a fullstack app, a standalone API, or a standalone React frontend
-- **Two backends, one API** — Django (Python, DRF) or Express (TypeScript, Prisma). Both expose the
-  same HTTP contract, so the generated frontend is identical either way
+- **Three backends, one API** — Django (Python, DRF), Express (TypeScript, Prisma), or FastAPI
+  (Python, Pydantic). All three expose the same HTTP contract, so the generated frontend is
+  identical whichever you pick
 - **Automatic API sync** — change a serializer or Zod schema, get updated TypeScript types and API client instantly (fullstack)
 - **Resource scaffolding** — `make:resource BlogPost` creates everything you need for the resource based on your project type
 - **AI-ready** — generates `CLAUDE.md` and skill files so AI coding assistants understand your entire stack
@@ -23,7 +24,7 @@ Building web apps usually means gluing together separate projects, manually keep
 ### Prerequisites
 
 - **Node.js** >= 20.5.0 and **npm**
-- **Python 3** — only for a Django backend
+- **Python 3** — for a Django or FastAPI backend (not needed for Express)
 
 ### Installation
 
@@ -45,6 +46,9 @@ blacksmith init my-app --type fullstack
 
 # Fullstack with an Express + Prisma backend
 blacksmith init my-app --type fullstack --backend express
+
+# Fullstack with a FastAPI + Pydantic backend
+blacksmith init my-app --type fullstack --backend fastapi
 
 # Backend only
 blacksmith init my-app --type backend --backend django
@@ -83,7 +87,7 @@ What starts depends on your project type:
 | `blacksmith setup:backend` | Set up the backend (install Python, create venv, install deps) |
 | `blacksmith setup:frontend` | Set up the frontend (install Node.js, install deps) |
 | `blacksmith skills` | List available AI skills |
-| `blacksmith backend <cmd>` | Run a backend command (`manage.py` for Django, `npm` for Express) |
+| `blacksmith backend <cmd>` | Run a backend command (`manage.py` for Django, `npm` for Express; not available for FastAPI yet) |
 | `blacksmith frontend <cmd>` | Run an npm command in the frontend |
 
 ## Project Structures
@@ -92,7 +96,7 @@ What starts depends on your project type:
 
 ```
 my-app/
-├── backend/                  # Django project (Express projects use src/ + prisma/)
+├── backend/                  # Django project (Express uses src/ + prisma/, FastAPI uses app/ + scripts.py)
 │   ├── config/               # Settings, URLs, WSGI/ASGI
 │   ├── apps/                 # Django apps (one per resource)
 │   │   └── users/            # Built-in user app with JWT auth
@@ -147,6 +151,9 @@ my-app/
 With `--backend express` the backend is instead **Express 5** + **Prisma** + **Zod** +
 **zod-to-openapi**, in TypeScript, exposing the same HTTP API.
 
+With `--backend fastapi` the backend is instead **FastAPI** + **Pydantic** +
+**SQLAlchemy**, in Python, exposing the same HTTP API.
+
 ### Frontend
 - **React 19** with TypeScript (strict mode)
 - **Vite** for fast builds and HMR
@@ -178,9 +185,10 @@ blacksmith make:resource BlogPost
 
 ## OpenAPI Sync (Fullstack Only)
 
-Blacksmith bridges Django and React through OpenAPI:
+Blacksmith bridges the backend and React through OpenAPI:
 
-1. Django serves an OpenAPI schema via `drf-spectacular`
+1. The backend serves an OpenAPI schema — Django via `drf-spectacular`, Express via its
+   OpenAPI registry, FastAPI natively
 2. `@hey-api/openapi-ts` generates a typed API client from that schema
 3. During `blacksmith dev`, a file watcher detects backend changes and re-syncs automatically
 

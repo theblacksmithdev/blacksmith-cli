@@ -10,6 +10,13 @@ The layouts below show the Django backend. An Express backend replaces `apps/`, 
 `package.json`. See [Express Backend](../stack/backend-express.md).
 :::
 
+:::note FastAPI backends
+A FastAPI backend keeps the Python layout (`venv/`, `requirements.txt`, `tests/`) but
+replaces `apps/`, `config/` and `manage.py` with an `app/` package (main, config, db,
+routers) and a `scripts.py` maintenance script. See
+[Choosing a Backend](../guides/choosing-a-backend.md) for how the three compare.
+:::
+
 
 The generated structure depends on the project type selected during `blacksmith init`.
 

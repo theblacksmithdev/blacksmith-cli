@@ -21,7 +21,8 @@ blacksmith init my-app --type fullstack -b 8000 -f 5173 --theme-color blue --ai
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--type` | `fullstack` | Project type: `fullstack`, `backend`, or `frontend` |
-| `--backend-port` | `8000` | Django development server port |
+| `--backend` | `django` | Backend framework: `django`, `express`, or `fastapi` |
+| `--backend-port` | `8000` | Backend development server port |
 | `--frontend-port` | `5173` | Vite development server port |
 | `--theme-color` | `default` | UI theme preset (`default`, `blue`, `green`, `violet`, `red`, `neutral`) |
 | `--ai` | `false` | Generate CLAUDE.md and AI skill files |
@@ -37,8 +38,8 @@ What starts depends on your project type:
 
 | Type | What runs |
 |------|-----------|
-| **Fullstack** | Django + Vite + OpenAPI watcher (auto-syncs types on backend changes) |
-| **Backend** | Django development server |
+| **Fullstack** | Backend (Django, Express, or FastAPI) + Vite + OpenAPI watcher (auto-syncs types on backend changes) |
+| **Backend** | Backend development server (Django, Express, or FastAPI) |
 | **Frontend** | Vite dev server with hot reloading |
 
 ## Create Your First Resource

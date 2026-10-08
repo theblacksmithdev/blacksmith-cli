@@ -8,7 +8,13 @@ sidebar_position: 2
 OpenAPI synchronization is only available for fullstack projects (`type: "fullstack"`). Backend-only and frontend-only projects do not use this feature.
 :::
 
-OpenAPI is the bridge between your Django backend and React frontend. Blacksmith uses it to automatically generate type-safe client code from your backend API definitions.
+OpenAPI is the bridge between your backend and React frontend. Blacksmith uses it to automatically generate type-safe client code from your backend API definitions.
+
+:::note Backend frameworks
+The pipeline is the same whichever backend you chose: Django exports the schema with
+`drf-spectacular`, Express with its OpenAPI registry, and FastAPI serves its built-in
+schema — all at `/api/schema/`.
+:::
 
 ## How It Works
 
@@ -18,7 +24,7 @@ Django Serializers → OpenAPI Schema → TypeScript Types + API Client + React 
 
 ### 1. Schema Generation
 
-When you run `blacksmith sync` (or it runs automatically during `blacksmith dev`), Blacksmith uses `drf-spectacular` to introspect your Django REST Framework serializers and viewsets and generate an OpenAPI 3.0 schema.
+When you run `blacksmith sync` (or it runs automatically during `blacksmith dev`), Blacksmith uses `drf-spectacular` to introspect your Django REST Framework serializers and viewsets and generate an OpenAPI 3.0 schema. Express and FastAPI produce the same schema shape from their own definitions.
 
 ### 2. Code Generation
 

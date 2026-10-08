@@ -21,7 +21,7 @@ node --version
 
 ### Python 3 (Backend and Fullstack Projects)
 
-Python is required for projects that include a Django backend. Blacksmith creates a virtual environment for each project. Not needed for frontend-only projects.
+Python is required for projects that include a Django or FastAPI backend (Express backends use Node.js instead). Blacksmith creates a virtual environment for each project. Not needed for frontend-only projects.
 
 ```bash
 # Check your version
@@ -53,7 +53,7 @@ pip3 --version
 When you run `blacksmith init`, the CLI automatically:
 
 - Creates a **Python virtual environment** (`backend/venv/`)
-- Installs **Django**, **Django REST Framework**, **drf-spectacular**, **SimpleJWT**, and other backend dependencies
+- Installs the backend dependencies — **Django**, **Django REST Framework**, **drf-spectacular**, and **SimpleJWT** (or the **Express**/**FastAPI** equivalents when selected)
 - Installs **React**, **Vite**, **TanStack Query**, **React Router**, **Tailwind CSS**, and other frontend dependencies
 - Configures **environment files** (`.env`) for both stacks
 - Runs **initial database migrations** (SQLite by default)

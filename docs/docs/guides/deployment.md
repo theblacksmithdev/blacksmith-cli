@@ -11,6 +11,12 @@ migrations with `prisma migrate deploy`, and set `JWT_SECRET`, `DATABASE_URL` an
 `CORS_ALLOWED_ORIGINS` in the environment.
 :::
 
+:::note FastAPI backends
+The Django sections below do not apply to a FastAPI backend. Serve it with an ASGI server
+(`./venv/bin/uvicorn app.main:app` behind Gunicorn or similar), and set `SECRET_KEY`,
+`DATABASE_URL` and `CORS_ALLOWED_ORIGINS` in the environment.
+:::
+
 
 This guide covers preparing your Blacksmith project for production deployment.
 
