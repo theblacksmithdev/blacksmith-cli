@@ -190,6 +190,26 @@ describe('generated test files', () => {
     expect(tests).toContain('assert bad.status_code == 401')
   })
 
+  it('gives the FastAPI backend a conftest so bare pytest finds the app package', () => {
+    const dest = path.join(getTmpDir(), 'backend-fastapi-conftest')
+    renderDirectory(path.join(TEMPLATES_DIR, 'backend', 'fastapi'), dest, FASTAPI_CONTEXT)
+
+    // CI runs plain `pytest` (no `python -m`), which does not put the backend
+    // directory on sys.path by itself — the root conftest.py is what makes
+    // `import app` resolve, exactly as it does for the Django backend.
+    const conftestFile = path.join(dest, 'conftest.py')
+    expect(fs.existsSync(conftestFile)).toBe(true)
+    const conftest = fs.readFileSync(conftestFile, 'utf-8')
+    expect(conftest).toContain('import os')
+    expect(conftest).toContain('os.environ["DATABASE_URL"]')
+    expect(conftest).toContain('os.environ["SECRET_KEY"]')
+
+    // The env setup must live in one place, loaded before any test module, so
+    // test files stay free of import-order tricks.
+    const tests = fs.readFileSync(path.join(dest, 'tests', 'test_auth.py'), 'utf-8')
+    expect(tests).not.toContain('os.environ')
+  })
+
   it('keeps the markers make:resource writes into', () => {
     const dest = path.join(getTmpDir(), 'backend-express')
     renderDirectory(path.join(TEMPLATES_DIR, 'backend', 'express'), dest, EXPRESS_CONTEXT)
