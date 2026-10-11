@@ -20,7 +20,7 @@ export const aiGuidelinesSkill: Skill = {
 - Use existing patterns in the codebase as reference before inventing new ones
 
 ### Frontend Architecture (Mandatory)
-- **Use \`@chakra-ui/react\` for ALL UI** — \`VStack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\` for layout; \`Heading\`, \`Text\` for text; \`Card\`, \`Button\`, \`Badge\`, etc. for all elements. Never use raw HTML (\`<div>\`, \`<h1>\`, \`<p>\`, \`<button>\`) when a Chakra UI component exists. Semantic landmarks (\`<main>\`, \`<section>\`, \`<nav>\`, etc.) are the only exception
+- **Use \`@chakra-ui/react\` for ALL UI** — \`Stack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\` for layout; \`Heading\`, \`Text\` for text; \`Card.Root\`, \`Button\`, \`Badge\`, etc. for all elements (Chakra v3 APIs, semantic color tokens, no Tailwind). Never use raw HTML (\`<div>\`, \`<h1>\`, \`<p>\`, \`<button>\`) when a Chakra UI component exists. Semantic landmarks (\`<main>\`, \`<section>\`, \`<nav>\`, etc.) are the only exception
 - **Pages are thin orchestrators** — compose child components from \`components/\`, extract logic into \`hooks/\`. Aim for clarity over strict line counts
 - **Use the \`Path\` enum** — all route paths come from \`src/router/paths.ts\`. Never hardcode path strings
 - **One component per file** — promote complex components to folders with barrel exports (see \`frontend-modularization\` skill)
@@ -37,7 +37,7 @@ export const aiGuidelinesSkill: Skill = {
 3. Frontend builds (if project has frontend): \`npm run build\` in the frontend directory
 4. API types are in sync (fullstack only): \`blacksmith sync\`
 5. No lint errors in modified files
-6. All UI uses \`@chakra-ui/react\` components — no raw \`<div>\` for layout, no raw \`<h1>\`-\`<h6>\` for text
+6. All UI uses \`@chakra-ui/react\` v3 components — no raw \`<div>\` for layout, no raw \`<h1>\`-\`<h6>\` for text, no hardcoded colors
 7. Pages are modular — page file is a thin orchestrator, sections are in \`components/\`, logic in \`hooks/\`
 8. Logic is in hooks — no \`useApiQuery\`, \`useApiMutation\`, \`useEffect\`, or multi-\`useState\` in component bodies
 9. No hardcoded route paths — all paths use the \`Path\` enum from \`@/router/paths\`

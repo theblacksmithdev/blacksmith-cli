@@ -1,0 +1,21 @@
+import { HStack, Text } from '@chakra-ui/react'
+import { Link } from 'react-router-dom'
+import { Path } from '@/router/paths'
+import { SITE } from '@/shared/utils/site-config'
+import { BrandMark } from './brand-mark'
+
+/**
+ * App mark + name, linking home.
+ */
+export function BrandLogo() {
+  return (
+    <HStack asChild gap="2.5" color="fg" _hover=\{{ opacity: 0.8 }} transition="opacity 0.15s">
+      <Link to={Path.Home}>
+        <BrandMark boxSize="7" color="colorPalette.solid" />
+        <Text fontWeight="semibold" letterSpacing="tight">
+          {SITE.name}
+        </Text>
+      </Link>
+    </HStack>
+  )
+}

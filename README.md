@@ -160,7 +160,7 @@ With `--backend fastapi` the backend is instead **FastAPI** + **Pydantic** +
 - **React Router v7** for client-side routing
 - **TanStack React Query** for server state management
 - **React Hook Form** + **Zod** for forms and validation
-- **Chakra UI** for components
+- **Chakra UI v3** for components, with an OpenAI-inspired light/dark theme
 - **@hey-api/openapi-ts** for API client generation
 
 ## Resource Scaffolding

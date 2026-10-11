@@ -1,0 +1,67 @@
+import { Heading, Link, Separator, Stack, Text } from '@chakra-ui/react'
+import { StatusAlert } from '@/shared/components/status-alert'
+import { SITE } from '@/shared/utils/site-config'
+import type { LegalSection } from '../types'
+
+interface LegalDocumentProps {
+  title: string
+  intro: string
+  sections: LegalSection[]
+}
+
+/**
+ * Long-form legal page: a narrow reading column with numbered sections and
+ * a contact line at the end.
+ */
+export function LegalDocument({ title, intro, sections }: LegalDocumentProps) {
+  return (
+    <Stack as="article" gap="10" maxW="3xl" mx="auto" py=\{{ base: '4', md: '8' }}>
+      <Stack gap="4">
+        <Heading as="h1" fontSize=\{{ base: '4xl', md: '5xl' }} letterSpacing="display" lineHeight="1.1">
+          {title}
+        </Heading>
+        {SITE.legalUpdatedAt && (
+          <Text textStyle="sm" color="fg.muted">
+            Last updated {SITE.legalUpdatedAt}
+          </Text>
+        )}
+        <Text fontSize="lg" color="fg.muted" lineHeight="1.7">
+          {intro}
+        </Text>
+      </Stack>
+
+      <StatusAlert
+        status="neutral"
+        title="Template text"
+        message="This is a starting point, not legal advice. Replace it with terms reviewed for your product before you launch."
+      />
+
+      <Separator />
+
+      <Stack as="ol" gap="10" listStyleType="none">
+        {sections.map((section, index) => (
+          <Stack as="li" key={section.title} gap="3">
+            <Heading as="h2" size="lg">
+              {index + 1}. {section.title}
+            </Heading>
+            {section.paragraphs.map((paragraph) => (
+              <Text key={paragraph} color="fg.muted" lineHeight="1.75">
+                {paragraph}
+              </Text>
+            ))}
+          </Stack>
+        ))}
+      </Stack>
+
+      <Separator />
+
+      <Text color="fg.muted">
+        Questions? Email us at{' '}
+        <Link href={`mailto:${SITE.supportEmail}`} color="fg" variant="underline">
+          {SITE.supportEmail}
+        </Link>
+        .
+      </Text>
+    </Stack>
+  )
+}

@@ -1,6 +1,7 @@
 import path from 'node:path'
 import fs from 'node:fs'
 import { spawn } from 'node:child_process'
+import { kebabCase } from 'change-case'
 import { renderDirectory } from '../utils/template.js'
 import { ensureEnvFile } from '../utils/env-file.js'
 import { ensureGitignore } from '../utils/gitignore.js'
@@ -165,6 +166,8 @@ export async function init(name: string | undefined, options: InitOptions) {
 
   const context = {
     projectName: name,
+    // Domain-safe form of the name, used for placeholder addresses like support@acme.com
+    projectDomain: kebabCase(name),
     backendPort: backendPort || 8000,
     frontendPort: frontendPort || 5173,
     themePreset,

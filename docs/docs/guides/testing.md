@@ -201,7 +201,7 @@ pages/customers/
 
 All component tests should use `renderWithProviders` from `src/__tests__/test-utils.tsx` instead of importing `render` from `@testing-library/react` directly. This wraps your component with all the app's providers:
 
-- **ChakraProvider** — the app's theme, for deterministic snapshots
+- **Provider** — the Chakra UI design system and color mode, same as the app
 - **QueryClientProvider** — test-friendly QueryClient (no retries, no GC)
 - **MemoryRouter** — routing support without a real browser history
 

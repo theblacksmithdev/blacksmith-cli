@@ -63,7 +63,7 @@ export const defaultTemplates: PromptTemplate[] = [
       { name: 'description', label: 'What should this component do?', type: 'textarea', placeholder: 'Describe the component, its props, and behavior...', required: true },
       { name: 'location', label: 'Where should it live?', type: 'text', placeholder: 'e.g. src/shared/components', required: false },
     ],
-    promptTemplate: 'Create a new React component called "{{componentName}}". {{description}}.{{#if location}} Place it in {{location}}.{{/if}} Use Chakra UI for styling and follow the existing component patterns in the project.',
+    promptTemplate: 'Create a new React component called "{{componentName}}". {{description}}.{{#if location}} Place it in {{location}}.{{/if}} Use Chakra UI v3 components and semantic tokens for styling and follow the existing component patterns in the project.',
   },
   {
     id: 'refactor',

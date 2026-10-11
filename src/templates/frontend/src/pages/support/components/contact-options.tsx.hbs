@@ -1,0 +1,46 @@
+import { Link } from 'react-router-dom'
+import { Button, SimpleGrid } from '@chakra-ui/react'
+import { ArrowUpRight, BookOpen, KeyRound, Mail } from 'lucide-react'
+import { Path } from '@/router/paths'
+import { InfoCard } from '@/shared/components/info-card'
+import { API_DOCS_URL } from '@/shared/utils/api-url'
+import { SITE } from '@/shared/utils/site-config'
+
+export function ContactOptions() {
+  return (
+    <SimpleGrid columns=\{{ base: 1, md: 3 }} gap="4">
+      <InfoCard
+        icon={<Mail />}
+        title="Email us"
+        description="Questions, bugs or account requests. We usually reply within one business day."
+      >
+        <Button asChild size="sm">
+          <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>
+        </Button>
+      </InfoCard>
+
+      <InfoCard
+        icon={<KeyRound />}
+        title="Account access"
+        description="Locked out? Reset your password and get back in a couple of minutes."
+      >
+        <Button asChild variant="outline" size="sm">
+          <Link to={Path.ForgotPassword}>Reset password</Link>
+        </Button>
+      </InfoCard>
+
+      <InfoCard
+        icon={<BookOpen />}
+        title="API reference"
+        description="Building an integration? Every endpoint is documented with examples."
+      >
+        <Button asChild variant="outline" size="sm">
+          <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer">
+            View API docs
+            <ArrowUpRight />
+          </a>
+        </Button>
+      </InfoCard>
+    </SimpleGrid>
+  )
+}

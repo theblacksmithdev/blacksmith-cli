@@ -1,0 +1,18 @@
+import { Stack } from '@chakra-ui/react'
+import { PageHeader } from '@/shared/components/page-header'
+import { ContactOptions } from './components/contact-options'
+import { FaqList } from './components/faq-list'
+
+export default function SupportPage() {
+  return (
+    <Stack gap="14" maxW="5xl" mx="auto" py=\{{ base: '4', md: '8' }}>
+      <PageHeader
+        align="center"
+        title="How can we help?"
+        description="Reach the team, get back into your account, or find answers below."
+      />
+      <ContactOptions />
+      <FaqList />
+    </Stack>
+  )
+}

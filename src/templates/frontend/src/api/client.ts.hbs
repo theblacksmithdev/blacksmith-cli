@@ -11,38 +11,22 @@
  */
 
 import { createClient } from '@hey-api/client-fetch'
+import { API_URL } from '@/shared/utils/api-url'
+import { clearTokens, getAccessToken, getRefreshToken, setTokens } from './token-storage'
+
+/** Fired when the session can't be renewed; the auth adapter signs the user out. */
+export const AUTH_EXPIRED_EVENT = 'auth:expired'
+
+const REFRESH_PATH = '/api/auth/refresh/'
 
 // Create the client directly (no dependency on generated files)
 export const client = createClient({
-  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:{{backendPort}}',
+  baseUrl: API_URL,
 })
-
-// In-memory token storage (more secure than localStorage)
-let accessToken: string | null = null
-let refreshToken: string | null = null
-
-export function setTokens(access: string | null, refresh?: string | null) {
-  accessToken = access
-  if (refresh !== undefined) {
-    refreshToken = refresh
-  }
-}
-
-export function getAccessToken(): string | null {
-  return accessToken
-}
-
-export function getRefreshToken(): string | null {
-  return refreshToken
-}
-
-export function clearTokens() {
-  accessToken = null
-  refreshToken = null
-}
 
 // Auth interceptor — attach JWT to every request
 client.interceptors.request.use((request) => {
+  const accessToken = getAccessToken()
   if (accessToken) {
     request.headers.set('Authorization', `Bearer ${accessToken}`)
   }
@@ -62,22 +46,19 @@ client.interceptors.request.use((request) => {
   return request
 })
 
-// 401 interceptor — attempt token refresh, then retry
-let isRefreshing = false
+// Token refresh — concurrent callers share one in-flight request
 let refreshPromise: Promise<boolean> | null = null
 
-async function attemptTokenRefresh(): Promise<boolean> {
-  if (!refreshToken) return false
+async function requestNewTokens(): Promise<boolean> {
+  const refresh = getRefreshToken()
+  if (!refresh) return false
 
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL || 'http://localhost:{{backendPort}}'}/api/auth/refresh/`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh: refreshToken }),
-      }
-    )
+    const response = await fetch(`${API_URL}${REFRESH_PATH}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh }),
+    })
 
     if (!response.ok) return false
 
@@ -89,22 +70,22 @@ async function attemptTokenRefresh(): Promise<boolean> {
   }
 }
 
-client.interceptors.response.use(async (response) => {
-  if (response.status === 401 && !response.url.includes('/api/auth/refresh/')) {
-    if (!isRefreshing) {
-      isRefreshing = true
-      refreshPromise = attemptTokenRefresh().finally(() => {
-        isRefreshing = false
-        refreshPromise = null
-      })
-    }
+/** Exchange the stored refresh token for a new pair. Resolves false if that fails. */
+export function refreshAccessToken(): Promise<boolean> {
+  refreshPromise ??= requestNewTokens().finally(() => {
+    refreshPromise = null
+  })
+  return refreshPromise
+}
 
-    const refreshed = await refreshPromise
+// 401 interceptor — try to renew the session; sign out if that fails
+client.interceptors.response.use(async (response) => {
+  if (response.status === 401 && !response.url.includes(REFRESH_PATH)) {
+    const refreshed = await refreshAccessToken()
     if (!refreshed) {
       clearTokens()
-      window.dispatchEvent(new CustomEvent('auth:logout'))
+      window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT))
     }
   }
   return response
 })
-

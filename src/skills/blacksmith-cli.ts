@@ -104,6 +104,7 @@ blacksmith init my-app --type fullstack --backend ${isExpress ? 'express' : 'dja
 | \`--backend <framework>\` | Backend framework: django, express, or fastapi (default: django) |
 | \`-b, --backend-port <port>\` | Backend port (default: 8000) |
 | \`-f, --frontend-port <port>\` | Vite port (default: 5173) |
+| \`-t, --theme-color <preset>\` | UI theme preset: default (OpenAI-style monochrome), neutral (monochrome, square corners), blue, green, red, violet. Lives in \`frontend/src/theme/presets.ts\` |
 | \`--ai\` | Generate CLAUDE.md with project skills |
 | \`--no-chakra-ui-skill\` | Exclude Chakra UI skill from CLAUDE.md |
 `

@@ -15,7 +15,7 @@ export const chakraUiAuthSkill: Skill = {
 
 \`\`\`tsx
 import { useAuth } from '@/features/auth/hooks/use-auth'
-import type { User } from '@/features/auth/types'
+import type { AuthUser } from '@/features/auth/types'
 \`\`\`
 
 ### useAuth() Hook
@@ -23,41 +23,42 @@ import type { User } from '@/features/auth/types'
 Returns auth state and actions. Use this everywhere — never manage auth state manually.
 
 \`\`\`tsx
-const { user, isAuthenticated, loading, error, signInWithEmail, signOut } = useAuth()
+const { user, isAuthenticated, isLoading, error, login, logout } = useAuth()
 \`\`\`
 
 | Field | Type | Description |
 |-------|------|-------------|
-| \`user\` | \`User \\| null\` | Current authenticated user |
+| \`user\` | \`AuthUser \\| null\` | Current authenticated user (\`email\`, \`displayName\`, …) |
 | \`isAuthenticated\` | \`boolean\` | Whether the user is logged in |
-| \`loading\` | \`boolean\` | Auth state is being resolved |
-| \`error\` | \`string \\| null\` | Last auth error message |
-| \`signInWithEmail\` | \`(email, password) => Promise\` | Log in |
-| \`signUpWithEmail\` | \`(email, password, displayName?) => Promise\` | Register |
-| \`signOut\` | \`() => Promise\` | Log out |
+| \`isLoading\` | \`boolean\` | Auth state is being resolved |
+| \`error\` | \`AuthError \\| null\` | Last auth error (\`error.message\` for display) |
+| \`login\` | \`(email, password) => Promise<{ success }>\` | Log in |
+| \`register\` | \`(email, password, displayName?) => Promise<{ success }>\` | Register |
+| \`logout\` | \`() => Promise\` | Log out |
 | \`sendPasswordResetEmail\` | \`(email) => Promise\` | Request password reset |
-| \`confirmPasswordReset\` | \`(code, newPassword) => Promise\` | Set new password |
+| \`confirmPasswordReset\` | \`(token, newPassword) => Promise<{ success }>\` | Set new password |
 
 ### Usage Examples
 
 **Conditionally render based on auth:**
 \`\`\`tsx
+import { Text } from '@chakra-ui/react'
 import { useAuth } from '@/features/auth/hooks/use-auth'
 
 function UserGreeting() {
   const { user, isAuthenticated } = useAuth()
 
-  if (!isAuthenticated) return <Text>Please log in.</Text>
-  return <Text>Welcome, {user?.email}</Text>
+  if (!isAuthenticated) return <Text color="fg.muted">Please log in.</Text>
+  return <Text>Welcome, {user?.displayName || user?.email}</Text>
 }
 \`\`\`
 
 **Protected action:**
 \`\`\`tsx
 function LogoutButton() {
-  const { signOut } = useAuth()
+  const { logout } = useAuth()
 
-  return <Button onClick={signOut} variant="ghost">Sign out</Button>
+  return <Button onClick={logout} variant="ghost">Sign out</Button>
 }
 \`\`\`
 
@@ -66,12 +67,12 @@ function LogoutButton() {
 import { useAuth } from '@/features/auth/hooks/use-auth'
 
 function useLoginForm() {
-  const { signInWithEmail, error } = useAuth()
+  const { login, error } = useAuth()
   const navigate = useNavigate()
 
   const onSubmit = async (data: { email: string; password: string }) => {
-    await signInWithEmail(data.email, data.password)
-    navigate(Path.Dashboard)
+    const result = await login(data.email, data.password)
+    if (result.success) navigate(Path.Dashboard)
   }
 
   return { onSubmit, error }
@@ -80,19 +81,22 @@ function useLoginForm() {
 
 ### Auth Provider Setup
 
-\`AuthProvider\` wraps the app (inside \`ChakraProvider\`) and manages token storage and session lifecycle:
+\`AuthProvider\` wraps the router (inside the UI \`Provider\`) and manages token storage and session lifecycle:
 
 \`\`\`tsx
 // app.tsx
-import { AuthProvider } from '@/features/auth/context'
+import { Provider } from '@/shared/components/ui/provider'
+import { AuthProvider } from '@/features/auth/components/auth-provider'
 
 function App() {
   return (
-    <ChakraProvider>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
-    </ChakraProvider>
+    <Provider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
+      </QueryClientProvider>
+    </Provider>
   )
 }
 \`\`\`
@@ -100,17 +104,38 @@ function App() {
 ### Auth Pages
 
 Pre-built pages in \`src/features/auth/pages/\`:
-- \`LoginPage\` — email/password login with validation
+- \`LoginPage\` — email/password login
 - \`RegisterPage\` — registration with email, password, display name
 - \`ForgotPasswordPage\` — password reset email request
 - \`ResetPasswordPage\` — set new password form
 
-All use Chakra UI form components with React Hook Form + Zod validation.
+Every page renders inside \`AuthPanel\` (\`src/features/auth/components/auth-panel.tsx\`), which owns the centered heading, error/success \`StatusAlert\`s and footer links. New auth screens (e.g. 2FA, email verification) should reuse it:
+
+\`\`\`tsx
+<AuthPanel
+  title="Verify your email"
+  description="Enter the code we sent you."
+  error={error?.message}
+  footer={<RouterLink to={Path.Login}>Back to log in</RouterLink>}
+>
+  <form onSubmit={handleSubmit}>
+    <Stack gap="4">
+      <Field.Root required>
+        <Field.Label>Code</Field.Label>
+        <Input autoComplete="one-time-code" />
+      </Field.Root>
+      <Button type="submit" size="lg" w="full" loading={isSubmitting}>Continue</Button>
+    </Stack>
+  </form>
+</AuthPanel>
+\`\`\`
+
+The pages sit in \`AuthLayoutWrapper\` (\`src/router/layouts/auth-layout.tsx\`): a minimal centered column with the logo, color mode toggle and legal links.
 
 ### Rules
 - NEVER manage auth state manually — always use \`useAuth()\`
 - Use the \`Path\` enum for auth route paths (\`Path.Login\`, \`Path.Register\`, etc.)
-- Auth adapter (Django JWT) lives in \`src/features/auth/adapter.ts\`
+- Auth adapter (backend JWT) lives in \`src/features/auth/adapter.ts\`
 `
   },
 }

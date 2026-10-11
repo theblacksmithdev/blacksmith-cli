@@ -6,9 +6,11 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom'
+import { Button, Card, HStack, Skeleton, SkeletonText, Stack, Text } from '@chakra-ui/react'
 import { useGet{{Name}}, useDelete{{Name}} } from '@/api/hooks/{{kebabs}}'
-import { Alert, AlertIcon, AlertDescription } from '@chakra-ui/react'
 import { Path } from '@/router/paths'
+import { PageHeader } from '@/shared/components/page-header'
+import { StatusAlert } from '@/shared/components/status-alert'
 
 export default function {{Name}}DetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -19,25 +21,19 @@ export default function {{Name}}DetailPage() {
 
   if (isLoading) {
     return (
-      <div className="animate-pulse space-y-4">
-        <div className="h-8 w-64 bg-muted rounded" />
-        <div className="h-4 w-full bg-muted rounded" />
-        <div className="h-4 w-3/4 bg-muted rounded" />
-      </div>
+      <Stack gap="6" role="status" aria-label="Loading {{name}}">
+        <Skeleton h="10" w="64" />
+        <SkeletonText noOfLines={3} />
+      </Stack>
     )
   }
 
   if (errorMessage) {
-    return (
-      <Alert status="error" borderRadius="md">
-        <AlertIcon />
-        <AlertDescription>{errorMessage}</AlertDescription>
-      </Alert>
-    )
+    return <StatusAlert message={errorMessage} />
   }
 
   if (!{{name}}) {
-    return <div className="text-muted-foreground">{{Name}} not found.</div>
+    return <Text color="fg.muted">{{Name}} not found.</Text>
   }
 
   const handleDelete = async () => {
@@ -48,43 +44,40 @@ export default function {{Name}}DetailPage() {
   }
 
   return (
-    <div>
-      {delete{{Name}}.errorMessage && (
-        <Alert status="error" borderRadius="md" className="mb-4">
-          <AlertIcon />
-          <AlertDescription>{delete{{Name}}.errorMessage}</AlertDescription>
-        </Alert>
-      )}
+    <Stack gap="8">
+      {delete{{Name}}.errorMessage && <StatusAlert message={delete{{Name}}.errorMessage} />}
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">
-          {({{name}} as any).title}
-        </h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => navigate(`${Path.{{Names}}}/${id}/edit`)}
-            className="px-4 py-2 text-sm border border-border rounded-md hover:bg-muted"
-          >
-            Edit
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={delete{{Name}}.isPending}
-            className="px-4 py-2 text-sm text-destructive border border-destructive/30 rounded-md hover:bg-destructive/10 disabled:opacity-50"
-          >
-            {delete{{Name}}.isPending ? 'Deleting...' : 'Delete'}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={({{name}} as any).title}
+        actions={
+          <HStack gap="2">
+            <Button variant="outline" size="sm" onClick={() => navigate(`${Path.{{Names}}}/${id}/edit`)}>
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              colorPalette="red"
+              onClick={handleDelete}
+              loading={delete{{Name}}.isPending}
+              loadingText="Deleting..."
+            >
+              Delete
+            </Button>
+          </HStack>
+        }
+      />
 
-      <div className="bg-card rounded-lg border border-border p-6">
-        <p className="text-card-foreground whitespace-pre-wrap">
-          {({{name}} as any).description || 'No description.'}
-        </p>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Created {new Date(({{name}} as any).created_at).toLocaleString()}
-        </p>
-      </div>
-    </div>
+      <Card.Root variant="outline">
+        <Card.Body gap="4">
+          <Text whiteSpace="pre-wrap">
+            {({{name}} as any).description || 'No description.'}
+          </Text>
+          <Text textStyle="sm" color="fg.muted">
+            Created {new Date(({{name}} as any).created_at).toLocaleString()}
+          </Text>
+        </Card.Body>
+      </Card.Root>
+    </Stack>
   )
 }

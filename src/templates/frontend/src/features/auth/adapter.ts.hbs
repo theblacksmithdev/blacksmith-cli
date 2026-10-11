@@ -8,17 +8,20 @@
  */
 
 import type { AuthAdapter, AuthUser, AuthError, SocialProvider } from './types'
-import { setTokens, getAccessToken, clearTokens } from '@/api/client'
+import { AUTH_EXPIRED_EVENT, refreshAccessToken } from '@/api/client'
+import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/api/token-storage'
 import { parseApiError } from '@/shared/hooks/api-error'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:{{backendPort}}'
+import { API_URL } from '@/shared/utils/api-url'
 
 // Internal state
 let currentUser: AuthUser | null = null
 let authListeners: Array<(user: AuthUser | null) => void> = []
+// False until the stored session has been checked, so guards don't redirect early
+let initialized = false
 
 function notifyListeners(user: AuthUser | null) {
   currentUser = user
+  initialized = true
   authListeners.forEach((cb) => cb(user))
 }
 
@@ -73,19 +76,33 @@ async function fetchCurrentUser(): Promise<AuthUser> {
   return mapDjangoUser(data)
 }
 
+/**
+ * Rebuild the session from stored tokens after a page load. An expired
+ * access token is renewed once with the refresh token before giving up.
+ */
+async function restoreSession(): Promise<AuthUser | null> {
+  if (!getAccessToken() && !getRefreshToken()) return null
+
+  try {
+    return await fetchCurrentUser()
+  } catch {
+    if (await refreshAccessToken()) {
+      return fetchCurrentUser()
+    }
+    throw new Error('Session expired')
+  }
+}
+
 export function createAuthAdapter(): AuthAdapter {
-  // Try to restore session on init
-  ;(async () => {
-    try {
-      if (getAccessToken()) {
-        const user = await fetchCurrentUser()
-        notifyListeners(user)
-      }
-    } catch {
+  restoreSession()
+    .then(notifyListeners)
+    .catch(() => {
       clearTokens()
       notifyListeners(null)
-    }
-  })()
+    })
+
+  // The API client gave up renewing the session mid-use
+  window.addEventListener(AUTH_EXPIRED_EVENT, () => notifyListeners(null))
 
   return {
     async signInWithEmail(email: string, password: string) {
@@ -171,8 +188,10 @@ export function createAuthAdapter(): AuthAdapter {
 
     async signOut(): Promise<void> {
       try {
+        // Lets the backend revoke the refresh token (Django blacklists it)
         await apiFetch('/api/auth/logout/', {
           method: 'POST',
+          body: JSON.stringify({ refresh: getRefreshToken() }),
         })
       } catch {
         // Ignore errors on logout
@@ -187,8 +206,8 @@ export function createAuthAdapter(): AuthAdapter {
 
     onAuthStateChanged(callback: (user: AuthUser | null) => void): () => void {
       authListeners.push(callback)
-      // Fire immediately with current state
-      callback(currentUser)
+      // Fire immediately once the stored session has been checked
+      if (initialized) callback(currentUser)
 
       return () => {
         authListeners = authListeners.filter((cb) => cb !== callback)

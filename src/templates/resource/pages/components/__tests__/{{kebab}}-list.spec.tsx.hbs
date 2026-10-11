@@ -13,11 +13,10 @@ const items = [
 
 describe('{{Name}}List', () => {
   it('shows loading skeletons while loading', () => {
-    const { container } = renderWithProviders(
-      <{{Name}}List {{names}}={[]} isLoading />
-    )
+    renderWithProviders(<{{Name}}List {{names}}={[]} isLoading />)
 
-    expect(container.querySelectorAll('.animate-pulse')).toHaveLength(6)
+    const loading = screen.getByRole('status', { name: /loading {{names}}/i })
+    expect(loading.children).toHaveLength(6)
   })
 
   it('shows the empty state when there are no {{names}}', () => {
