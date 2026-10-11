@@ -1,0 +1,37 @@
+import type { ReactNode } from 'react'
+import { Badge, Card, Center, HStack } from '@chakra-ui/react'
+import { interactiveCard } from '@/theme/styles'
+
+interface InfoCardProps {
+  icon: ReactNode
+  title: string
+  description: ReactNode
+  /** Small pill in the top-right corner, e.g. the technology name. */
+  badge?: string
+  /** Rendered at the bottom — a button, link, or command snippet. */
+  children?: ReactNode
+}
+
+export function InfoCard({ icon, title, description, badge, children }: InfoCardProps) {
+  return (
+    <Card.Root variant="outline" css={interactiveCard}>
+      <Card.Header>
+        <HStack justify="space-between" align="start">
+          <Center boxSize="9" borderRadius="l2" bg="bg.muted" color="fg" _icon=\{{ boxSize: '4' }}>
+            {icon}
+          </Center>
+          {badge && (
+            <Badge variant="outline" size="sm">
+              {badge}
+            </Badge>
+          )}
+        </HStack>
+      </Card.Header>
+      <Card.Body gap="1.5">
+        <Card.Title>{title}</Card.Title>
+        <Card.Description>{description}</Card.Description>
+      </Card.Body>
+      {children && <Card.Footer>{children}</Card.Footer>}
+    </Card.Root>
+  )
+}

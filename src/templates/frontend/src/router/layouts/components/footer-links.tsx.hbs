@@ -1,0 +1,21 @@
+import { HStack } from '@chakra-ui/react'
+import { Path } from '@/router/paths'
+import { RouterLink } from '@/shared/components/ui/router-link'
+
+const LINKS = [
+  { label: 'Terms', to: Path.Terms },
+  { label: 'Privacy', to: Path.Privacy },
+  { label: 'Support', to: Path.Support },
+]
+
+export function FooterLinks() {
+  return (
+    <HStack gap="5" fontSize="sm">
+      {LINKS.map((link) => (
+        <RouterLink key={link.to} to={link.to} color="fg.muted" _hover=\{{ color: 'fg' }}>
+          {link.label}
+        </RouterLink>
+      ))}
+    </HStack>
+  )
+}

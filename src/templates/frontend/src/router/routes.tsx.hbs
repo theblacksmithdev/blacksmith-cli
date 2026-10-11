@@ -15,6 +15,8 @@ import { RouteErrorBoundary } from '@/router/error-boundary'
 import NotFoundPage from '@/shared/components/not-found-page'
 import { homeRoutes } from '@/pages/home'
 import { dashboardRoutes } from '@/pages/dashboard'
+import { legalRoutes } from '@/pages/legal'
+import { supportRoutes } from '@/pages/support'
 import { authRoutes } from '@/features/auth'
 // blacksmith:import
 
@@ -23,6 +25,8 @@ import { authRoutes } from '@/features/auth'
  */
 const publicRoutes: RouteObject[] = [
   ...homeRoutes,
+  ...legalRoutes,
+  ...supportRoutes,
 ]
 
 /**

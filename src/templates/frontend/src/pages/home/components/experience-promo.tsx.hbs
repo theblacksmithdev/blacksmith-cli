@@ -1,0 +1,73 @@
+import { Box, Button, Flex, HStack, Heading, Stack, Text } from '@chakra-ui/react'
+import { ArrowUpRight } from 'lucide-react'
+import { BrandMark } from '@/shared/components/brand-mark'
+
+const BLACKSMITH_EXPERIENCE_URL =
+  'https://www.blacksmithexp.dev/?utm_source=blacksmith-cli&utm_medium=generated-app'
+
+/**
+ * Blacksmith Experience callout. Delete this component (and its use in
+ * home.tsx) when you're ready to make the home page your own.
+ */
+export function ExperiencePromo() {
+  return (
+    <Box
+      as="section"
+      maxW="5xl"
+      mx="auto"
+      w="full"
+      borderRadius="l3"
+      bg="black"
+      color="white"
+      px=\{{ base: '7', md: '12' }}
+      py=\{{ base: '10', md: '14' }}
+      bgImage="radial-gradient(640px circle at 100% 0%, rgba(255, 255, 255, 0.1), transparent 65%)"
+      _dark=\{{ bg: 'bg.panel', borderWidth: '1px', borderColor: 'border' }}
+    >
+      <Flex
+        direction=\{{ base: 'column', md: 'row' }}
+        align=\{{ base: 'start', md: 'end' }}
+        justify="space-between"
+        gap="8"
+      >
+        <Stack gap="4" maxW="2xl">
+          <HStack gap="2" color="whiteAlpha.700">
+            <BrandMark boxSize="4" />
+            <Text textStyle="sm" fontWeight="medium" letterSpacing="tight">
+              Blacksmith Experience
+            </Text>
+          </HStack>
+
+          <Heading
+            as="h2"
+            fontSize=\{{ base: '3xl', md: '5xl' }}
+            letterSpacing="display"
+            lineHeight="1.05"
+          >
+            Prove you can actually build.
+          </Heading>
+
+          <Text color="whiteAlpha.700" fontSize=\{{ base: 'md', md: 'lg' }}>
+            Build real products start to finish, defend every decision you make, and walk away
+            with work that shows you're ready.
+          </Text>
+        </Stack>
+
+        <Button
+          asChild
+          size="lg"
+          px="6"
+          flexShrink="0"
+          bg="white"
+          color="black"
+          _hover=\{{ bg: 'whiteAlpha.900' }}
+        >
+          <a href={BLACKSMITH_EXPERIENCE_URL} target="_blank" rel="noopener noreferrer">
+            Start building
+            <ArrowUpRight />
+          </a>
+        </Button>
+      </Flex>
+    </Box>
+  )
+}

@@ -80,7 +80,7 @@ Create \`src/__tests__/test-utils.tsx\` if it doesn't exist:
 \`\`\`tsx
 // src/__tests__/test-utils.tsx
 import { render, type RenderOptions } from '@testing-library/react'
-import { ChakraProvider } from '@chakra-ui/react'
+import { Provider } from '@/shared/components/ui/provider'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
@@ -96,11 +96,11 @@ export function renderWithProviders(ui: React.ReactElement, options: ProviderOpt
 
   const result = render(ui, {
     wrapper: ({ children }) => (
-      <ChakraProvider>
+      <Provider>
         <QueryClientProvider client={queryClient}>
           <MemoryRouter initialEntries={routerEntries}>{children}</MemoryRouter>
         </QueryClientProvider>
-      </ChakraProvider>
+      </Provider>
     ),
     ...renderOptions,
   })
@@ -110,6 +110,8 @@ export function renderWithProviders(ui: React.ReactElement, options: ProviderOpt
 
 export { screen, waitFor, within } from '@testing-library/react'
 \`\`\`
+
+\`Provider\` is the same Chakra UI v3 system the app uses, so components render with real recipes and tokens. jsdom cannot parse Chakra's CSS cascade layers; \`src/__tests__/setup.ts\` filters that one "Could not parse CSS stylesheet" error and mocks \`window.matchMedia\` (used by the color mode store). Don't assert on generated class names — query by role, text or label (e.g. loading grids expose \`role="status"\` with an \`aria-label\`).
 
 **Usage:**
 \`\`\`tsx
@@ -195,11 +197,11 @@ beforeEach(() => {
 vi.mock('@/features/auth/hooks/use-auth', () => ({
   useAuth: () => ({
     user: null,
-    loading: false,
+    isLoading: false,
     error: null,
     isAuthenticated: false,
-    signInWithEmail: vi.fn(),
-    signOut: vi.fn(),
+    login: vi.fn(),
+    logout: vi.fn(),
   }),
 }))
 \`\`\`

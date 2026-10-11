@@ -50,13 +50,14 @@ Form handling:
 - **Zod** for schema validation (schemas auto-generated from OpenAPI)
 - **@hookform/resolvers** for integrating Zod with React Hook Form
 
-### Tailwind CSS
+### Chakra UI v3
 
-Utility-first CSS framework:
+Component library and design system:
 
-- Theme color customization via presets
-- Responsive design utilities
-- No custom CSS needed for most components
+- Every UI element (layout, typography, forms, overlays) is a Chakra component, with no utility CSS
+- OpenAI-inspired theme in `src/theme/`, with presets (see [Theme Colors](/docs/configuration/theme-colors))
+- Light and dark mode that follows the OS, with a toggle in the header
+- Inter variable font via `@fontsource-variable/inter`
 
 ### @hey-api/openapi-ts
 
@@ -89,12 +90,12 @@ frontend/
 │   ├── pages/                  # Route pages
 │   ├── router/                 # Routing config
 │   ├── shared/                 # Shared components, hooks, utils
-│   ├── styles/                 # Global styles
-│   ├── App.tsx                 # Root component
+│   │   └── components/ui/      # Chakra glue: Provider, ColorModeButton, RouterLink
+│   ├── theme/                  # Chakra UI design system (tokens, recipes, presets)
+│   ├── app.tsx                 # Root component
 │   └── main.tsx                # Entry point
 ├── openapi-ts.config.ts        # Code generation config
 ├── vite.config.ts
-├── tailwind.config.js
 ├── tsconfig.json
 └── package.json
 ```
@@ -145,6 +146,7 @@ function CreateProduct() {
 ```typescript
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Field, Input } from '@chakra-ui/react';
 import { ProductSchema } from '@/api/generated/zod.gen';
 
 function ProductForm() {
@@ -154,8 +156,11 @@ function ProductForm() {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      <input {...form.register('name')} />
-      {form.formState.errors.name && <span>{form.formState.errors.name.message}</span>}
+      <Field.Root invalid={!!form.formState.errors.name}>
+        <Field.Label>Name</Field.Label>
+        <Input {...form.register('name')} />
+        <Field.ErrorText>{form.formState.errors.name?.message}</Field.ErrorText>
+      </Field.Root>
     </form>
   );
 }
@@ -164,16 +169,15 @@ function ProductForm() {
 ### Navigation
 
 ```typescript
-import { useNavigate } from 'react-router-dom';
-import { Paths } from '@/router/paths';
+import { Link } from 'react-router-dom';
+import { Button } from '@chakra-ui/react';
+import { Path } from '@/router/paths';
 
 function MyComponent() {
-  const navigate = useNavigate();
-
   return (
-    <button onClick={() => navigate(Paths.PRODUCTS)}>
-      View Products
-    </button>
+    <Button asChild>
+      <Link to={Path.Products}>View Products</Link>
+    </Button>
   );
 }
 ```
@@ -222,7 +226,7 @@ pages/customers/
 
 ### Test Utilities
 
-All component tests use `renderWithProviders` from `src/__tests__/test-utils.tsx`, which wraps components with the app's providers (ThemeProvider, QueryClientProvider, MemoryRouter):
+All component tests use `renderWithProviders` from `src/__tests__/test-utils.tsx`, which wraps components with the app's providers (the Chakra UI `Provider`, QueryClientProvider, MemoryRouter):
 
 ```typescript
 import { screen } from '@/__tests__/test-utils'
@@ -248,7 +252,7 @@ Key packages in `package.json`:
 | `react-hook-form` | Form state management |
 | `zod` | Schema validation |
 | `@hookform/resolvers` | Form + Zod integration |
-| `tailwindcss` | Utility-first CSS |
+| `@chakra-ui/react` | Component library and design system |
 | `@hey-api/openapi-ts` | API client code generation |
 | `vitest` | Test runner |
 | `@testing-library/react` | Component testing utilities |

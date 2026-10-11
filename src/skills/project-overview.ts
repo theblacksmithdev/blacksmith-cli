@@ -52,8 +52,9 @@ ${backendTree}
 │   │   ├── api/          # API client and hooks
 │   │   ├── features/     # Feature modules (auth, etc.)
 │   │   ├── pages/        # Top-level pages
-│   │   ├── router/       # React Router setup
-│   │   └── shared/       # Shared components, hooks, utils
+│   │   ├── router/       # React Router setup and layouts
+│   │   ├── shared/       # Shared components (ui/ = Chakra glue), hooks, utils
+│   │   └── theme/        # Chakra UI v3 design system (tokens, recipes, presets)
 │   └── package.json
 ├── blacksmith.config.json
 └── CLAUDE.md
@@ -73,7 +74,8 @@ ${ctx.projectName}/
 │   ├── api/
 │   ├── pages/
 │   ├── router/
-│   └── shared/
+│   ├── shared/
+│   └── theme/
 ├── package.json
 └── blacksmith.config.json
 \`\`\`

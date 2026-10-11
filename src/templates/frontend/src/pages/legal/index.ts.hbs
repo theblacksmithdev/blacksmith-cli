@@ -1,0 +1,1 @@
+export { legalRoutes } from './routes'

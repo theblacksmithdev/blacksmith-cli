@@ -1,20 +1,13 @@
-import { Spinner } from '@chakra-ui/react'
+import { Center, Spinner, type CenterProps } from '@chakra-ui/react'
 
-interface LoadingSpinnerProps {
+interface LoadingSpinnerProps extends CenterProps {
   size?: 'sm' | 'md' | 'lg'
-  className?: string
 }
 
-const sizeMap = {
-  sm: 'sm',
-  md: 'md',
-  lg: 'lg',
-} as const
-
-export function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerProps) {
+export function LoadingSpinner({ size = 'md', ...props }: LoadingSpinnerProps) {
   return (
-    <div className={`flex items-center justify-center ${className}`}>
-      <Spinner size={sizeMap[size]} />
-    </div>
+    <Center {...props}>
+      <Spinner size={size} color="fg.muted" />
+    </Center>
   )
 }

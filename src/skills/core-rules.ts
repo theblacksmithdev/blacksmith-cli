@@ -15,12 +15,13 @@ export const coreRulesSkill: Skill = {
 
 > **These rules are mandatory. Violating them produces broken, inconsistent code.**
 
-### 1. Use \`@chakra-ui/react\` for ALL UI
-- **Layout**: Use \`VStack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\`, \`Box\`, \`Container\` — NEVER \`<div className="flex ...">\` or \`<div className="grid ...">\`
+### 1. Use \`@chakra-ui/react\` v3 for ALL UI
+- **Layout**: Use \`Stack\`, \`HStack\`, \`VStack\`, \`Flex\`, \`SimpleGrid\`, \`Box\`, \`Container\` with \`gap\` — NEVER styled \`<div>\`s. There is no Tailwind: never write utility \`className\`s
 - **Typography**: Use \`Heading\` and \`Text\` — NEVER raw \`<h1>\`–\`<h6>\`, \`<p>\`, or \`<span>\` with text classes
-- **Separators**: Use \`Divider\` — NEVER \`<hr>\`
-- **Everything else**: \`Button\`, \`Card\`, \`Badge\`, \`Input\`, \`Table\`, \`Modal\`, \`Alert\`, \`Skeleton\`, \`Stat\`, etc.
-- **Exceptions**: Semantic HTML landmarks (\`<main>\`, \`<section>\`, \`<nav>\`, \`<header>\`, \`<footer>\`, \`<article>\`, \`<aside>\`) are acceptable for page structure. \`<form>\` is acceptable with React Hook Form. \`<Link>\` from react-router-dom for navigation
+- **Separators**: Use \`Separator\` — NEVER \`<hr>\`
+- **Everything else**: \`Button\`, \`Card.Root\`, \`Badge\`, \`Field.Root\` + \`Input\`, \`Table.Root\`, \`Dialog.Root\`, \`Alert.Root\`, \`Skeleton\`, \`Stat.Root\`, etc. — v3 compound components, never v2 APIs (\`CardBody\`, \`FormControl\`, \`Modal\`, \`colorScheme\`, \`isLoading\`)
+- **Colors**: Semantic tokens only (\`fg.muted\`, \`bg.subtle\`, \`border\`) — NEVER hex values or \`gray.500\`
+- **Exceptions**: Semantic HTML landmarks (\`<main>\`, \`<section>\`, \`<nav>\`, \`<header>\`, \`<footer>\`, \`<article>\`, \`<aside>\`) are acceptable for page structure. \`<form>\` is acceptable with React Hook Form. \`<Link>\` from react-router-dom for navigation, wrapped via \`asChild\` (\`<Button asChild>\`) or the shared \`RouterLink\`
 - See the \`chakra-ui-react\` skill for the full component list
 
 ### 2. Pages Are Thin Orchestrators

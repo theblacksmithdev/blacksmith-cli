@@ -1,0 +1,55 @@
+import { Link } from 'react-router-dom'
+import { Button, SimpleGrid } from '@chakra-ui/react'
+import { ArrowUpRight, Database, Layout, Rocket } from 'lucide-react'
+import { Path } from '@/router/paths'
+import { InfoCard } from '@/shared/components/info-card'
+import { CommandSnippet } from '@/shared/components/command-snippet'
+import { API_DOCS_URL } from '@/shared/utils/api-url'
+
+export function StackOverview() {
+  return (
+    <SimpleGrid columns=\{{ base: 1, sm: 2, lg: 3 }} gap="4">
+      <InfoCard
+        icon={<Rocket />}
+        title="Quick start"
+        badge="Guide"
+        description="Scaffold a new resource with models, API, and pages in one command."
+      >
+        <CommandSnippet command="blacksmith make:resource Post" />
+      </InfoCard>
+
+      <InfoCard
+        icon={<Database />}
+        title="Backend"
+{{#if isExpress}}
+        badge="Express"
+        description="Express REST API with JWT auth, Prisma, and auto-generated OpenAPI docs."
+{{else if isFastapi}}
+        badge="FastAPI"
+        description="FastAPI with JWT auth, SQLAlchemy, and auto-generated OpenAPI docs."
+{{else}}
+        badge="Django"
+        description="Django REST API with JWT auth, serializers, and auto-generated OpenAPI docs."
+{{/if}}
+      >
+        <Button asChild variant="outline" size="sm">
+          <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer">
+            View API docs
+            <ArrowUpRight />
+          </a>
+        </Button>
+      </InfoCard>
+
+      <InfoCard
+        icon={<Layout />}
+        title="Frontend"
+        badge="React"
+        description="React + TypeScript with TanStack Query, React Router, and Chakra UI."
+      >
+        <Button asChild variant="outline" size="sm">
+          <Link to={Path.Home}>Home page</Link>
+        </Button>
+      </InfoCard>
+    </SimpleGrid>
+  )
+}

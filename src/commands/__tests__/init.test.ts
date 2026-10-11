@@ -220,6 +220,23 @@ describe('init', () => {
     expect(frontendCall![2]).toMatchObject({ projectName: 'my-app' })
   })
 
+  it('derives a domain-safe name for placeholder addresses', async () => {
+    setupSuccessfulInit()
+
+    await init('My_Cool App', {
+      type: 'fullstack',
+      backendPort: '8000',
+      frontendPort: '5173',
+      themeColor: 'default',
+      ai: false,
+    })
+
+    const frontendCall = templateMocks.renderDirectory.mock.calls.find(
+      (c: any[]) => c[0] === '/templates/frontend'
+    )
+    expect(frontendCall![2]).toMatchObject({ projectDomain: 'my-cool-app' })
+  })
+
   it('should record the backend framework in the config', async () => {
     setupSuccessfulInit()
 

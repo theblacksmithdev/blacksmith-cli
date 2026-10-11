@@ -115,6 +115,8 @@ buildPath(Path.ResetPassword, { token: 'abc123' })
 
 The \`Path\` enum is re-exported from \`@/router\` along with \`buildPath\`.
 
+Site-wide details (app name, support email, legal "last updated" date) live in \`SITE\` from \`@/shared/utils/site-config\` — read them from there, never hardcode them.
+
 ### Central Router (\`src/router/routes.tsx\`)
 
 The central router imports and spreads route arrays — it never imports page components directly:
@@ -122,12 +124,16 @@ The central router imports and spreads route arrays — it never imports page co
 \`\`\`tsx
 import { homeRoutes } from '@/pages/home'
 import { dashboardRoutes } from '@/pages/dashboard'
+import { legalRoutes } from '@/pages/legal'
+import { supportRoutes } from '@/pages/support'
 import { authRoutes } from '@/features/auth'
 import { postsRoutes } from '@/features/posts'
 // blacksmith:import
 
 const publicRoutes: RouteObject[] = [
   ...homeRoutes,
+  ...legalRoutes,   // /terms, /privacy
+  ...supportRoutes, // /support
 ]
 
 const privateRoutes: RouteObject[] = [
@@ -175,7 +181,8 @@ pages/dashboard/
 
 \`\`\`tsx
 // dashboard.tsx — thin orchestrator using @chakra-ui/react layout
-import { VStack, SimpleGrid, Divider } from '@chakra-ui/react'
+import { Separator, SimpleGrid, Stack } from '@chakra-ui/react'
+import { PageHeader } from '@/shared/components/page-header'
 import { StatsCards } from './components/stats-cards'
 import { RecentActivity } from './components/recent-activity'
 import { QuickActions } from './components/quick-actions'
@@ -185,14 +192,15 @@ export default function DashboardPage() {
   const { stats, activity, isLoading } = useDashboardData()
 
   return (
-    <VStack spacing={6} align="stretch">
+    <Stack gap="8">
+      <PageHeader title="Dashboard" description="Your workspace at a glance." />
       <StatsCards stats={stats} isLoading={isLoading} />
-      <Divider />
-      <SimpleGrid columns={{ base: 1, lg: 3 }} spacing={6}>
+      <Separator />
+      <SimpleGrid columns={{ base: 1, lg: 3 }} gap="6">
         <RecentActivity items={activity} isLoading={isLoading} gridColumn={{ lg: 'span 2' }} />
         <QuickActions />
       </SimpleGrid>
-    </VStack>
+    </Stack>
   )
 }
 \`\`\`
@@ -252,7 +260,8 @@ export function useOrdersPage() {
 }
 
 // orders-page.tsx
-import { VStack } from '@chakra-ui/react'
+import { Stack } from '@chakra-ui/react'
+import { PageHeader } from '@/shared/components/page-header'
 import { useOrdersPage } from './hooks/use-orders-page'
 import { OrdersTable } from './components/orders-table'
 import { OrdersToolbar } from './components/orders-toolbar'
@@ -261,10 +270,11 @@ export default function OrdersPage() {
   const { orders, total, isLoading, page, setPage, search, setSearch, deleteOrder } = useOrdersPage()
 
   return (
-    <VStack spacing={4} align="stretch">
+    <Stack gap="6">
+      <PageHeader title="Orders" />
       <OrdersToolbar search={search} onSearchChange={setSearch} />
       <OrdersTable orders={orders} isLoading={isLoading} onDelete={(id) => deleteOrder.mutate({ path: { id } })} />
-    </VStack>
+    </Stack>
   )
 }
 \`\`\`

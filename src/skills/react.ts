@@ -14,8 +14,8 @@ export const reactSkill: Skill = {
 - TanStack React Query for server state management
 - React Router v7 for client-side routing
 - React Hook Form + Zod for forms and validation
-- Chakra UI v2 for component library and theming
-- Tailwind CSS for additional styling
+- Chakra UI v3 for components, theming and styling (no Tailwind)
+- \`@fontsource-variable/inter\` for typography
 - \`@hey-api/openapi-ts\` for auto-generating API client from Django's OpenAPI schema
 - \`lucide-react\` for icons
 
@@ -45,10 +45,11 @@ export const reactSkill: Skill = {
 
 ### UI Components
 - **All UI must use \`@chakra-ui/react\` components** — see the \`chakra-ui-react\` skill for the full component list
-- Use \`VStack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\`, \`Box\` for layout — never raw \`<div>\` with flex/grid classes
+- Use \`Stack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\`, \`Box\` for layout (with \`gap\`) — never styled \`<div>\`s
 - Use \`Heading\` and \`Text\` for headings and text — never raw \`<h1>\`–\`<h6>\` or \`<p>\`
-- Use \`Divider\` instead of \`<hr>\`
-- Use \`Stat\`, \`Skeleton\` instead of building custom equivalents
+- Use \`Separator\` instead of \`<hr>\`
+- Use \`Stat\`, \`Skeleton\`, \`EmptyState\` instead of building custom equivalents
+- Reuse the shared components in \`src/shared/components/\` before writing new ones: \`PageHeader\`, \`StatusAlert\`, \`StatusPage\`, \`InfoCard\`, \`CommandSnippet\`, \`LoadingSpinner\`, \`BrandLogo\`, and \`RouterLink\` / \`ColorModeButton\` / \`Provider\` in \`ui/\`
 
 ### Route Paths
 - All route paths live in the \`Path\` enum at \`src/router/paths.ts\` — **never hardcode path strings**
@@ -56,12 +57,14 @@ export const reactSkill: Skill = {
 - Use \`buildPath()\` for dynamic segments — see the \`page-structure\` skill for details
 
 ### Styling
-- Use Chakra UI style props as the primary styling approach
-- Use Tailwind CSS utility classes for additional styling needs
-- Theming via Chakra UI \`extendTheme()\` and design tokens
-- Color mode is supported via Chakra UI \`useColorMode()\` hook
+- Use Chakra UI style props as the only styling approach — there is no Tailwind and no \`className\` utilities
+- The design system lives in \`src/theme/\` (\`createSystem(defaultConfig, config)\`): tokens, semantic tokens, recipe overrides, global CSS and the theme preset (\`presets.ts\`)
+- The default look is OpenAI-inspired: monochrome surfaces, hairline borders, pill-shaped controls, tight Inter type
+- Use semantic tokens only — \`bg\`, \`bg.subtle\`, \`bg.muted\`, \`bg.panel\`, \`fg\`, \`fg.muted\`, \`fg.subtle\`, \`border\`, \`border.emphasized\`, \`colorPalette.solid\`; radii \`l1\`/\`l2\`/\`l3\`/\`control\`; shadow \`panel\`. Never hex values or \`gray.500\`
+- Change a component's look in \`src/theme/recipes.ts\` / \`slot-recipes.ts\`; share reusable style objects via \`src/theme/styles.ts\` (e.g. \`css={interactiveCard}\`)
+- Color mode: \`useColorMode()\` from \`@/shared/hooks/use-color-mode\`; dark styles come from semantic tokens or the \`_dark\` condition
 - Use responsive props (\`{{ base: ..., md: ..., lg: ... }}\`) for responsive layouts
-- Avoid inline \`style\` attributes — use Chakra style props or Tailwind classes instead
+- Avoid inline \`style\` attributes — use Chakra style props instead
 
 ### Path Aliases
 - \`@/\` maps to \`frontend/src/\`
@@ -71,7 +74,7 @@ export const reactSkill: Skill = {
 ### Error Handling
 - Use React Error Boundary (\`frontend/src/router/error-boundary.tsx\`) for render errors
 - API errors are handled by \`useApiQuery\` / \`useApiMutation\` — see the \`react-query\` skill for error display patterns
-- Display user-facing errors using the project's feedback components (Alert, useToast)
+- Display user-facing errors using the project's feedback components (\`StatusAlert\`, toaster)
 
 ### Testing
 - See the \`frontend-testing\` skill for full conventions on test placement, utilities, mocking, and what to test

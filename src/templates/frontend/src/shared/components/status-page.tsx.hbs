@@ -1,0 +1,41 @@
+import type { ReactNode } from 'react'
+import { Center, Heading, Stack, Text } from '@chakra-ui/react'
+
+interface StatusPageProps {
+  /** Large display line, e.g. "404". */
+  code?: ReactNode
+  title: string
+  description?: ReactNode
+  /** Buttons that get the user unstuck. */
+  actions?: ReactNode
+  /** Fill the viewport (standalone pages) or just the content area. */
+  fullPage?: boolean
+}
+
+/**
+ * Centered full-bleed message for 404s, crashes, and access denials.
+ */
+export function StatusPage({ code, title, description, actions, fullPage = false }: StatusPageProps) {
+  return (
+    <Center minH={fullPage ? '100dvh' : '60vh'} px="6" py="16">
+      <Stack gap="5" align="center" textAlign="center" maxW="md">
+        {code && (
+          <Heading as="h1" fontSize=\{{ base: '6xl', md: '7xl' }} letterSpacing="display" lineHeight="1">
+            {code}
+          </Heading>
+        )}
+        <Stack gap="2">
+          <Heading as={code ? 'h2' : 'h1'} size="xl">
+            {title}
+          </Heading>
+          {description && <Text color="fg.muted">{description}</Text>}
+        </Stack>
+        {actions && (
+          <Stack direction="row" gap="3" pt="2">
+            {actions}
+          </Stack>
+        )}
+      </Stack>
+    </Center>
+  )
+}

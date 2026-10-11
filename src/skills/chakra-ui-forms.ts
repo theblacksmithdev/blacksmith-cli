@@ -3,49 +3,52 @@ import type { Skill, SkillContext } from './types.js'
 export const chakraUiFormsSkill: Skill = {
   id: 'chakra-ui-forms',
   name: 'Chakra UI Forms',
-  description: 'Form components using Chakra UI + React Hook Form + Zod for validation and submission.',
+  description: 'Form components using Chakra UI v3 (Field) + React Hook Form + Zod for validation and submission.',
 
   render(_ctx: SkillContext): string {
-    return `## Chakra UI Forms — Form Components (React Hook Form + Zod)
+    return `## Chakra UI Forms — Form Components (v3 + React Hook Form + Zod)
 
-> **RULE: ALWAYS use Chakra UI form components for forms.** Do NOT build forms with raw \`<form>\`, \`<input>\`, \`<label>\`, or manual error display.
+> **RULE: ALWAYS use Chakra UI \`Field\` components for forms.** Do NOT build forms with raw \`<input>\`, \`<label>\`, or manual error display.
+> v2 names (\`FormControl\`, \`FormLabel\`, \`FormErrorMessage\`, \`isInvalid\`, \`isRequired\`) do NOT exist in v3.
 
 \`\`\`tsx
 import {
-  FormControl, FormLabel, FormErrorMessage, FormHelperText,
-  Input, Textarea, Select, Checkbox, Switch, NumberInput,
-  NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
-  Radio, RadioGroup, Button,
+  Field, Fieldset, Input, InputGroup, Textarea, NativeSelect,
+  Checkbox, Switch, RadioGroup, NumberInput, Button,
 } from '@chakra-ui/react'
 \`\`\`
 
 ### Components
 
-- \`FormControl\` — Wraps each field. Props: \`isInvalid\`, \`isRequired\`, \`isDisabled\`
-- \`FormLabel\` — Label for a form field
-- \`FormErrorMessage\` — Displays field-level validation error (shown when \`FormControl\` has \`isInvalid\`)
-- \`FormHelperText\` — Displays helper text below a field
-- \`Input\` — Text input. Props: \`type\`, \`placeholder\`, \`size\`
-- \`Textarea\` — Textarea. Props: \`rows\`, \`placeholder\`
-- \`Select\` — Select dropdown. Props: \`placeholder\`
-- \`Checkbox\` — Checkbox input
-- \`Switch\` — Toggle switch
-- \`RadioGroup\` + \`Radio\` — Radio group
-- \`NumberInput\` — Numeric input with stepper
+- \`Field.Root\` — Wraps each field. Props: \`invalid\`, \`required\`, \`disabled\`, \`readOnly\` (propagated to the input inside)
+- \`Field.Label\` — Label for the field (add \`<Field.RequiredIndicator />\` inside to show an asterisk)
+- \`Field.ErrorText\` — Field-level validation error (shown when \`Field.Root\` has \`invalid\`)
+- \`Field.HelperText\` — Helper text below a field
+- \`Fieldset.Root\`, \`Fieldset.Legend\`, \`Fieldset.Content\` — Group related fields
+- \`Input\` — Text input. Props: \`type\`, \`placeholder\`, \`size\`, \`variant\` (\`outline\` | \`subtle\` | \`flushed\`)
+- \`InputGroup\` — Input with \`startElement\` / \`endElement\` (icons, units)
+- \`Textarea\` — Multi-line text. Props: \`rows\`, \`placeholder\`, \`autoresize\`
+- \`NativeSelect.Root\` + \`NativeSelect.Field\` + \`NativeSelect.Indicator\` — Native select (works with \`register\`)
+- \`Checkbox.Root\` + \`Checkbox.HiddenInput\` + \`Checkbox.Control\` + \`Checkbox.Label\`
+- \`Switch.Root\` + \`Switch.HiddenInput\` + \`Switch.Control\` + \`Switch.Label\`
+- \`RadioGroup.Root\` + \`RadioGroup.Item\` + \`RadioGroup.ItemHiddenInput\` + \`RadioGroup.ItemIndicator\` + \`RadioGroup.ItemText\`
+- \`NumberInput.Root\` + \`NumberInput.Input\` + \`NumberInput.Control\` — Numeric input with stepper
+
+Controlled components (\`Checkbox\`, \`Switch\`, \`RadioGroup\`, \`NumberInput\`, \`Select\`) use React Hook Form's \`Controller\` and their \`checked\` / \`onCheckedChange\`, \`value\` / \`onValueChange\` props.
 
 ### Rules
-- NEVER use raw \`<form>\` with manual \`<label>\` and error \`<p>\` tags. Always use \`FormControl\` + \`FormLabel\` + \`FormErrorMessage\`.
-- NEVER use \`<input>\`, \`<textarea>\`, \`<select>\` inside forms. Use Chakra UI \`Input\`, \`Textarea\`, \`Select\`.
+- NEVER use manual \`<label>\` and error \`<p>\` tags. Always use \`Field.Root\` + \`Field.Label\` + \`Field.ErrorText\`.
+- NEVER use \`<input>\`, \`<textarea>\`, \`<select>\` directly. Use Chakra UI \`Input\`, \`Textarea\`, \`NativeSelect\`.
+- Submit buttons use \`loading\` / \`loadingText\` (NOT \`isLoading\`) and the default \`brand\` palette (no \`colorScheme\`).
+- Show request-level errors with the shared \`StatusAlert\` component above the fields.
 
 ### Form Pattern — ALWAYS follow this:
 \`\`\`tsx
-import {
-  FormControl, FormLabel, FormErrorMessage,
-  Input, Textarea, Select, Button, VStack,
-} from '@chakra-ui/react'
+import { Button, Field, Input, NativeSelect, Stack, Textarea } from '@chakra-ui/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { StatusAlert } from '@/shared/components/status-alert'
 
 const schema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -55,7 +58,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-function ResourceForm({ defaultValues, onSubmit, isSubmitting }: Props) {
+function ResourceForm({ defaultValues, onSubmit, isSubmitting, errorMessage }: Props) {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { title: '', description: '', status: 'draft', ...defaultValues },
@@ -63,32 +66,37 @@ function ResourceForm({ defaultValues, onSubmit, isSubmitting }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <VStack spacing={4} align="stretch">
-        <FormControl isInvalid={!!errors.title} isRequired>
-          <FormLabel>Title</FormLabel>
+      <Stack gap="5">
+        {errorMessage && <StatusAlert message={errorMessage} />}
+
+        <Field.Root invalid={!!errors.title} required>
+          <Field.Label>Title</Field.Label>
           <Input placeholder="Enter title" {...register('title')} />
-          <FormErrorMessage>{errors.title?.message}</FormErrorMessage>
-        </FormControl>
+          <Field.ErrorText>{errors.title?.message}</Field.ErrorText>
+        </Field.Root>
 
-        <FormControl isInvalid={!!errors.description}>
-          <FormLabel>Description</FormLabel>
+        <Field.Root invalid={!!errors.description}>
+          <Field.Label>Description</Field.Label>
           <Textarea rows={4} placeholder="Enter description" {...register('description')} />
-          <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
-        </FormControl>
+          <Field.ErrorText>{errors.description?.message}</Field.ErrorText>
+        </Field.Root>
 
-        <FormControl isInvalid={!!errors.status}>
-          <FormLabel>Status</FormLabel>
-          <Select {...register('status')}>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-          </Select>
-          <FormErrorMessage>{errors.status?.message}</FormErrorMessage>
-        </FormControl>
+        <Field.Root invalid={!!errors.status}>
+          <Field.Label>Status</Field.Label>
+          <NativeSelect.Root>
+            <NativeSelect.Field {...register('status')}>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </NativeSelect.Field>
+            <NativeSelect.Indicator />
+          </NativeSelect.Root>
+          <Field.ErrorText>{errors.status?.message}</Field.ErrorText>
+        </Field.Root>
 
-        <Button type="submit" colorScheme="blue" isLoading={isSubmitting}>
+        <Button type="submit" alignSelf="start" loading={isSubmitting} loadingText="Saving...">
           Save
         </Button>
-      </VStack>
+      </Stack>
     </form>
   )
 }
@@ -96,19 +104,17 @@ function ResourceForm({ defaultValues, onSubmit, isSubmitting }: Props) {
 
 ### Example: Detail Page with Edit Dialog
 \`\`\`tsx
+import { useState } from 'react'
 import {
-  Card, CardHeader, CardBody, CardFooter,
-  Button, Badge, Divider, Heading, Text,
-  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton,
-  Alert, AlertIcon, AlertTitle, AlertDescription,
-  FormControl, FormLabel, FormErrorMessage,
-  Input, Textarea, Flex, HStack, useDisclosure,
+  Badge, Button, Card, Dialog, Field, HStack, Input, Portal, Stack, Text, Textarea,
 } from '@chakra-ui/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Edit, ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { PageHeader } from '@/shared/components/page-header'
+import { StatusAlert } from '@/shared/components/status-alert'
 
 const editSchema = z.object({
   title: z.string().min(1, 'Required'),
@@ -116,72 +122,76 @@ const editSchema = z.object({
 })
 
 function ResourceDetailPage({ resource, onUpdate, error }) {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [open, setOpen] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(editSchema),
     defaultValues: { title: resource.title, description: resource.description },
   })
 
   return (
-    <Card>
-      <CardHeader>
-        <Flex align="center" justify="space-between">
-          <Box>
-            <Heading size="md">{resource.title}</Heading>
-            <Text fontSize="sm" color="gray.500">Created {new Date(resource.created_at).toLocaleDateString()}</Text>
-          </Box>
-          <HStack spacing={2}>
-            <Button variant="outline" as={Link} to="/resources" leftIcon={<ArrowLeft size={16} />}>
-              Back
+    <Stack gap="8">
+      <PageHeader
+        title={resource.title}
+        description={\`Created \${new Date(resource.created_at).toLocaleDateString()}\`}
+        actions={
+          <HStack gap="2">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/resources"><ArrowLeft /> Back</Link>
             </Button>
-            <Button leftIcon={<Edit size={16} />} colorScheme="blue" onClick={onOpen}>
-              Edit
+            <Button size="sm" onClick={() => setOpen(true)}>
+              <Pencil /> Edit
             </Button>
           </HStack>
-        </Flex>
-      </CardHeader>
-      <Divider />
-      <CardBody>
-        {error && (
-          <Alert status="error" mb={4}>
-            <AlertIcon />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        <Text>{resource.description || 'No description provided.'}</Text>
-      </CardBody>
-      <CardFooter>
-        <Badge>{resource.status}</Badge>
-      </CardFooter>
+        }
+      />
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Edit Resource</ModalHeader>
-          <ModalCloseButton />
-          <form onSubmit={handleSubmit(onUpdate)}>
-            <ModalBody>
-              <VStack spacing={4}>
-                <FormControl isInvalid={!!errors.title}>
-                  <FormLabel>Title</FormLabel>
-                  <Input {...register('title')} />
-                  <FormErrorMessage>{errors.title?.message}</FormErrorMessage>
-                </FormControl>
-                <FormControl isInvalid={!!errors.description}>
-                  <FormLabel>Description</FormLabel>
-                  <Textarea rows={4} {...register('description')} />
-                  <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
-                </FormControl>
-              </VStack>
-            </ModalBody>
-            <ModalFooter>
-              <Button type="submit" colorScheme="blue">Save Changes</Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
-    </Card>
+      {error && <StatusAlert title="Error" message={error} />}
+
+      <Card.Root variant="outline">
+        <Card.Body>
+          <Text>{resource.description || 'No description provided.'}</Text>
+        </Card.Body>
+        <Card.Footer>
+          <Badge variant="outline">{resource.status}</Badge>
+        </Card.Footer>
+      </Card.Root>
+
+      <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content asChild>
+              <form onSubmit={handleSubmit(onUpdate)}>
+                <Dialog.Header>
+                  <Dialog.Title>Edit resource</Dialog.Title>
+                </Dialog.Header>
+                <Dialog.Body>
+                  <Stack gap="4">
+                    <Field.Root invalid={!!errors.title}>
+                      <Field.Label>Title</Field.Label>
+                      <Input {...register('title')} />
+                      <Field.ErrorText>{errors.title?.message}</Field.ErrorText>
+                    </Field.Root>
+                    <Field.Root invalid={!!errors.description}>
+                      <Field.Label>Description</Field.Label>
+                      <Textarea rows={4} {...register('description')} />
+                      <Field.ErrorText>{errors.description?.message}</Field.ErrorText>
+                    </Field.Root>
+                  </Stack>
+                </Dialog.Body>
+                <Dialog.Footer>
+                  <Dialog.ActionTrigger asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </Dialog.ActionTrigger>
+                  <Button type="submit">Save changes</Button>
+                </Dialog.Footer>
+                <Dialog.CloseTrigger />
+              </form>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+    </Stack>
   )
 }
 \`\`\`

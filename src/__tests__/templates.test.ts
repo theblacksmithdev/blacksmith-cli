@@ -14,6 +14,7 @@ const TEMPLATES_DIR = path.resolve(
 
 const PROJECT_CONTEXT = {
   projectName: 'my-app',
+  projectDomain: 'my-app',
   backendPort: 8000,
   frontendPort: 5173,
   themePreset: 'default',
@@ -65,7 +66,6 @@ describe.each([
   ['resource/backend/express', path.join('resource', 'backend', 'express'), RESOURCE_CONTEXT],
   ['resource/pages', path.join('resource', 'pages'), RESOURCE_CONTEXT],
   ['resource/api-hooks', path.join('resource', 'api-hooks'), RESOURCE_CONTEXT],
-  ['resource/frontend', path.join('resource', 'frontend'), RESOURCE_CONTEXT],
 ])('%s templates', (_label, relDir, context) => {
   const getTmpDir = useTmpDir()
 

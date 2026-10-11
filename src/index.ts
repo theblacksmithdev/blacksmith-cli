@@ -34,7 +34,7 @@ program
   .option('--no-chakra-ui-skill', 'Disable Chakra UI skill when using --ai')
   .option('-b, --backend-port <port>', 'Backend port (default: 8000)')
   .option('-f, --frontend-port <port>', 'Vite frontend port (default: 5173)')
-  .option('-t, --theme-color <color>', 'Theme color (zinc, slate, blue, green, orange, red, violet)')
+  .option('-t, --theme-color <color>', 'Theme preset (default, neutral, blue, green, violet, red)')
   .description('Create a new Blacksmith project')
   .action(init)
 

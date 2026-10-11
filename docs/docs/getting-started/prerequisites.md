@@ -54,7 +54,7 @@ When you run `blacksmith init`, the CLI automatically:
 
 - Creates a **Python virtual environment** (`backend/venv/`)
 - Installs the backend dependencies — **Django**, **Django REST Framework**, **drf-spectacular**, and **SimpleJWT** (or the **Express**/**FastAPI** equivalents when selected)
-- Installs **React**, **Vite**, **TanStack Query**, **React Router**, **Tailwind CSS**, and other frontend dependencies
+- Installs **React**, **Vite**, **TanStack Query**, **React Router**, **Chakra UI**, and other frontend dependencies
 - Configures **environment files** (`.env`) for both stacks
 - Runs **initial database migrations** (SQLite by default)
 - Performs the **first OpenAPI sync** to generate TypeScript types

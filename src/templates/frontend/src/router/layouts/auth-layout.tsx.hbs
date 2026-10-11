@@ -1,68 +1,32 @@
-import { Outlet, Link } from 'react-router-dom'
-import { Divider, Button } from '@chakra-ui/react'
-import { Anvil } from 'lucide-react'
-import { Path } from '@/router/paths'
+import { Outlet } from 'react-router-dom'
+import { Box, Center, Container, Flex, HStack } from '@chakra-ui/react'
+import { BrandLogo } from '@/shared/components/brand-logo'
+import { ColorModeButton } from '@/shared/components/ui/color-mode-button'
+import { FooterLinks } from './components/footer-links'
 
+/**
+ * Minimal, centered auth shell: logo on top, a single narrow form column,
+ * and quiet legal links underneath.
+ */
 export function AuthLayoutWrapper() {
   return (
-    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-      {/* Left Column — Branding Panel */}
-      <div className="hidden lg:flex flex-col justify-between bg-primary text-primary-foreground p-10">
-        <div className="flex items-center gap-2">
-          <Anvil className="h-6 w-6" />
-          <span className="text-lg font-semibold">{{projectName}}</span>
-        </div>
+    <Flex direction="column" minH="100dvh" bg="bg">
+      <Container maxW="6xl">
+        <HStack h="16" justify="space-between">
+          <BrandLogo />
+          <ColorModeButton />
+        </HStack>
+      </Container>
 
-        <div className="flex flex-col items-center gap-4">
-          <blockquote className="text-2xl font-medium">
-            &ldquo;Build faster. Ship with confidence.&rdquo;
-          </blockquote>
-          <p className="text-primary-foreground/70">
-            A fullstack platform powered by Django, React, and Blacksmith.
-          </p>
-        </div>
+      <Center flex="1" px="6" py="12">
+        <Box w="full" maxW="sm">
+          <Outlet />
+        </Box>
+      </Center>
 
-        <p className="text-sm text-primary-foreground/50">
-          &copy; {new Date().getFullYear()} {{projectName}}. All rights reserved.
-        </p>
-      </div>
-
-      {/* Right Column — Auth Form */}
-      <div className="flex flex-col">
-        <div className="flex items-center justify-between p-6 lg:p-8">
-          <div className="flex items-center gap-2 lg:hidden">
-            <Anvil className="h-5 w-5" />
-            <span className="font-semibold">{{projectName}}</span>
-          </div>
-          <div className="lg:ml-auto">
-            <Button variant="ghost" size="sm" as={Link} to={Path.Home}>
-              Back to Home
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex flex-1 items-center justify-center px-6 pb-10">
-          <div className="w-full max-w-[420px]">
-            <Outlet />
-          </div>
-        </div>
-
-        <Divider />
-
-        <div className="flex items-center justify-center gap-4 p-6">
-          <Button variant="link" size="sm" className="text-muted-foreground" as={Link} to="/terms">
-            Terms
-          </Button>
-          <Divider orientation="vertical" h={4} />
-          <Button variant="link" size="sm" className="text-muted-foreground" as={Link} to="/privacy">
-            Privacy
-          </Button>
-          <Divider orientation="vertical" h={4} />
-          <Button variant="link" size="sm" className="text-muted-foreground" as={Link} to="/support">
-            Support
-          </Button>
-        </div>
-      </div>
-    </div>
+      <Center py="8">
+        <FooterLinks />
+      </Center>
+    </Flex>
   )
 }

@@ -108,7 +108,9 @@ function MyComponent() {
 
 ### Token Storage
 
-Tokens are stored in memory and/or local storage, with the API client automatically attaching the access token to every request and refreshing it when needed.
+Tokens are stored in `localStorage` (`src/api/token-storage.ts`), so a session survives page reloads and new tabs. The API client attaches the access token to every request. On a `401` it exchanges the refresh token for a new pair, and if that fails the user is signed out. On load, the auth adapter restores the session from stored tokens, renewing an expired access token first, before route guards decide anything. Signing out sends the refresh token to the backend so Django can blacklist it.
+
+Because `localStorage` is readable by scripts on the page, keep XSS out of your app. For stricter requirements, have the backend set the refresh token as an `httpOnly` cookie instead.
 
 ## Creating a Superuser
 
