@@ -147,6 +147,39 @@ describe('ports chosen at init', () => {
 })
 
 /**
+ * The generated hooks call the client in src/api/generated/client.gen.ts, so
+ * that is the one the token interceptors must sit on. A separate client would
+ * leave every generated request unauthenticated.
+ */
+describe('frontend API client', () => {
+  const getTmpDir = useTmpDir()
+
+  function renderClient(projectType: 'fullstack' | 'frontend') {
+    const dest = path.join(getTmpDir(), projectType)
+    renderDirectory(path.join(TEMPLATES_DIR, 'frontend'), dest, {
+      ...PROJECT_CONTEXT,
+      ...projectLayout(projectType, 'django'),
+    })
+    return fs.readFileSync(path.join(dest, 'src', 'api', 'client.ts'), 'utf-8')
+  }
+
+  it('configures the generated client in a fullstack project', () => {
+    const client = renderClient('fullstack')
+
+    expect(client).toContain("import { client } from './generated/client.gen'")
+    expect(client).toContain('client.setConfig({ baseUrl: API_URL })')
+    expect(client).not.toContain('createClient')
+  })
+
+  it('creates its own client in a frontend-only project, which may have no generated one', () => {
+    const client = renderClient('frontend')
+
+    expect(client).toContain('export const client = createClient(')
+    expect(client).not.toContain("import { client } from './generated/client.gen'")
+  })
+})
+
+/**
  * hey-api derives its exported names from the OpenAPI operationId by
  * camelCasing it: `blog_posts_list` becomes `blogPostsList`. The hook
  * templates must interpolate the camelCase plural to match.

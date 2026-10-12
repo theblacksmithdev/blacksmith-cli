@@ -21,6 +21,7 @@ class OpenApiDocumentTest extends ApiTest {
         api.perform(get("/api/schema/"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.openapi", startsWith("3.0")))
+                .andExpect(jsonPath("$.info.description", startsWith("API documentation for ")))
                 .andExpect(jsonPath("$.components.schemas.RegisterRequest.properties", hasKey("first_name")))
                 .andExpect(jsonPath("$.paths['/api/auth/me/'].get.operationId").value("auth_me_retrieve"));
     }
@@ -31,6 +32,15 @@ class OpenApiDocumentTest extends ApiTest {
                 .andExpect(jsonPath("$.components.schemas.User.required",
                         containsInAnyOrder("id", "email", "first_name", "last_name")))
                 .andExpect(jsonPath("$.components.schemas.PatchedUserRequest", not(hasKey("required"))));
+    }
+
+    @Test
+    void servesTheDocumentAndSwaggerUiConfigWithAndWithoutTheSlash() throws Exception {
+        api.perform(get("/api/schema")).andExpect(status().isOk());
+        // Swagger UI loads its configuration from here; a double slash is rejected
+        api.perform(get("/api/schema/swagger-config"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value("/api/schema"));
     }
 
     @Test

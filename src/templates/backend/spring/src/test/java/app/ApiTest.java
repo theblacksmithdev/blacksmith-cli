@@ -9,10 +9,12 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.filter.UrlHandlerFilter;
 
 /**
  * Base for API tests: the whole application, driven through MockMvc without a
@@ -25,11 +27,18 @@ public abstract class ApiTest {
     @Autowired
     private WebApplicationContext context;
 
+    @Autowired
+    private FilterRegistrationBean<UrlHandlerFilter> schemaTrailingSlash;
+
     protected MockMvc api;
 
     @BeforeEach
     void setUpApi() {
-        api = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        // The servlet filters MockMvc does not pick up on its own, in the server's order
+        api = MockMvcBuilders.webAppContextSetup(context)
+                .addFilters(schemaTrailingSlash.getFilter())
+                .apply(springSecurity())
+                .build();
     }
 
     /** A fresh email, so no two tests share a user. */

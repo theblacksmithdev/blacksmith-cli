@@ -28,7 +28,9 @@ app:
 # The same documentation URLs as the Django, Express and FastAPI backends
 springdoc:
   api-docs:
-    path: /api/schema/
+    # Mapped without the slash, so springdoc's derived URLs (/api/schema/swagger-config,
+    # which Swagger UI loads) have no double slash; OpenApiConfig serves /api/schema/ too
+    path: /api/schema
     version: openapi_3_0
   swagger-ui:
     path: /api/docs/

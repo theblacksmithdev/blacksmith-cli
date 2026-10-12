@@ -38,6 +38,8 @@ public class SecurityConfig {
         "/api/docs/**",
         "/api/redoc/",
         "/error",
+        // Browsers ask for it on every docs page; answer 404, not 401
+        "/favicon.ico",
     };
 
     @Bean
