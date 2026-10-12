@@ -33,7 +33,7 @@ A top-level file that serves as the AI assistant's entry point. It contains:
 
 Detailed skill files organized by topic. Each skill is a focused document covering a specific area of development:
 
-- **Django patterns** — Models, views, serializers, URL configuration
+- **Backend patterns** — for the project's framework only: Django (models, serializers, viewsets), Express (modules, Prisma), or FastAPI (packages, SQLAlchemy, Alembic)
 - **React patterns** — Components, hooks, state management
 - **API patterns** — OpenAPI, React Query, data fetching
 - **UI patterns** — Component library, forms, authentication
@@ -45,10 +45,10 @@ When an AI coding assistant (like Claude) opens your project, it reads `CLAUDE.m
 
 1. **What the project is** — Stack, architecture, directory layout
 2. **How to develop** — Commands, workflows, conventions
-3. **What patterns to follow** — Code style, component patterns, Django conventions
+3. **What patterns to follow** — Code style, component patterns, backend conventions
 4. **What to avoid** — Anti-patterns, common mistakes
 
-The skill files provide deeper context when the AI is working on specific areas (e.g., creating a new Django model or building a React form).
+The skill files provide deeper context when the AI is working on specific areas (e.g., creating a new model or building a React form).
 
 ## Workflow with AI
 
@@ -62,7 +62,7 @@ blacksmith make:resource Invoice
 # 3. Ask the AI to implement your business logic
 # The AI now knows:
 # - Your project structure
-# - Django model patterns to follow
+# - The backend's model and migration patterns
 # - React component patterns to follow
 # - How the OpenAPI sync works
 # - Available UI components and hooks

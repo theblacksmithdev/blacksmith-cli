@@ -1,68 +1,8 @@
 import fs from 'node:fs'
-import { findProjectRoot, loadConfig, getBackendFramework, getProjectType, hasBackend } from '../utils/paths.js'
+import { findProjectRoot, loadConfig, getBackendFramework, getProjectType } from '../utils/paths.js'
 import { setupAiDev } from './ai-setup.js'
 import { log } from '../utils/logger.js'
-
-import { projectOverviewSkill } from '../skills/project-overview.js'
-import { djangoSkill } from '../skills/django.js'
-import { djangoRestAdvancedSkill } from '../skills/django-rest-advanced.js'
-import { apiDocumentationSkill } from '../skills/api-documentation.js'
-import { backendModularizationSkill } from '../skills/backend-modularization.js'
-import { expressSkill } from '../skills/express.js'
-import { expressPrismaSkill } from '../skills/express-prisma.js'
-import { expressOpenApiSkill } from '../skills/express-openapi.js'
-import { reactSkill } from '../skills/react.js'
-import { chakraUiReactSkill } from '../skills/chakra-ui-react.js'
-import { chakraUiFormsSkill } from '../skills/chakra-ui-forms.js'
-import { chakraUiAuthSkill } from '../skills/chakra-ui-auth.js'
-import { blacksmithHooksSkill } from '../skills/blacksmith-hooks.js'
-import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
-import { frontendModularizationSkill } from '../skills/frontend-modularization.js'
-import { frontendTestingSkill } from '../skills/frontend-testing.js'
-import { cleanCodeSkill } from '../skills/clean-code.js'
-import { aiGuidelinesSkill } from '../skills/ai-guidelines.js'
-import type { Skill } from '../skills/types.js'
-import type { BackendFramework } from '../utils/paths.js'
-
-const djangoBackendSkills: Skill[] = [
-  djangoSkill,
-  djangoRestAdvancedSkill,
-  apiDocumentationSkill,
-  backendModularizationSkill,
-]
-
-const expressBackendSkills: Skill[] = [
-  expressSkill,
-  expressPrismaSkill,
-  expressOpenApiSkill,
-]
-
-const sharedSkills: Skill[] = [
-  reactSkill,
-  frontendModularizationSkill,
-  chakraUiReactSkill,
-  chakraUiFormsSkill,
-  chakraUiAuthSkill,
-  blacksmithHooksSkill,
-  blacksmithCliSkill,
-  frontendTestingSkill,
-  cleanCodeSkill,
-  aiGuidelinesSkill,
-]
-
-/** Skills that apply to a project, given its backend framework. */
-function skillsFor(framework: BackendFramework, includeBackend: boolean): Skill[] {
-  return [
-    projectOverviewSkill,
-    ...(includeBackend
-      ? framework === 'express'
-        ? expressBackendSkills
-        : djangoBackendSkills
-      : []),
-    ...sharedSkills,
-  ]
-}
-
+import { selectSkills } from '../skills/selection.js'
 
 interface SetupOptions {
   chakraUiSkill?: boolean
@@ -105,7 +45,13 @@ export function listSkills() {
   const hasClaude = fs.existsSync(`${root}/CLAUDE.md`)
   const hasSkillsDir = fs.existsSync(`${root}/.claude/skills`)
 
-  const skills = skillsFor(getBackendFramework(root), hasBackend(root))
+  // Chakra UI skills are listed as expected; `setup:ai --no-chakra-ui-skill`
+  // leaves them unwritten, which shows as ✗ below.
+  const skills = selectSkills({
+    projectType: getProjectType(root),
+    backendFramework: getBackendFramework(root),
+    includeChakraUiSkill: true,
+  })
   const inlineSkills = skills.filter((s) => !s.name)
   const fileSkills = skills.filter((s) => s.name)
 

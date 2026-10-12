@@ -1,4 +1,5 @@
 import type { Skill, SkillContext } from './types.js'
+import { backendProfile } from './backend-profiles.js'
 
 export const projectOverviewSkill: Skill = {
   id: 'project-overview',
@@ -6,33 +7,7 @@ export const projectOverviewSkill: Skill = {
   description: 'Overview of the project structure, commands, and development workflow.',
 
   render(ctx: SkillContext): string {
-    const isExpress = ctx.backendFramework === 'express'
-    const backendName = isExpress ? 'Express' : 'Django'
-
-    const backendTree = isExpress
-      ? `│   ├── src/
-│   │   ├── config/       # env, Zod, OpenAPI registry
-│   │   ├── db/           # Prisma client
-│   │   ├── middleware/   # auth, validation, error handling
-│   │   ├── modules/      # one folder per resource
-│   │   └── utils/        # errors, pagination, tokens
-│   ├── prisma/           # schema.prisma and migrations
-│   └── package.json`
-      : `│   ├── apps/             # Django apps (one per resource)
-│   ├── config/           # Django settings, urls, wsgi/asgi
-│   ├── utils/            # Shared backend utilities
-│   ├── manage.py
-│   └── venv/             # Python virtual environment`
-
-    const backendOnlyTree = isExpress
-      ? `├── src/
-├── prisma/
-├── package.json`
-      : `├── apps/
-├── config/
-├── utils/
-├── manage.py
-├── venv/`
+    const backend = backendProfile(ctx)
 
     return `# ${ctx.projectName}
 
@@ -42,11 +17,11 @@ A web application scaffolded by **Blacksmith CLI**. Check \`blacksmith.config.js
 
 The structure depends on the project type configured in \`blacksmith.config.json\`:
 
-**Fullstack** (\`type: "fullstack"\`) — ${backendName} backend + React frontend in subdirectories:
+**Fullstack** (\`type: "fullstack"\`) — ${backend.name} backend + React frontend in subdirectories:
 \`\`\`
 ${ctx.projectName}/
-├── backend/              # ${backendName} project
-${backendTree}
+├── backend/              # ${backend.name} project
+${backend.tree}
 ├── frontend/             # React + Vite project
 │   ├── src/
 │   │   ├── api/          # API client and hooks
@@ -60,10 +35,10 @@ ${backendTree}
 └── CLAUDE.md
 \`\`\`
 
-**Backend-only** (\`type: "backend"\`) — ${backendName} project at root:
+**Backend-only** (\`type: "backend"\`) — ${backend.name} project at root:
 \`\`\`
 ${ctx.projectName}/
-${backendOnlyTree}
+${backend.rootTree}
 └── blacksmith.config.json
 \`\`\`
 
@@ -84,21 +59,21 @@ ${ctx.projectName}/
 
 | Command | Fullstack | Backend | Frontend |
 |---|---|---|---|
-| \`blacksmith dev\` | ${backendName} + Vite + sync | ${backendName} only | Vite only |
+| \`blacksmith dev\` | ${backend.name} + Vite + sync | ${backend.name} only | Vite only |
 | \`blacksmith sync\` | Regenerate frontend types | N/A | N/A |
 | \`blacksmith make:resource <Name>\` | Both ends | Backend only | Frontend only |
-| \`blacksmith build\` | Both | ${isExpress ? 'tsc build' : 'collectstatic'} | Vite build |
+| \`blacksmith build\` | Both | ${backend.build} | Vite build |
 | \`blacksmith eject\` | Remove Blacksmith | Remove Blacksmith | Remove Blacksmith |
 
 ## Development Workflow
 
 **Fullstack:**
-1. ${isExpress ? 'Define the Prisma model, Zod schemas, service, and routes' : 'Define models, serializers, and viewsets'} in the backend
+1. ${backend.defineFeature} in the backend
 2. Run \`blacksmith sync\` to generate TypeScript types and API client
 3. Build frontend features using the generated hooks and types
 
 **Backend-only:**
-1. ${isExpress ? 'Define the Prisma model, Zod schemas, service, and routes' : 'Define models, serializers, and viewsets'}
+1. ${backend.defineFeature}
 2. Run migrations and test endpoints
 
 **Frontend-only:**

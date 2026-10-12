@@ -1,11 +1,14 @@
 import type { Skill, SkillContext } from './types.js'
+import { backendProfile } from './backend-profiles.js'
 
 export const cleanCodeSkill: Skill = {
   id: 'clean-code',
   name: 'Clean Code Principles',
   description: 'Naming, functions, components, file organization, conditionals, error handling, and DRY guidelines.',
 
-  render(_ctx: SkillContext): string {
+  render(ctx: SkillContext): string {
+    const backend = backendProfile(ctx)
+
     return `## Clean Code Principles
 
 Write code that is easy to read, easy to change, and easy to delete. Treat clarity as a feature.
@@ -85,12 +88,7 @@ Write code that is easy to read, easy to change, and easy to delete. Treat clari
 - Premature abstraction is worse than duplication. Wait for patterns to emerge before creating shared utilities
 - Helper functions should be genuinely reusable. A "helper" called from one place is just indirection
 
-### Python-Specific (Django)
-- Use \`f-strings\` for string formatting, not \`.format()\` or \`%\`
-- Use list/dict/set comprehensions when they are clearer than loops — but don't nest them
-- Use \`dataclasses\` or typed dicts for structured data outside of Django models
-- Keep view methods thin — push business logic into model methods, serializer validation, or service functions
-- Use \`get_object_or_404\` instead of manual \`try/except DoesNotExist\`
+${backend.languageRules}
 
 ### TypeScript-Specific (React)
 - Use strict TypeScript. Don't use \`any\` — use \`unknown\` and narrow, or define a proper type

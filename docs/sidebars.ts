@@ -60,6 +60,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'stack/backend',
         'stack/backend-express',
+        'stack/backend-fastapi',
         'stack/frontend',
       ],
     },

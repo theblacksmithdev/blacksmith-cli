@@ -206,7 +206,7 @@ blacksmith setup:ai
 
 This creates:
 - **CLAUDE.md** — project overview, commands, workflow, and conventions
-- **.claude/skills/** — detailed skill files tailored to your project type (Django skills for backend, React skills for frontend, all for fullstack)
+- **.claude/skills/** — detailed skill files tailored to your project type (skills for the project's own backend framework, React skills for the frontend, both for fullstack)
 
 ## Configuration
 

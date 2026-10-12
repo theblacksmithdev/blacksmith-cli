@@ -33,10 +33,7 @@ A directory of detailed skill files organized by topic:
 |-------|-------------|
 | Core Rules | Fundamental project rules and conventions |
 | Project Overview | Architecture and directory structure |
-| Django Basics | Django model and view patterns |
-| Django Advanced | Complex Django patterns (signals, middleware, etc.) |
-| DRF (Django REST Framework) | Serializer and viewset patterns |
-| API Documentation | OpenAPI and drf-spectacular usage |
+| Backend skills | One set for the project's backend framework (below) |
 | React Basics | Component patterns and conventions |
 | React Query | Data fetching and mutation patterns |
 | Page Structure | Page layout and routing conventions |
@@ -48,6 +45,18 @@ A directory of detailed skill files organized by topic:
 | Programming Paradigms | Code style and architectural patterns |
 | Clean Code | Code quality guidelines |
 | AI Guidelines | How AI assistants should interact with the codebase |
+
+Backend skills are written only for the framework the project uses. Conventions for
+the wrong framework are worse than none, so a project never gets another backend's set:
+
+| Framework | Skills |
+|-----------|--------|
+| Django | `django`, `django-rest-advanced`, `api-documentation`, `backend-modularization` |
+| Express | `express`, `express-prisma`, `express-openapi` |
+| FastAPI | `fastapi`, `fastapi-sqlalchemy` (models and Alembic migrations) |
+
+The project overview, CLI, guidelines, clean-code and programming-paradigms skills
+describe the project's own backend too.
 
 ## When to Use
 
