@@ -21,7 +21,7 @@ blacksmith init my-app --type fullstack -b 8000 -f 5173 --theme-color blue --ai
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--type` | `fullstack` | Project type: `fullstack`, `backend`, or `frontend` |
-| `--backend` | `django` | Backend framework: `django`, `express`, or `fastapi` |
+| `--backend` | `django` | Backend framework: `django`, `express`, `fastapi`, or `spring` |
 | `--backend-port` | `8000` | Backend development server port |
 | `--frontend-port` | `5173` | Vite development server port |
 | `--theme-color` | `default` | UI theme preset (`default`, `blue`, `green`, `violet`, `red`, `neutral`) |
@@ -38,8 +38,8 @@ What starts depends on your project type:
 
 | Type | What runs |
 |------|-----------|
-| **Fullstack** | Backend (Django, Express, or FastAPI) + Vite + OpenAPI watcher (auto-syncs types on backend changes) |
-| **Backend** | Backend development server (Django, Express, or FastAPI) |
+| **Fullstack** | Backend (Django, Express, FastAPI, or Spring Boot) + Vite + OpenAPI watcher (auto-syncs types on backend changes) |
+| **Backend** | Backend development server (Django, Express, FastAPI, or Spring Boot) |
 | **Frontend** | Vite dev server with hot reloading |
 
 ## Create Your First Resource
@@ -71,6 +71,8 @@ What gets generated depends on your project type:
 | `src/pages/products/` | List and detail pages |
 
 For fullstack projects, it also syncs the OpenAPI schema to generate TypeScript types.
+
+`make:resource` does not support Spring Boot backends yet — on a Spring project it stops before writing anything.
 
 ## Customize Your Model
 
@@ -104,7 +106,7 @@ blacksmith sync
 blacksmith build
 ```
 
-This runs the appropriate build steps for your project type — Vite build for the frontend, and the backend's own step (`collectstatic` for Django, `tsc` for Express, nothing for FastAPI), or both for fullstack.
+This runs the appropriate build steps for your project type — Vite build for the frontend, and the backend's own step (`collectstatic` for Django, `tsc` for Express, nothing for FastAPI, `./gradlew bootJar` for Spring Boot), or both for fullstack.
 
 ## Next Steps
 

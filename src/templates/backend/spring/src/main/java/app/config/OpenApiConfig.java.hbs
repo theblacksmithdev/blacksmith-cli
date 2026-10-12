@@ -1,0 +1,41 @@
+package app.config;
+
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import io.swagger.v3.core.jackson.ModelResolver;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * The OpenAPI document, served at /api/schema/ and exported by
+ * {@code ./gradlew exportOpenApi}. The frontend client is generated from it.
+ */
+@Configuration
+public class OpenApiConfig {
+
+    @Bean
+    OpenAPI openApi() {
+        return new OpenAPI()
+                .info(new Info().title("{{projectName}} API").version("0.1.0"))
+                .components(new Components().addSecuritySchemes("jwtAuth", new SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")))
+                .addSecurityItem(new SecurityRequirement().addList("jwtAuth"));
+    }
+
+    /**
+     * Document properties in snake_case, as the API sends them
+     * ({@code spring.jackson.property-naming-strategy}). The document generator
+     * keeps its own JSON mapper, which does not read that setting.
+     */
+    @Bean
+    ModelResolver snakeCaseModelResolver() {
+        return new ModelResolver(Json.mapper().copy().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE));
+    }
+}

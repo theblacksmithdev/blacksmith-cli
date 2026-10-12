@@ -23,6 +23,7 @@ vi.mock('../../utils/template.js', () => templateMocks)
 const execMocks = vi.hoisted(() => ({
   exec: vi.fn(),
   execPython: vi.fn(),
+  execGradle: vi.fn(),
   execPip: vi.fn(),
   commandExists: vi.fn(),
 }))
@@ -293,8 +294,57 @@ describe('init', () => {
     ).rejects.toThrow('process.exit called')
 
     expect(log.error).toHaveBeenCalledWith(
-      'Invalid backend framework: "fastify". Must be one of: django, express, fastapi'
+      'Invalid backend framework: "fastify". Must be one of: django, express, fastapi, spring'
     )
+  })
+
+  describe('on a Spring Boot backend', () => {
+    /** A JDK of `version` on PATH, and templates that ship the Gradle wrapper. */
+    function setupSpringInit(version = '21.0.2') {
+      setupSuccessfulInit()
+      execMocks.execGradle.mockResolvedValue({})
+      execMocks.exec.mockImplementation(async (command: string) =>
+        command === 'java' ? { stderr: `openjdk version "${version}" 2024-01-16` } : {})
+      templateMocks.renderDirectory.mockImplementation((src: string, dest: string) => {
+        fs.mkdirSync(dest, { recursive: true })
+        if (src.includes('spring')) fs.writeFileSync(path.join(dest, 'gradlew'), '#!/bin/sh\n')
+      })
+    }
+
+    it('compiles through the Gradle wrapper and runs no migration step', async () => {
+      setupSpringInit()
+
+      await init('my-app', { type: 'backend', backend: 'spring', backendPort: '8000', ai: false })
+
+      const backendDir = path.join(fs.realpathSync(tmpDir), 'my-app')
+      expect(execMocks.execGradle).toHaveBeenCalledWith(['classes', '--console=plain'], backendDir, true)
+      // The wrapper is made executable whatever the copied template kept
+      expect(fs.statSync(path.join(backendDir, 'gradlew')).mode & 0o111).not.toBe(0)
+      // Flyway migrates as the application starts; no Python or Node steps run
+      expect(execMocks.execPython).not.toHaveBeenCalled()
+      expect(execMocks.execPip).not.toHaveBeenCalled()
+      expect(execMocks.exec).not.toHaveBeenCalledWith('npm', expect.anything(), expect.anything())
+    })
+
+    it('refuses a JDK older than 17', async () => {
+      setupSpringInit('11.0.20')
+
+      await expect(
+        init('my-app', { type: 'backend', backend: 'spring', backendPort: '8000', ai: false })
+      ).rejects.toThrow('process.exit called')
+    })
+
+    it('needs Java and Node, but never Python, for a fullstack project', async () => {
+      setupSpringInit()
+
+      await init('my-app', {
+        type: 'fullstack', backend: 'spring', backendPort: '8000', frontendPort: '5173', ai: false,
+      })
+
+      const checked = execMocks.commandExists.mock.calls.map((c: any[]) => c[0])
+      expect(checked).toEqual(['node', 'npm'])
+      expect(execMocks.exec).toHaveBeenCalledWith('java', ['-version'], { silent: true })
+    })
   })
 
   it('should record fastapi as the backend framework in the config', async () => {

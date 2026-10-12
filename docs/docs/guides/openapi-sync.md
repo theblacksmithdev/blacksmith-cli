@@ -12,8 +12,8 @@ OpenAPI is the bridge between your backend and React frontend. Blacksmith uses i
 
 :::note Backend frameworks
 The pipeline is the same whichever backend you chose: Django exports the schema with
-`drf-spectacular`, Express with its OpenAPI registry, and FastAPI serves its built-in
-schema — all at `/api/schema/`.
+`drf-spectacular`, Express with its OpenAPI registry, FastAPI serves its built-in
+schema, and Spring Boot uses `springdoc-openapi` — all at `/api/schema/`.
 :::
 
 ## How It Works
@@ -24,7 +24,7 @@ Django Serializers → OpenAPI Schema → TypeScript Types + API Client + React 
 
 ### 1. Schema Generation
 
-When you run `blacksmith sync` (or it runs automatically during `blacksmith dev`), Blacksmith uses `drf-spectacular` to introspect your Django REST Framework serializers and viewsets and generate an OpenAPI 3.0 schema. Express and FastAPI produce the same schema shape from their own definitions.
+When you run `blacksmith sync` (or it runs automatically during `blacksmith dev`), Blacksmith uses `drf-spectacular` to introspect your Django REST Framework serializers and viewsets and generate an OpenAPI 3.0 schema. Express, FastAPI and Spring Boot produce the same schema shape from their own definitions.
 
 ### 2. Code Generation
 
@@ -69,6 +69,11 @@ When running `blacksmith dev`, a file watcher monitors all `.py` files in the `b
 5. Vite picks up the changed files via HMR
 
 This creates a seamless workflow where backend changes are immediately reflected in frontend types.
+
+On a Spring Boot backend the watcher follows `.java` files instead and waits about 8 seconds
+after the last change, so the continuous compile and the DevTools restart finish first. The
+schema is exported with `./gradlew exportOpenApi`, which starts a JVM, so each sync takes a few
+seconds.
 
 ## Manual Sync
 

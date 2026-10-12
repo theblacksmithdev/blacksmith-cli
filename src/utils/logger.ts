@@ -118,18 +118,20 @@ export function printNextSteps(
   console.log(`  ${chalk.cyan('blacksmith dev')}        ${chalk.dim('# Start development server' + (projectType === 'fullstack' ? 's' : ''))}`)
   console.log()
 
-  if (backendPort !== undefined) {
-    const toolchain = BACKEND_TOOLCHAINS[backendFramework]
-    const label = `${toolchain.label}:`.padEnd(8)
-    console.log(chalk.dim(`  ${label}  http://localhost:${backendPort}`))
-    console.log(chalk.dim(`  Swagger:  http://localhost:${backendPort}/api/docs/`))
-    if (toolchain.redoc) {
-      console.log(chalk.dim(`  ReDoc:    http://localhost:${backendPort}/api/redoc/`))
-    }
+  // One column for every URL, as wide as the longest label shown
+  const toolchain = backendPort !== undefined ? BACKEND_TOOLCHAINS[backendFramework] : null
+  const width = Math.max(8, (toolchain?.label.length ?? 0) + 1)
+  const url = (label: string, address: string) =>
+    console.log(chalk.dim(`  ${`${label}:`.padEnd(width)}  ${address}`))
+
+  if (toolchain) {
+    url(toolchain.label, `http://localhost:${backendPort}`)
+    url('Swagger', `http://localhost:${backendPort}/api/docs/`)
+    if (toolchain.redoc) url('ReDoc', `http://localhost:${backendPort}/api/redoc/`)
   }
 
   if (frontendPort !== undefined) {
-    console.log(chalk.dim(`  React:    http://localhost:${frontendPort}`))
+    url('React', `http://localhost:${frontendPort}`)
   }
 
   log.blank()

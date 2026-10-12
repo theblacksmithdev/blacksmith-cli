@@ -1,7 +1,7 @@
 import type { BackendFramework } from '../utils/paths.js'
 import type { SkillContext } from './types.js'
 import { BACKEND_TOOLCHAINS } from '../utils/backend-toolchains.js'
-import { DJANGO_PARADIGMS, EXPRESS_PARADIGMS, FASTAPI_PARADIGMS } from './backend-paradigms.js'
+import { DJANGO_PARADIGMS, EXPRESS_PARADIGMS, FASTAPI_PARADIGMS, SPRING_PARADIGMS } from './backend-paradigms.js'
 
 /**
  * What the framework-neutral skills (project overview, CLI, guidelines) say
@@ -10,8 +10,6 @@ import { DJANGO_PARADIGMS, EXPRESS_PARADIGMS, FASTAPI_PARADIGMS } from './backen
  */
 export interface BackendProfile {
   name: string
-  /** Source file extension the dev sync watcher reacts to. */
-  sourceExt: string
   /** The backend's subtree inside `backend/` of a fullstack project. */
   tree: string
   /** The project root of a backend-only project. */
@@ -39,7 +37,6 @@ export interface BackendProfile {
 export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
   django: {
     name: BACKEND_TOOLCHAINS.django.label,
-    sourceExt: '.py',
     tree: `│   ├── apps/             # Django apps (one per resource)
 │   ├── config/           # Django settings, urls, wsgi/asgi
 │   ├── utils/            # Shared backend utilities
@@ -69,7 +66,6 @@ export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
   },
   express: {
     name: BACKEND_TOOLCHAINS.express.label,
-    sourceExt: '.ts',
     tree: `│   ├── src/
 │   │   ├── config/       # env, Zod, OpenAPI registry
 │   │   ├── db/           # Prisma client
@@ -99,7 +95,6 @@ export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
   },
   fastapi: {
     name: BACKEND_TOOLCHAINS.fastapi.label,
-    sourceExt: '.py',
     tree: `│   ├── app/
 │   │   ├── main.py       # FastAPI app; routers mounted here
 │   │   ├── db.py         # engine, session, Base, User
@@ -128,6 +123,37 @@ export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
 - Type-hint every function signature; FastAPI validates and documents from them
 - Keep routers thin — queries and writes belong in the resource's \`service.py\`
 - Use SQLAlchemy 2.0 \`select()\`, not the legacy \`session.query()\` API`,
+  },
+  spring: {
+    name: BACKEND_TOOLCHAINS.spring.label,
+    tree: `│   ├── src/main/java/app/
+│   │   ├── auth/         # auth endpoints, tokens, request filter
+│   │   ├── config/       # security, OpenAPI, settings
+│   │   ├── errors/       # DRF-shaped error bodies
+│   │   └── users/        # User entity and repository
+│   ├── src/main/resources/
+│   │   ├── application.yml
+│   │   └── db/migration/ # Flyway migrations
+│   ├── src/test/java/app/
+│   └── build.gradle`,
+    rootTree: `├── src/main/java/app/
+├── src/main/resources/
+├── src/test/java/app/
+├── build.gradle`,
+    build: 'bootJar',
+    defineFeature: 'Define the JPA entity, Flyway migration, request and response records, service, and controller',
+    resourceSteps: `- Not available for Spring Boot yet: write the package by hand under \`src/main/java/app/\``,
+    schemaExport: 'gradlew exportOpenApi',
+    codeStyle: 'Java 17. Constructor injection, records for request and response types, thin controllers, logic and transactions in services',
+    toolchain: 'Gradle wrapper: run tasks with `blacksmith backend <task>` (e.g. `blacksmith backend test`), which runs `./gradlew <task>` in the backend directory',
+    paradigmSummary: '**Backend (Spring Boot/Java): layered OOP.** Injected classes for the layers, immutable records for the data between them.',
+    paradigms: SPRING_PARADIGMS,
+    languageRules: `### Java-Specific (Spring Boot)
+- Constructor injection with \`final\` fields; never field \`@Autowired\`
+- \`record\`s for request and response types; entities stay inside the service layer
+- \`Optional\` instead of \`null\` for "may be absent", unwrapped at the service's edge
+- \`var\` only where the type is obvious from the right-hand side
+- Change the schema with a new \`V<n>__description.sql\` migration; Hibernate only validates it`,
   },
 }
 

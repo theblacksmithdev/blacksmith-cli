@@ -15,6 +15,12 @@ the backend directory is deployed as it is. On a fullstack project, `blacksmith 
 builds the frontend only.
 :::
 
+:::note Spring Boot backends
+The backend step runs `./gradlew bootJar` and emits a single runnable jar at
+`build/libs/app.jar` (start it with `java -jar build/libs/app.jar`). There is no
+`collectstatic` step.
+:::
+
 
 Build the project for production deployment.
 

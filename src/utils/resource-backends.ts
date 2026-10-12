@@ -269,4 +269,13 @@ export const RESOURCE_BACKENDS: Record<BackendFramework, ResourceBackend> = {
     existsMessage: (names) => `Backend package "app/${names.snakes}" already exists.`,
     generate: generateFastapiResource,
   },
+  spring: {
+    dir: (backendDir, names) => path.join(backendDir, 'src', 'main', 'java', 'app', names.snakes),
+    existsMessage: (names) => `Backend package "app.${names.snakes}" already exists.`,
+    generate: async () => {
+      log.error('make:resource does not support Spring Boot backends yet.')
+      log.step('Add the package by hand under src/main/java/app/ for now.')
+      process.exit(1)
+    },
+  },
 }

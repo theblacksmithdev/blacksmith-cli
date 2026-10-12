@@ -27,13 +27,16 @@ import { cleanCodeSkill } from './clean-code.js'
 import { aiGuidelinesSkill } from './ai-guidelines.js'
 
 /**
- * Backend conventions per framework. The three have entirely separate
+ * Backend conventions per framework. They have entirely separate
  * conventions, so shipping the wrong set is worse than shipping none.
  */
 const BACKEND_SKILLS: Record<BackendFramework, Skill[]> = {
   django: [djangoSkill, djangoRestAdvancedSkill, apiDocumentationSkill, backendModularizationSkill],
   express: [expressSkill, expressPrismaSkill, expressOpenApiSkill],
   fastapi: [fastapiSkill, fastapiSqlalchemySkill],
+  // Spring conventions skills arrive with Spring's make:resource; until then the
+  // shared skills carry the Spring profile
+  spring: [],
 }
 
 const CHAKRA_UI_SKILLS: Skill[] = [

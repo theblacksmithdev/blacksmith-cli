@@ -10,6 +10,12 @@ every backend; for FastAPI, see [On a FastAPI backend](#on-a-fastapi-backend) be
 for the Express layout see the [make:resource command](/docs/commands/make-resource).
 :::
 
+:::warning Spring Boot backends
+`make:resource` does not support Spring Boot backends yet — it exits before writing
+anything. Support is planned next. Until then, add the entity, repository, controller and a
+Flyway migration by hand; see [Spring Boot Backend](../stack/backend-spring.md).
+:::
+
 The `blacksmith make:resource` command is the primary way to add new features to your project. This guide walks through the full workflow of creating and customizing a resource.
 
 ## Step 1: Generate the Resource

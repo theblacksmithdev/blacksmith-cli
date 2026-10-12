@@ -60,6 +60,13 @@ export async function execPython(args: string[], cwd: string, silent = false) {
 }
 
 /**
+ * Run the project's Gradle wrapper
+ */
+export async function execGradle(args: string[], cwd: string, silent = false) {
+  return exec(`${cwd}/gradlew`, args, { cwd, silent })
+}
+
+/**
  * Run pip using the project's virtual environment
  */
 export async function execPip(args: string[], cwd: string, silent = false) {

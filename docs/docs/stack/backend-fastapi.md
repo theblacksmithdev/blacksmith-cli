@@ -9,7 +9,8 @@ like Django, but small and function-first: an `app/` package you own, Pydantic f
 validation and the schema, SQLAlchemy for the database, and Alembic for migrations. It
 speaks exactly the same HTTP contract as the Django and Express backends, so the React
 frontend is identical whichever you pick. See
-[Choosing a Backend](../guides/choosing-a-backend.md) for how the three compare.
+[Choosing a Backend](../guides/choosing-a-backend.md) for how the backends compare, and
+[Spring Boot Backend](./backend-spring.md) for the Java option.
 
 ## Stack
 

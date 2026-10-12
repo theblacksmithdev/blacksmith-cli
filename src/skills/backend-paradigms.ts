@@ -279,3 +279,36 @@ and Pydantic schemas.
 | Returning ORM rows and relying on \`from_attributes\` everywhere | One \`serialize()\` per resource |
 | Mutable default arguments (\`def f(items=[])\`) | \`None\` default, then \`items = items or []\` |
 `
+
+export const SPRING_PARADIGMS = `## Backend — Layered OOP with Immutable Data
+
+Spring is object-oriented and built on dependency injection. Use classes for the
+layers Spring wires together, and immutable records for the data that moves
+between them.
+
+### Rules
+
+- **One responsibility per layer.** The controller adapts HTTP, the service holds
+  the logic and the transaction, the repository queries. A controller never
+  touches a repository
+- **Constructor injection only.** \`final\` fields set in the constructor; no
+  \`@Autowired\` on fields, so every class can be built in a test without Spring
+- **Records for data crossing a layer.** Request and response types are
+  \`record\`s, validated with Bean Validation (\`@NotBlank\`, \`@Email\`). Entities
+  never leave the service as a response body; map them with a \`from(entity)\`
+  factory on the response record
+- **\`@Transactional\` on service methods that write**, never on controllers
+- **Throw \`ApiException\`** for expected failures; never return \`null\` to mean
+  "not found" — use \`Optional\` inside the service and throw at its edge
+- **Streams and \`Optional\` for transforms**, not mutable accumulators
+
+### Anti-Patterns
+
+| Anti-pattern | Correct approach |
+|---|---|
+| \`@Autowired private PostRepository posts\` | A \`final\` field set by the constructor |
+| Returning an \`@Entity\` from a controller | Map it to a response \`record\` |
+| Business rules in a controller | Move them to the service |
+| \`try/catch\` in a controller to build an error body | Throw \`ApiException\`; \`ApiExceptionHandler\` answers |
+| \`spring.jpa.hibernate.ddl-auto=update\` | A new Flyway migration in \`db/migration/\` |
+`

@@ -55,6 +55,18 @@ describe('CI workflow template', () => {
     expect(yaml).not.toContain('manage.py spectacular')
   })
 
+  it('runs JUnit and exports the schema through Gradle for a Spring project', () => {
+    const yaml = render(getTmpDir(), 'fullstack', 'spring')
+    const workflow = YAML.parse(yaml)
+
+    expect(workflow.jobs.backend.name).toBe('Backend (JUnit)')
+    expect(yaml).toContain('run: ./gradlew test')
+    expect(yaml).toContain('run: ./gradlew exportOpenApi -Pout=../frontend/_schema.json')
+    expect(yaml).toContain("java-version: '17'")
+    expect(yaml).not.toContain('pytest')
+    expect(yaml).not.toMatch(/(?<!\$)\{\{\s*[#/]?[a-zA-Z_][\w.]*\s*\}\}/)
+  })
+
   it('never overwrites an existing workflow', () => {
     const dir = getTmpDir()
     render(dir, 'fullstack')

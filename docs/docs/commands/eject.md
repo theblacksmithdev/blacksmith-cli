@@ -6,10 +6,10 @@ sidebar_position: 6
 
 Remove Blacksmith CLI dependency and convert to a standalone project. The post-eject instructions are tailored to your project type (fullstack, backend-only, or frontend-only).
 
-:::note Express and FastAPI backends
+:::note Express, FastAPI and Spring Boot backends
 Ejection removes the config file the same way. The post-eject instructions name your
 backend and how to start it: `npm run dev` for Express, `./venv/bin/uvicorn app.main:app --reload`
-for FastAPI.
+for FastAPI, `./gradlew bootRun` for Spring Boot.
 :::
 
 ## Usage

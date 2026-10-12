@@ -81,12 +81,9 @@ export async function dev() {
 
   if (projectHasBackend && backendPort) {
     const backendDir = getBackendDir(root)
-    processes.push({
-      ...toolchain.devServer(backendPort),
-      name: backendFramework,
-      cwd: backendDir,
-      prefixColor: 'green',
-    })
+    for (const devProcess of toolchain.devProcesses(backendPort)) {
+      processes.push({ ...devProcess, cwd: backendDir, prefixColor: 'green' })
+    }
   }
 
   if (projectHasFrontend && frontendPort) {
@@ -108,7 +105,7 @@ export async function dev() {
     // Source extension and the paths worth ignoring differ per framework, but
     // the sync itself does not: openapi-ts reads /api/schema/ off whichever
     // dev server is running.
-    const { ext: watchExt, ignoredPrefixes, ignoredFragments } = toolchain.watch
+    const { ext: watchExt, ignoredPrefixes, ignoredFragments, settleMs } = toolchain.watch
 
     const watcherCode = [
       `const{watch}=require("fs"),{exec}=require("child_process");`,
@@ -126,7 +123,7 @@ export async function dev() {
       `if(err)console.error("Sync failed:",se||err.message);`,
       `else console.log("OpenAPI types synced");`,
       `})`,
-      `},2000)});`,
+      `},${settleMs})});`,
       `console.log("Watching for ${watchExt} changes...");`,
     ].join('')
 

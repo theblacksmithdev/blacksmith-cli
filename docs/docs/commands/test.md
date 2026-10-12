@@ -16,6 +16,14 @@ the Alembic migrations, so no database setup is needed before the first run.
 `--coverage` works the same.
 :::
 
+:::note Spring Boot backends
+Backend tests run with `./gradlew test` (JUnit 5). The suite builds an in-memory H2
+database from the Flyway migrations, and Hibernate's `ddl-auto: validate` makes the app
+fail to start — and `MigrationsTest` fail — when an entity changes without a migration.
+`--watch` runs `./gradlew test --continuous`. `--coverage` is not set up for Spring yet: it
+prints a warning and runs the tests without coverage.
+:::
+
 
 Run the project's test suites — pytest on the backend, Vitest on the frontend.
 

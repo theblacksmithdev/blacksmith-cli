@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { exec, execPython } from './exec.js'
+import { exec, execGradle, execPython } from './exec.js'
 import { log } from './logger.js'
 
 export interface TestOptions {
@@ -59,6 +59,25 @@ export async function runNpmTests(
   log.info(`Running ${side} tests (vitest)...`)
   try {
     await exec('npm', ['run', npmTestScript(options)], { cwd: dir })
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Run a Spring backend's JUnit suite through the Gradle wrapper. The suite
+ * builds an in-memory database from the Flyway migrations, so nothing needs
+ * setting up first.
+ */
+export async function runGradleTests(backendDir: string, options: TestOptions): Promise<boolean> {
+  if (options.coverage) {
+    log.warn('--coverage is not set up for Spring backends yet; running the tests without it.')
+  }
+
+  log.info('Running backend tests (JUnit)...')
+  try {
+    await execGradle(options.watch ? ['test', '--continuous'] : ['test'], backendDir)
     return true
   } catch {
     return false

@@ -61,6 +61,7 @@ const sidebars: SidebarsConfig = {
         'stack/backend',
         'stack/backend-express',
         'stack/backend-fastapi',
+        'stack/backend-spring',
         'stack/frontend',
       ],
     },

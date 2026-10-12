@@ -6,7 +6,7 @@ The parity contract and the open decisions for the fourth backend, Spring Boot. 
 
 It is written before the sprint opens on purpose. Several of the decisions below change the size of the work rather than the shape of a ticket, and settling them after the board exists means rewriting tickets.
 
-This revision adds a recommendation to each open decision, a sixth decision the first draft missed (the development database), the parity traps that Spring's defaults set, and a ticket 0 that has already landed in the CLI. The recommendations are proposals. The team still makes the calls.
+The second revision added a recommendation to each open decision, a sixth decision the first draft missed (the development database), the parity traps that Spring's defaults set, and a ticket 0 that landed in the CLI. This third revision records that the scaffold was built on those recommendations (ticket 1), with what building it measured and what it left for the `make:resource` ticket.
 
 ## What Spring Boot is here
 
@@ -51,19 +51,21 @@ Two packaging details to carry into the template ticket. `gradle/wrapper/gradle-
 
 ## Decisions
 
-### 1. Java or Kotlin. Recommended: Java
+All six were taken as recommended. Ticket 1 is built on them.
+
+### 1. Java or Kotlin. Taken: Java
 
 Every template file and both AI skills depend on the answer. Kotlin is the more common choice for new Spring work and generates less ceremony. Java has the larger talent pool, and a scaffolder's audience is part of the product.
 
 The recommendation follows the audience argument. Two further points support it. Kotlin with JPA needs compiler plugins (`kotlin-jpa`, `allopen`) before entities behave, which is configuration a newcomer cannot debug and a common place for AI-written code to go wrong. Java 17+ records remove most of the ceremony from the request and response types, which are the bulk of a resource.
 
-### 2. Gradle or Maven. Recommended: Gradle with the checked-in wrapper
+### 2. Gradle or Maven. Taken: Gradle with the checked-in wrapper
 
 Gradle with the wrapper keeps the JDK as the only prerequisite. Maven would add a second install check to the CLI's prerequisite list.
 
 "Only the JDK" needs two qualifications in the CLI and the docs. Spring Boot 3 needs JDK 17 or newer, so the prerequisite check reads the version rather than testing that `java` exists. The wrapper also downloads Gradle on its first run, so the first `init` needs a network connection and is noticeably slower than later runs.
 
-### 3. Flyway or Liquibase. Recommended: Flyway
+### 3. Flyway or Liquibase. Taken: Flyway
 
 The migration tool owns the schema. Nothing creates tables at startup, and `make:resource` runs a real migration. The FastAPI phase paid this price once already with Alembic and the same discipline applies here rather than being rediscovered.
 
@@ -74,7 +76,7 @@ Neither tool generates a migration from the entities the way Alembic's autogener
 
 The missing-migration check still holds. The test profile runs Flyway and then Hibernate with `ddl-auto=validate`, which fails at startup when an entity and the migrated schema disagree. Flyway is preferred because its migrations are plain SQL files a reader can review. Liquibase's diff plugin is the only route to generated changelogs, and it is brittle enough that it would be a liability in a scaffold.
 
-### 4. The dev loop promise. Recommended: build a real dev loop, and promise seconds rather than instant
+### 4. The dev loop promise. Taken: build a real dev loop, and promise seconds rather than instant
 
 On the existing three, saving a file brings the server back in a second or two. A JVM backend reloads behind a build daemon and a cold start is measured in tens of seconds. Either the phase builds Spring a real dev loop or it documents a restart and agrees that Spring users get a slower experience than everyone else.
 
@@ -84,7 +86,7 @@ The promise to users is then: a slow first start, then a few seconds after each 
 
 The cold-start open question has the same answer. `dev` prints that the backend is starting and polls the port until it answers, so forty seconds of compilation never reads as a hang. The schema-export cost from the parity section lands here too. The sync watcher re-exports after each restart rather than on each save, so a burst of edits costs one export.
 
-### 5. The CI job. Recommended: a dedicated Spring job, run in parallel
+### 5. The CI job. Taken: a dedicated Spring job, run in parallel
 
 The first draft assumed an existing per-framework backend job. There is none. The CLI's CI today runs typecheck, vitest and the build on Node 20 and 22, and checks the npm tarball's contents. Generated backends are exercised only by unit tests that mock the toolchain, and by manual end-to-end runs.
 
@@ -97,7 +99,7 @@ So the decision is whether Spring gets the first real-backend job. It should, be
 
 Run in parallel with the existing jobs, it adds its own duration to the pipeline's wall time rather than adding to the sum. With a warm Gradle cache that should be a few minutes. The same job shape can later cover the other three, which closes a gap that exists today.
 
-### 6. The development and test database. Recommended: H2 in PostgreSQL mode
+### 6. The development and test database. Taken: H2 in PostgreSQL mode
 
 This was missing from the first draft. The other three backends develop and test on SQLite and deploy on Postgres. SQLite with Hibernate needs a community dialect. Testcontainers would add Docker as a second prerequisite, which breaks decision 2's "JDK only". H2 in PostgreSQL compatibility mode keeps the JDK as the only prerequisite. Migrations are written in the Postgres-compatible subset of SQL, so the same files run in development, in tests and in production.
 
@@ -130,9 +132,48 @@ The same change fixed two FastAPI gaps: `blacksmith build` no longer runs `colle
 
 The Handlebars templates still branch on `isDjango`, `isExpress` and `isFastapi`. That is content per framework, not a decision, and a Spring template set brings its own content.
 
+## Ticket 1: the scaffold (landed)
+
+`blacksmith init --backend spring` generates a Spring Boot 4.1 project on Java 17, Gradle 9.8 and springdoc 3.1. It meets the parity contract for everything the scaffold has, which is auth:
+
+- DRF error bodies, including "Not found." for unknown routes and non-numeric ids.
+- The `/api/auth/...` routes and token shape.
+- The three documentation URLs.
+- An offline export through `./gradlew exportOpenApi`.
+
+Every CLI command works on it except `make:resource`, which refuses with a clear message before writing anything.
+
+What building it measured, on a machine with Gradle and the dependencies already cached:
+
+| | Time |
+|---|---|
+| `init`, fullstack | about 40 seconds |
+| `dev`, backend answering | about 7 seconds |
+| Save to change live | about 4 seconds (the restart itself takes under half a second) |
+| Save to frontend client regenerated | about 9 seconds |
+| `exportOpenApi` | about 5 seconds |
+
+A first `init` on a clean machine adds the Gradle download, around 130 MB, plus the dependencies.
+
+Traps from the parity list that the scaffold met, and how:
+
+- springdoc does not read Jackson's naming strategy. With Spring Boot 4 the API is on Jackson 3 and springdoc's model resolver is on Jackson 2. `OpenApiConfig` registers a snake_case `ModelResolver`, and `OpenApiDocumentTest` pins the result.
+- Error responses are kept out of the document with `springdoc.override-with-generic-response: false`, and a test pins that too.
+- The 400-versus-404 trap for non-numeric ids is handled in `ApiExceptionHandler`.
+
+Left for the `make:resource` ticket:
+
+- **Required response fields.** springdoc marks a property required only when it carries a constraint. drf-spectacular marks every read field required. The generated TypeScript types make the difference visible: `post.title` would be `string | undefined`. Resource response records need a rule, either per field (`@Schema(requiredMode = REQUIRED)`) or as a schema customizer.
+- **Pagination.** DRF's envelope, and a component name per resource (`PaginatedPostList`), which a generic `PageResponse<T>` will not produce.
+- **PATCH absent versus null** (`JsonNullable`).
+- **The Spring conventions skill**, now that the code it describes exists.
+- **`--coverage`.** JaCoCo is not set up yet, so `blacksmith test --coverage` warns and runs the tests without it.
+
+Found along the way, and not Spring's: the generated `vite.config.ts` hard-codes port 5173, so the frontend port chosen at `init` is ignored on every backend.
+
 ## Open questions
 
-- Does the frontend need anything Spring-specific at all once parity is met, or is it byte-identical to the FastAPI one? Only the parity work answers this. The traps listed above are the likely places for a difference to appear.
+- Does the frontend need anything Spring-specific at all once parity is met, or is it byte-identical to the FastAPI one? For the scaffold, the answer is no: the generated frontend typechecks, builds and passes its tests unchanged. `make:resource` answers it for resources.
 - Studio's runner starts a Python virtual environment and labels the backend Django in its UI. Recommended answer: this belongs to the Studio stream (`studio-backend-inventory.md`), not to this phase. That stream's first ticket, "run any backend", should be designed for a JVM runner from the start rather than as a venv runner with branches.
 
 ## Out of scope

@@ -12,6 +12,7 @@ project's backend framework:
 | Django | `manage.py <args>` inside the virtual environment |
 | Express | `npm <args>` in the backend directory |
 | FastAPI | `python -m <args>` inside the virtual environment |
+| Spring Boot | `./gradlew <args>` in the backend directory |
 
 **FastAPI examples:**
 
@@ -30,6 +31,17 @@ blacksmith backend run openapi            # regenerate openapi.json
 blacksmith backend exec prisma studio     # browse the database
 blacksmith backend install zod            # add a dependency
 ```
+
+**Spring Boot examples:**
+
+```bash
+blacksmith backend test                   # ./gradlew test
+blacksmith backend dependencies           # list the dependency tree
+blacksmith backend bootJar                # build build/libs/app.jar
+```
+
+Spring Boot projects have no migration command to run: add a Flyway file under
+`src/main/resources/db/migration/` and it is applied when the application starts.
 
 Express projects have no management commands and no admin site, so there is no
 `createsuperuser` equivalent — create the first user through `POST /api/auth/register/`

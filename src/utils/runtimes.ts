@@ -1,20 +1,21 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { exec, execPip, execSilent, commandExists } from './exec.js'
+import { exec, execGradle, execPip, execSilent, commandExists } from './exec.js'
 import { log } from './logger.js'
 import type { Step } from './steps.js'
 import { CREATE_VENV, ensurePython, ensureVenv } from './python-setup.js'
-import { runNpmTests, runPytest } from './test-runners.js'
+import { runGradleTests, runNpmTests, runPytest } from './test-runners.js'
+import { MINIMUM_JAVA_VERSION, supportedJavaVersion } from './java.js'
 import type { TestOptions } from './test-runners.js'
 
 /** The language toolchain a backend runs on. The frontend always runs on Node. */
-export type Runtime = 'python' | 'node'
+export type Runtime = 'python' | 'node' | 'jvm'
 
 export interface RuntimeSupport {
   /** Shown in "Prerequisites OK (...)". */
   label: string
-  /** Executables that must be on PATH. */
-  commands: string[]
+  /** Whether the runtime is on PATH, at a version the backend can use. */
+  isInstalled(): Promise<boolean>
   /** Shown when one of them is missing. */
   missing: string
   /** The directory dependencies are installed into, which must be gitignored. */
@@ -37,6 +38,20 @@ const PYTHON_DEPENDENCIES: Step = {
   run: (dir) => execPip(['install', '-r', 'requirements.txt'], dir, true),
 }
 
+const JAVA_MISSING = `Java ${MINIMUM_JAVA_VERSION} or newer is required but not found. Install a JDK from https://adoptium.net`
+
+/** Resolving dependencies and compiling are one Gradle step; the first run also downloads Gradle. */
+const GRADLE_CLASSES: Step = {
+  pending: 'Downloading Gradle and compiling the backend (the first run takes a few minutes)...',
+  done: 'Backend compiled',
+  failed: 'Failed to compile the backend',
+  run: async (dir) => {
+    // The wrapper script must be executable, and a copied template may not keep the bit
+    fs.chmodSync(path.join(dir, 'gradlew'), 0o755)
+    await execGradle(['classes', '--console=plain'], dir, true)
+  },
+}
+
 const NODE_DEPENDENCIES: Step = {
   pending: 'Installing backend dependencies...',
   done: 'Backend dependencies installed',
@@ -47,7 +62,7 @@ const NODE_DEPENDENCIES: Step = {
 export const RUNTIMES: Record<Runtime, RuntimeSupport> = {
   python: {
     label: 'Python 3',
-    commands: ['python3'],
+    isInstalled: () => commandExists('python3'),
     missing: 'Python 3 is required but not found. Install it from https://python.org',
     dependencyDir: 'venv',
     install: [CREATE_VENV, PYTHON_DEPENDENCIES],
@@ -70,7 +85,7 @@ export const RUNTIMES: Record<Runtime, RuntimeSupport> = {
   },
   node: {
     label: 'Node.js, npm',
-    commands: ['node', 'npm'],
+    isInstalled: async () => (await commandExists('node')) && (await commandExists('npm')),
     missing: 'Node.js and npm are required but not found. Install from https://nodejs.org',
     dependencyDir: 'node_modules',
     install: [NODE_DEPENDENCIES],
@@ -91,15 +106,34 @@ export const RUNTIMES: Record<Runtime, RuntimeSupport> = {
     },
     runTests: (dir, options) => runNpmTests(dir, options, 'backend'),
   },
+  jvm: {
+    label: `Java ${MINIMUM_JAVA_VERSION}+`,
+    isInstalled: async () => (await supportedJavaVersion()) !== null,
+    missing: JAVA_MISSING,
+    dependencyDir: 'build',
+    install: [GRADLE_CLASSES],
+    installDependencies: GRADLE_CLASSES,
+    notReady: (dir) =>
+      fs.existsSync(path.join(dir, 'gradlew'))
+        ? null
+        : 'gradlew not found in backend directory.',
+    prepare: async () => {
+      const version = await supportedJavaVersion()
+      if (version === null) {
+        log.error(JAVA_MISSING)
+        process.exit(1)
+      }
+      log.success('Java is installed')
+      log.step(`Version: ${version}`)
+    },
+    runTests: runGradleTests,
+  },
 }
 
-/** The first runtime whose executables are not all on PATH, or null. */
+/** The first runtime that is not installed, or null. */
 export async function findMissingRuntime(runtimes: Runtime[]): Promise<RuntimeSupport | null> {
   for (const runtime of runtimes) {
-    const support = RUNTIMES[runtime]
-    for (const command of support.commands) {
-      if (!(await commandExists(command))) return support
-    }
+    if (!(await RUNTIMES[runtime].isInstalled())) return RUNTIMES[runtime]
   }
   return null
 }

@@ -206,7 +206,9 @@ export async function init(name: string | undefined, options: InitOptions) {
     for (const step of RUNTIMES[toolchain.runtime].install) {
       await runStep(step, backendDir)
     }
-    await runStep(toolchain.initialMigration, backendDir)
+    if (toolchain.initialMigration) {
+      await runStep(toolchain.initialMigration, backendDir)
+    }
   }
 
   // 6. Generate frontend

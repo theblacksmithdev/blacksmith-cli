@@ -18,6 +18,16 @@ The Django sections below do not apply to a FastAPI backend. Serve it with an AS
 `./venv/bin/python -m alembic upgrade head` on each deploy.
 :::
 
+:::note Spring Boot backends
+The Django sections below do not apply to a Spring Boot backend. Build it with
+`blacksmith build` (which runs `./gradlew bootJar` and emits `build/libs/app.jar`), run it
+with `java -jar build/libs/app.jar` on Java 17 or newer, and set `SECRET_KEY` (at least 32
+bytes), `CORS_ORIGINS` and `DATABASE_URL` in the environment. `DATABASE_URL` is a JDBC URL
+such as `jdbc:postgresql://host:5432/dbname?user=...&password=...`; the Postgres driver and
+Flyway's Postgres support are already dependencies. There is no separate migration step —
+Flyway applies pending migrations when the application starts.
+:::
+
 
 This guide covers preparing your Blacksmith project for production deployment.
 

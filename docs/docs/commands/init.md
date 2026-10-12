@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # blacksmith init
 
-Scaffold a new backend, React, or fullstack project. The backend is Django, Express, or FastAPI —
+Scaffold a new backend, React, or fullstack project. The backend is Django, Express, FastAPI, or Spring Boot —
 see [Choosing a Backend](../guides/choosing-a-backend.md).
 
 ## Usage
@@ -24,7 +24,7 @@ blacksmith init <project-name> [options]
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--type <type>` | `fullstack` | Project type: `fullstack`, `backend`, or `frontend` |
-| `--backend <framework>` | `django` | Backend framework: `django`, `express`, or `fastapi` |
+| `--backend <framework>` | `django` | Backend framework: `django`, `express`, `fastapi`, or `spring` |
 | `--backend-port <port>` | `8000` | Port for the backend development server |
 | `--frontend-port <port>` | `5173` | Port for the Vite development server |
 | `--theme-color <color>` | `default` | UI theme color preset |
@@ -45,8 +45,9 @@ blacksmith init <project-name> [options]
 | `django` | Django + DRF + drf-spectacular + SimpleJWT, with a Python virtual environment |
 | `express` | Express 5 + Prisma + Zod + zod-to-openapi, in TypeScript |
 | `fastapi` | FastAPI + Pydantic + SQLAlchemy + PyJWT, with a Python virtual environment |
+| `spring` | Spring Boot 4.1 + Spring Data JPA + Spring Security (JWT) + Flyway + springdoc-openapi, in Java 17+ with the Gradle wrapper |
 
-All three expose the same HTTP API, so the generated frontend is identical. Omit the
+All four expose the same HTTP API, so the generated frontend is identical. Omit the
 flag and `init` prompts for it. The flag is ignored for `--type frontend`.
 
 ### Theme Color Options
@@ -65,7 +66,7 @@ flag and `init` prompts for it. The flag is ignored for `--type frontend`.
 The `init` command performs the following steps based on the selected project type:
 
 ### All project types
-1. **Validates prerequisites** — Checks that required tools are installed (Python 3 for a Django or FastAPI backend, Node.js/npm for an Express backend or any frontend)
+1. **Validates prerequisites** — Checks that required tools are installed (Python 3 for a Django or FastAPI backend, Node.js/npm for an Express backend or any frontend, Java 17 or newer for a Spring Boot backend)
 2. **Creates project directory** and `blacksmith.config.json`
 3. **Optionally generates AI files** (`CLAUDE.md` and `.claude/skills/`) with skills tailored to the project type
 
@@ -74,8 +75,9 @@ The `init` command performs the following steps based on the selected project ty
    - *Django*: split settings, users app, DRF, drf-spectacular, SimpleJWT, environment management
    - *Express*: app and module layout, Prisma schema, JWT auth, Zod validation, OpenAPI registry
    - *FastAPI*: `app/` package (main, config, db, routers), SQLAlchemy models, JWT auth, Pydantic validation, built-in OpenAPI
-5. **Creates Python virtual environment** and installs dependencies (Django and FastAPI)
-6. **Runs initial database setup** — Django migrations, Prisma migrate for Express, Alembic migrations for FastAPI
+   - *Spring Boot*: Gradle project with wrapper, `app` package (auth, config, errors, users), JPA `User` entity, Spring Security JWT auth, Bean Validation, Flyway migration, springdoc-openapi; `.env` created from `.env.example`
+5. **Creates Python virtual environment** and installs dependencies (Django and FastAPI); for Spring Boot, makes `gradlew` executable and runs `./gradlew classes`, which downloads Gradle and the dependencies on the first run (a few minutes; later runs are fast)
+6. **Runs initial database setup** — Django migrations, Prisma migrate for Express, Alembic migrations for FastAPI. Spring Boot has no step here: Flyway applies the migrations when the application starts
 
 ### Frontend steps (fullstack and frontend)
 7. **Scaffolds React project** — Vite, TypeScript, React Router, TanStack React Query, React Hook Form + Zod, Chakra UI, auth pages
@@ -95,6 +97,9 @@ blacksmith init my-app --type fullstack -b 9000 -f 3000 --theme-color blue
 
 # Backend-only Django API
 blacksmith init my-api --type backend -b 8000 --ai
+
+# Fullstack with a Spring Boot backend
+blacksmith init my-app --type fullstack --backend spring
 
 # Frontend-only React app
 blacksmith init my-ui --type frontend -f 3000 --theme-color violet

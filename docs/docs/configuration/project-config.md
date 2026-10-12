@@ -60,7 +60,7 @@ Every Blacksmith project has a `blacksmith.config.json` file in the project root
 | `type` | string | Yes | Project type: `fullstack`, `backend`, or `frontend` |
 | `backend` | object | No | Present for fullstack and backend projects |
 | `backend.port` | number | — | Port for the backend development server |
-| `backend.framework` | string | No | `django`, `express`, or `fastapi`. Absent means `django` |
+| `backend.framework` | string | No | `django`, `express`, `fastapi`, or `spring`. Absent means `django` |
 | `frontend` | object | No | Present for fullstack and frontend projects |
 | `frontend.port` | number | — | Port for the Vite development server |
 
@@ -110,6 +110,17 @@ DATABASE_URL="file:./dev.db"
 JWT_SECRET=change-me-in-production
 CORS_ALLOWED_ORIGINS=http://localhost:5173
 ```
+
+**Spring Boot:**
+```bash
+SECRET_KEY=change-me-in-production-use-at-least-32-bytes
+# DATABASE_URL=jdbc:postgresql://localhost:5432/app?user=app&password=secret
+CORS_ORIGINS=http://localhost:5173
+```
+
+Spring reads `.env` as a properties file. `SECRET_KEY` signs the JWTs and must be at least
+32 bytes, `CORS_ORIGINS` is comma-separated, and `DATABASE_URL` is an optional JDBC URL — leave
+it unset to use the H2 file database in `data/`.
 
 A `.env.example` template is also generated for reference.
 

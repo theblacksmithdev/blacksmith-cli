@@ -17,6 +17,14 @@ virtual environment, `pip install -r requirements.txt`, and apply the Alembic mi
 with `alembic upgrade head`.
 :::
 
+:::note Spring Boot backends
+On a Spring Boot project, `setup:backend` checks for Java 17 or newer, then runs
+`./gradlew classes`, which downloads Gradle and the dependencies and compiles the backend
+(the first run takes a few minutes). There is no migration step — Flyway applies the
+migrations when the application starts. `deps` runs the same Gradle step; `python` and
+`venv` exit with an error because they apply to Python backends.
+:::
+
 
 :::info Requires Backend
 This command is only available for fullstack and backend-only projects. Frontend-only projects will receive an error.

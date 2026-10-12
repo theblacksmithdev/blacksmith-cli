@@ -101,7 +101,7 @@ export function getFrontendDir(projectRoot?: string): string {
 export type ProjectType = 'fullstack' | 'backend' | 'frontend'
 
 /** Backend framework a project's API is built with. */
-export type BackendFramework = 'django' | 'express' | 'fastapi'
+export type BackendFramework = 'django' | 'express' | 'fastapi' | 'spring'
 
 export interface BlacksmithConfig {
   name: string

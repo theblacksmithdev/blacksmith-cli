@@ -222,6 +222,21 @@ describe('makeResource', () => {
     })
   })
 
+  it('refuses a Spring Boot backend before writing anything', async () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+    pathMocks.getBackendDir.mockReturnValue(path.join(getTmpDir(), 'backend'))
+    pathMocks.getFrontendDir.mockReturnValue(path.join(getTmpDir(), 'frontend'))
+    pathMocks.getTemplatesDir.mockReturnValue('/templates')
+    pathMocks.getBackendFramework.mockReturnValue('spring')
+
+    await expect(makeResource('BlogPost')).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith('make:resource does not support Spring Boot backends yet.')
+    expect(templateMocks.renderDirectory).not.toHaveBeenCalled()
+
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+
   describe('on a FastAPI backend', () => {
     function setupFastapi() {
       pathMocks.findProjectRoot.mockReturnValue(getTmpDir())

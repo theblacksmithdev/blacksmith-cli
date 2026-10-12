@@ -20,6 +20,13 @@ identical. Projects created before resource support have no Alembic setup; the c
 stops before writing anything and says so.
 :::
 
+:::warning Spring Boot backends
+`make:resource` does not support Spring Boot backends yet. On a Spring project the command
+exits with "make:resource does not support Spring Boot backends yet." before writing
+anything, frontend included. Support is planned next; until then, add entities, controllers
+and Flyway migrations by hand (see [Spring Boot Backend](../stack/backend-spring.md)).
+:::
+
 
 Generate a CRUD resource. The generated files depend on your project type.
 

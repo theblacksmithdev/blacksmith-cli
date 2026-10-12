@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url'
 import { useTmpDir } from './helpers.js'
 import { renderDirectory, renderTemplateFile } from '../utils/template.js'
 import { generateNames } from '../utils/names.js'
+import { projectLayout } from '../utils/scaffold.js'
+import type { BackendFramework } from '../utils/paths.js'
 
 const TEMPLATES_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -12,33 +14,21 @@ const TEMPLATES_DIR = path.resolve(
   'templates'
 )
 
-const PROJECT_CONTEXT = {
-  projectName: 'my-app',
-  projectDomain: 'my-app',
-  backendPort: 8000,
-  frontendPort: 5173,
-  themePreset: 'default',
-  projectType: 'fullstack',
-  needsBackend: true,
-  needsFrontend: true,
-  backendFramework: 'django',
-  isDjango: true,
-  isExpress: false,
+function projectContext(framework: BackendFramework) {
+  return {
+    projectName: 'my-app',
+    projectDomain: 'my-app',
+    backendPort: 8000,
+    frontendPort: 5173,
+    themePreset: 'default',
+    ...projectLayout('fullstack', framework),
+  }
 }
 
-const EXPRESS_CONTEXT = {
-  ...PROJECT_CONTEXT,
-  backendFramework: 'express',
-  isDjango: false,
-  isExpress: true,
-}
-
-const FASTAPI_CONTEXT = {
-  ...PROJECT_CONTEXT,
-  backendFramework: 'fastapi',
-  isDjango: false,
-  isExpress: false,
-}
+const PROJECT_CONTEXT = projectContext('django')
+const EXPRESS_CONTEXT = projectContext('express')
+const FASTAPI_CONTEXT = projectContext('fastapi')
+const SPRING_CONTEXT = projectContext('spring')
 
 const RESOURCE_CONTEXT = { ...generateNames('product'), projectName: 'my-app' }
 
@@ -61,6 +51,7 @@ describe.each([
   ['backend/django', path.join('backend', 'django'), PROJECT_CONTEXT],
   ['backend/express', path.join('backend', 'express'), EXPRESS_CONTEXT],
   ['backend/fastapi', path.join('backend', 'fastapi'), FASTAPI_CONTEXT],
+  ['backend/spring', path.join('backend', 'spring'), SPRING_CONTEXT],
   ['frontend', 'frontend', PROJECT_CONTEXT],
   ['resource/backend/django', path.join('resource', 'backend', 'django'), RESOURCE_CONTEXT],
   ['resource/backend/express', path.join('resource', 'backend', 'express'), RESOURCE_CONTEXT],
@@ -98,6 +89,20 @@ describe.each([
     renderDirectory(path.join(TEMPLATES_DIR, relDir), dest, context)
 
     expect(walkFiles(dest).filter((f) => f.endsWith('.hbs'))).toEqual([])
+  })
+})
+
+describe('backend/spring templates', () => {
+  const getTmpDir = useTmpDir()
+
+  it('copy the Gradle wrapper byte for byte, with gradlew executable', () => {
+    const src = path.join(TEMPLATES_DIR, 'backend', 'spring')
+    const dest = path.join(getTmpDir(), 'out')
+    renderDirectory(src, dest, SPRING_CONTEXT)
+
+    const jar = path.join('gradle', 'wrapper', 'gradle-wrapper.jar')
+    expect(fs.readFileSync(path.join(dest, jar)).equals(fs.readFileSync(path.join(src, jar)))).toBe(true)
+    expect(fs.statSync(path.join(dest, 'gradlew')).mode & 0o111).not.toBe(0)
   })
 })
 

@@ -75,6 +75,31 @@ jobs:
       # database has to be provisioned before pytest starts.
       - name: Run tests
         run: pytest --cov --cov-report=term-missing
+{{else if isSpring}}
+  backend:
+    name: Backend (JUnit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: {{backendPath}}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # The test database is built by the Flyway migrations and Hibernate
+      # validates every entity against it, so a missing migration fails here.
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Build
+        run: ./gradlew bootJar
 {{else}}
   backend:
     name: Backend (pytest)
@@ -164,6 +189,27 @@ jobs:
 
       - name: Export OpenAPI schema
         run: python scripts.py export-openapi ../{{frontendPath}}/{{schemaFile}}
+        working-directory: {{backendPath}}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: {{frontendPath}}/package-lock.json
+{{else if isSpring}}
+
+      # src/api/generated/ is git-ignored, so the typed client is rebuilt from
+      # the Spring schema before the frontend is type-checked or built. The
+      # export runs the application in-process; no server listens.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Export OpenAPI schema
+        run: ./gradlew exportOpenApi -Pout=../{{frontendPath}}/{{schemaFile}}
         working-directory: {{backendPath}}
 
       - uses: actions/setup-node@v4

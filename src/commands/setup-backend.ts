@@ -98,7 +98,9 @@ export async function setupBackendDeps() {
   }
 
   await runStep(runtime.installDependencies, project.dir)
-  await runStep(project.toolchain.migrate, project.dir)
+  if (project.toolchain.migrate) {
+    await runStep(project.toolchain.migrate, project.dir)
+  }
 }
 
 export async function setupBackend() {
