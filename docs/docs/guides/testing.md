@@ -12,10 +12,13 @@ between tests. `blacksmith test` works the same either way.
 
 :::note FastAPI backends
 Backend tests also use pytest, through the project venv. The generated suite points
-`DATABASE_URL` at a throwaway SQLite file and creates its tables through the app's
-lifespan, so no database setup is needed before the first run. The Django-specific stack
-below (`pytest-django`, the test settings module, `manage.py` fixtures) does not apply;
-the workflow and `blacksmith test` usage are the same.
+`DATABASE_URL` at a throwaway SQLite file and builds it by running every Alembic
+migration, so no database setup is needed before the first run. `conftest.py` provides
+`api_client`, `auth_client` and `other_client` (each signed-in client is a fresh user),
+and `tests/test_migrations.py` fails when a model has changes no migration covers, the
+equivalent of `makemigrations --check`. The Django-specific stack below (`pytest-django`,
+the test settings module, `manage.py` fixtures) does not apply; the workflow and
+`blacksmith test` usage are the same.
 :::
 
 

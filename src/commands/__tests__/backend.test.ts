@@ -97,4 +97,33 @@ describe('backend', () => {
 
     expect(log.error).toHaveBeenCalledWith('Please provide an npm command.')
   })
+
+  it('should run a Python module in the venv on a FastAPI backend', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    execMocks.execPython.mockResolvedValue({})
+
+    await backend(['alembic', 'upgrade', 'head'])
+
+    expect(execMocks.execPython).toHaveBeenCalledWith(
+      ['-m', 'alembic', 'upgrade', 'head'],
+      '/project/backend'
+    )
+    expect(execMocks.execPython).not.toHaveBeenCalledWith(
+      expect.arrayContaining(['manage.py']),
+      expect.anything()
+    )
+    expect(execMocks.exec).not.toHaveBeenCalled()
+  })
+
+  it('should show FastAPI usage when no command is given', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+
+    await expect(backend([])).rejects.toThrow('process.exit called')
+
+    expect(log.error).toHaveBeenCalledWith('Please provide a Python module to run.')
+    expect(log.step).toHaveBeenCalledWith('Example: blacksmith backend alembic upgrade head')
+  })
 })

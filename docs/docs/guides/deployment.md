@@ -13,8 +13,9 @@ migrations with `prisma migrate deploy`, and set `JWT_SECRET`, `DATABASE_URL` an
 
 :::note FastAPI backends
 The Django sections below do not apply to a FastAPI backend. Serve it with an ASGI server
-(`./venv/bin/uvicorn app.main:app` behind Gunicorn or similar), and set `SECRET_KEY`,
-`DATABASE_URL` and `CORS_ALLOWED_ORIGINS` in the environment.
+(`./venv/bin/uvicorn app.main:app` behind Gunicorn or similar), set `SECRET_KEY`,
+`DATABASE_URL` and `CORS_ORIGINS` in the environment, and apply migrations with
+`./venv/bin/python -m alembic upgrade head` on each deploy.
 :::
 
 

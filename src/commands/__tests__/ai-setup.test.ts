@@ -106,7 +106,7 @@ describe('setupAiDev', () => {
   })
 
   describe('backend framework selection', () => {
-    async function skillIds(backendFramework: 'django' | 'express') {
+    async function skillIds(backendFramework: 'django' | 'express' | 'fastapi') {
       await setupAiDev({
         projectDir: getTmpDir(),
         projectName: 'test-project',
@@ -169,6 +169,45 @@ describe('setupAiDev', () => {
       expect(cli).toContain('"framework": "express"')
       expect(cli).toContain('prisma migrate dev')
       expect(cli).not.toContain('makemigrations')
+    })
+
+    it('writes the FastAPI skills and neither the Django nor the Express ones', async () => {
+      const ids = await skillIds('fastapi')
+
+      expect(ids).toContain('fastapi')
+      expect(ids).toContain('fastapi-sqlalchemy')
+      expect(ids).not.toContain('django')
+      expect(ids).not.toContain('django-rest-advanced')
+      expect(ids).not.toContain('backend-modularization')
+      expect(ids).not.toContain('express')
+    })
+
+    it('describes FastAPI in every framework-neutral skill', async () => {
+      await setupAiDev({
+        projectDir: getTmpDir(),
+        projectName: 'test-project',
+        includeChakraUiSkill: true,
+        backendFramework: 'fastapi',
+      })
+      const read = (id: string) =>
+        fs.readFileSync(path.join(getTmpDir(), '.claude', 'skills', id, 'SKILL.md'), 'utf-8')
+
+      const overview = read('project-overview')
+      expect(overview).toContain('FastAPI backend + React frontend')
+      expect(overview).toContain('migrations/')
+      expect(overview).not.toContain('Django')
+
+      const cli = read('blacksmith-cli')
+      expect(cli).toContain('"framework": "fastapi"')
+      expect(cli).toContain('alembic revision --autogenerate')
+      expect(cli).toContain('scripts.py export-openapi')
+      expect(cli).not.toContain('makemigrations')
+      expect(cli).not.toContain('manage.py')
+
+      const guidelines = read('ai-guidelines')
+      expect(guidelines).toContain('blacksmith backend alembic upgrade head')
+      expect(guidelines).not.toContain('Django')
+      expect(guidelines).not.toContain('manage.py')
     })
   })
 })

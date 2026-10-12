@@ -13,9 +13,8 @@ Python-backend steps (Django and FastAPI) and exit with an error on an Express p
 
 :::note FastAPI backends
 On a FastAPI project, `setup:backend` runs the same Python flow: check Python, create the
-virtual environment, and `pip install -r requirements.txt`. The migration step in `deps`
-still assumes Django's `manage.py` and fails on FastAPI for now — create the tables with
-`./venv/bin/python scripts.py init-db` instead.
+virtual environment, `pip install -r requirements.txt`, and apply the Alembic migrations
+with `alembic upgrade head`.
 :::
 
 

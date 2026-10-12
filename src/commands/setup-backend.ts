@@ -3,6 +3,7 @@ import path from 'node:path'
 import { findProjectRoot, getBackendDir, getBackendFramework, hasBackend } from '../utils/paths.js'
 import type { BackendFramework } from '../utils/paths.js'
 import { exec, execPip, execPython, execSilent, commandExists } from '../utils/exec.js'
+import { alembicUpgrade } from '../utils/alembic.js'
 import { ensureEnvFile } from '../utils/env-file.js'
 import { ensureGitignore } from '../utils/gitignore.js'
 import { log, spinner } from '../utils/logger.js'
@@ -171,7 +172,7 @@ export async function setupBackendVenv() {
 
   // venv/ must be ignored before the venv exists, otherwise it lands in git.
   // Projects generated before .gitignore shipped correctly are healed here.
-  if (ensureGitignore(backendDir, 'backend/django')) {
+  if (ensureGitignore(backendDir, `backend/${project.framework}`)) {
     log.step('Added backend/.gitignore (ignores venv/)')
   }
 
@@ -255,7 +256,11 @@ export async function setupBackendDeps() {
   // Run migrations
   const migrateSpinner = spinner('Running database migrations...')
   try {
-    await execPython(['manage.py', 'migrate'], backendDir, true)
+    if (project.framework === 'fastapi') {
+      await alembicUpgrade(backendDir)
+    } else {
+      await execPython(['manage.py', 'migrate'], backendDir, true)
+    }
     migrateSpinner.succeed('Database migrated')
   } catch (error: any) {
     migrateSpinner.fail('Failed to run migrations')

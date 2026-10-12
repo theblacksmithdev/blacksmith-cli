@@ -87,7 +87,7 @@ What starts depends on your project type:
 | `blacksmith setup:backend` | Set up the backend (install Python, create venv, install deps) |
 | `blacksmith setup:frontend` | Set up the frontend (install Node.js, install deps) |
 | `blacksmith skills` | List available AI skills |
-| `blacksmith backend <cmd>` | Run a backend command (`manage.py` for Django, `npm` for Express; not available for FastAPI yet) |
+| `blacksmith backend <cmd>` | Run a backend command (`manage.py` for Django, `npm` for Express, `python -m` for FastAPI) |
 | `blacksmith frontend <cmd>` | Run an npm command in the frontend |
 
 ## Project Structures
@@ -96,7 +96,7 @@ What starts depends on your project type:
 
 ```
 my-app/
-├── backend/                  # Django project (Express uses src/ + prisma/, FastAPI uses app/ + scripts.py)
+├── backend/                  # Django project (Express uses src/ + prisma/, FastAPI uses app/ + migrations/)
 │   ├── config/               # Settings, URLs, WSGI/ASGI
 │   ├── apps/                 # Django apps (one per resource)
 │   │   └── users/            # Built-in user app with JWT auth
@@ -206,7 +206,7 @@ blacksmith setup:ai
 
 This creates:
 - **CLAUDE.md** — project overview, commands, workflow, and conventions
-- **.claude/skills/** — detailed skill files tailored to your project type (Django skills for backend, React skills for frontend, all for fullstack)
+- **.claude/skills/** — detailed skill files tailored to your project type (skills for the project's own backend framework, React skills for the frontend, both for fullstack)
 
 ## Configuration
 

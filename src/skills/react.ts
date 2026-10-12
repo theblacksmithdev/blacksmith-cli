@@ -1,11 +1,14 @@
 import type { Skill, SkillContext } from './types.js'
+import { backendProfile } from './backend-profiles.js'
 
 export const reactSkill: Skill = {
   id: 'react',
   name: 'React Frontend Conventions',
   description: 'Tech stack, project structure, state management, component patterns, styling, and testing for the React frontend.',
 
-  render(_ctx: SkillContext): string {
+  render(ctx: SkillContext): string {
+    const backend = backendProfile(ctx)
+
     return `## React Frontend Conventions
 
 ### Tech Stack
@@ -16,7 +19,7 @@ export const reactSkill: Skill = {
 - React Hook Form + Zod for forms and validation
 - Chakra UI v3 for components, theming and styling (no Tailwind)
 - \`@fontsource-variable/inter\` for typography
-- \`@hey-api/openapi-ts\` for auto-generating API client from Django's OpenAPI schema
+- \`@hey-api/openapi-ts\` for auto-generating API client from ${backend.name}'s OpenAPI schema
 - \`lucide-react\` for icons
 
 ### API Layer

@@ -19,8 +19,8 @@ export interface TestOptions {
  * backend directory on sys.path: for Django that is what lets `conftest.py`
  * and the `apps.*` imports resolve the same way they do under manage.py, and
  * for FastAPI it is what makes the `app.*` package importable. FastAPI's
- * generated tests point DATABASE_URL at a throwaway sqlite file and create
- * their tables through the app's lifespan, so — like Django's test settings —
+ * generated tests point DATABASE_URL at a throwaway sqlite file and build it
+ * by running the Alembic migrations, so — like Django's test settings —
  * no database setup is needed before pytest starts.
  */
 async function runBackendTests(backendDir: string, options: TestOptions): Promise<boolean> {

@@ -136,22 +136,6 @@ describe('makeResource', () => {
     expect(log.error).toHaveBeenCalledWith('Frontend page "posts" already exists.')
   })
 
-  it('refuses on a FastAPI backend rather than falling into the Django path', async () => {
-    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
-    pathMocks.getBackendDir.mockReturnValue(path.join(getTmpDir(), 'backend'))
-    pathMocks.getFrontendDir.mockReturnValue(path.join(getTmpDir(), 'frontend'))
-    pathMocks.getTemplatesDir.mockReturnValue('/templates')
-    pathMocks.getBackendFramework.mockReturnValue('fastapi')
-
-    await expect(makeResource('Product')).rejects.toThrow('process.exit called')
-
-    expect(log.error).toHaveBeenCalledWith(
-      'make:resource is not available yet for FastAPI backends (it ships in a later release).'
-    )
-    expect(templateMocks.renderDirectory).not.toHaveBeenCalled()
-    expect(execMocks.execPython).not.toHaveBeenCalled()
-  })
-
   describe('on an Express backend', () => {
     function setupExpress() {
       pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
@@ -235,6 +219,93 @@ describe('makeResource', () => {
       await expect(makeResource('Product')).rejects.toThrow('process.exit called')
 
       expect(log.error).toHaveBeenCalledWith('Backend module "products" already exists.')
+    })
+  })
+
+  describe('on a FastAPI backend', () => {
+    function setupFastapi() {
+      pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+      pathMocks.getBackendDir.mockReturnValue(path.join(getTmpDir(), 'backend'))
+      pathMocks.getFrontendDir.mockReturnValue(path.join(getTmpDir(), 'frontend'))
+      pathMocks.getTemplatesDir.mockReturnValue('/templates')
+      pathMocks.getBackendFramework.mockReturnValue('fastapi')
+      execMocks.exec.mockResolvedValue({})
+      execMocks.execPython.mockResolvedValue({})
+      // A project scaffolded with resource support has Alembic set up
+      fs.mkdirSync(path.join(getTmpDir(), 'backend'), { recursive: true })
+      fs.writeFileSync(path.join(getTmpDir(), 'backend', 'alembic.ini'), '')
+    }
+
+    it('renders the package and its tests into the backend root', async () => {
+      setupFastapi()
+
+      await makeResource('BlogPost')
+
+      // The template tree mirrors the backend root (app/<resource>/, tests/)
+      expect(templateMocks.renderDirectory).toHaveBeenCalledWith(
+        path.join('/templates', 'resource', 'backend', 'fastapi'),
+        path.join(getTmpDir(), 'backend'),
+        expect.objectContaining({ Name: 'BlogPost', snakes: 'blog_posts' })
+      )
+      const calls = templateMocks.renderDirectory.mock.calls
+      expect(calls.find((c: any[]) => c[0] === path.join('/templates', 'resource', 'backend', 'django'))).toBeUndefined()
+    })
+
+    it('mounts the router in app/main.py', async () => {
+      setupFastapi()
+
+      await makeResource('BlogPost')
+
+      const mainPath = path.join(getTmpDir(), 'backend', 'app', 'main.py')
+      expect(templateMocks.insertBeforeMarker).toHaveBeenCalledWith(
+        mainPath,
+        '# blacksmith:import',
+        'from app.blog_posts.router import router as blog_posts_router'
+      )
+      expect(templateMocks.insertBeforeMarker).toHaveBeenCalledWith(
+        mainPath,
+        '# blacksmith:routers',
+        'app.include_router(blog_posts_router, prefix="/api/blog_posts", tags=["blog_posts"])'
+      )
+    })
+
+    it('creates and applies an Alembic migration instead of makemigrations', async () => {
+      setupFastapi()
+
+      await makeResource('BlogPost')
+
+      const backendDir = path.join(getTmpDir(), 'backend')
+      expect(execMocks.execPython.mock.calls).toEqual([
+        [['-m', 'alembic', 'revision', '--autogenerate', '-m', 'add blog_posts'], backendDir, true],
+        [['-m', 'alembic', 'upgrade', 'head'], backendDir, true],
+        // Then the OpenAPI export for the frontend client
+        [['scripts.py', 'export-openapi', expect.any(String)], backendDir, true],
+      ])
+      expect(log.success).toHaveBeenCalledWith('Resource "BlogPost" created successfully!')
+    })
+
+    it('refuses to overwrite an existing package', async () => {
+      setupFastapi()
+      fs.mkdirSync(path.join(getTmpDir(), 'backend', 'app', 'products'), { recursive: true })
+
+      await expect(makeResource('Product')).rejects.toThrow('process.exit called')
+
+      expect(log.error).toHaveBeenCalledWith('Backend package "app/products" already exists.')
+      expect(templateMocks.renderDirectory).not.toHaveBeenCalled()
+    })
+
+    it('refuses a project without Alembic before writing anything', async () => {
+      setupFastapi()
+      fs.rmSync(path.join(getTmpDir(), 'backend', 'alembic.ini'))
+
+      await expect(makeResource('Product')).rejects.toThrow('process.exit called')
+
+      expect(log.error).toHaveBeenCalledWith(
+        'This FastAPI backend has no Alembic migrations, which make:resource needs.'
+      )
+      expect(templateMocks.renderDirectory).not.toHaveBeenCalled()
+      expect(templateMocks.insertBeforeMarker).not.toHaveBeenCalled()
+      expect(execMocks.execPython).not.toHaveBeenCalled()
     })
   })
 })

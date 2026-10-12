@@ -56,8 +56,7 @@ Omit the flag and `init` asks.
   validation and the schema in one, and Swagger UI and ReDoc are served
   automatically at `/api/docs/` and `/api/redoc/` with nothing to configure
 - You want Django's Python tooling (venv, pip, pytest) with fewer batteries:
-  a small `app/` package you own, no admin, and `scripts.py` in place of
-  Django's management commands
+  a small `app/` package you own, no admin, and Alembic for migrations
 
 ## What Is Identical
 
@@ -70,22 +69,20 @@ Because the Express and FastAPI backends reproduce DRF's wire format, these do n
 - OpenAPI operation IDs, so the generated React hooks have the same names
 - The whole `frontend/` tree, the auth flow, and every generated page
 
-`blacksmith dev`, `sync`, and `test` behave the same on all three; only what
-they run underneath differs. A few commands are still catching up with
-FastAPI — `make:resource` refuses for now, and the `backend` and `build`
-passthroughs still assume Django — so check the table below before using them
-on a FastAPI project.
+`blacksmith dev`, `sync`, `test` and `make:resource` behave the same on all
+three; only what they run underneath differs. `build` still assumes Django, so
+check the table below before using it on a FastAPI project.
 
 ## What Differs Day to Day
 
 | Task | Django | Express | FastAPI |
 |------|--------|---------|---------|
-| Add a resource | `blacksmith make:resource Post` | same command | not available yet |
-| Where the model goes | `apps/posts/models.py` | `prisma/schema.prisma` | `app/db.py` (or a module `app` imports) |
-| Migrate | `blacksmith backend makemigrations && ... migrate` | `blacksmith backend exec prisma migrate dev` | `./venv/bin/python scripts.py init-db` (create_all — no migration files) |
+| Add a resource | `blacksmith make:resource Post` | same command | same command |
+| Where the model goes | `apps/posts/models.py` | `prisma/schema.prisma` | `app/posts/models.py` |
+| Migrate | `blacksmith backend makemigrations && ... migrate` | `blacksmith backend exec prisma migrate dev` | `blacksmith backend alembic revision --autogenerate -m "..." && ... alembic upgrade head` |
 | Create an admin user | `blacksmith backend createsuperuser` | no admin; use Prisma Studio | no admin; use `POST /api/auth/register/` |
 | Browse data | Django admin at `/admin/` | `blacksmith backend exec prisma studio` | no admin; use your own SQL client |
-| Run a management command | `blacksmith backend <command>` | `blacksmith backend run <script>` | `./venv/bin/python scripts.py <command>` |
+| Run a management command | `blacksmith backend <command>` | `blacksmith backend run <script>` | `blacksmith backend <module>` (`python -m`) |
 
 ## Switching Later
 

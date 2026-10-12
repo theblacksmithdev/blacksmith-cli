@@ -1,4 +1,5 @@
 import type { Skill, SkillContext } from './types.js'
+import { backendProfile } from './backend-profiles.js'
 
 export const blacksmithCliSkill: Skill = {
   id: 'blacksmith-cli',
@@ -6,9 +7,8 @@ export const blacksmithCliSkill: Skill = {
   description: 'CLI commands, configuration, and workflows for project scaffolding and management.',
 
   render(ctx: SkillContext): string {
-    const isExpress = ctx.backendFramework === 'express'
-    const backendName = isExpress ? 'Express' : 'Django'
-    const sourceExt = isExpress ? '.ts' : '.py'
+    const backend = backendProfile(ctx)
+    const framework = ctx.backendFramework ?? 'django'
 
     return `## Blacksmith CLI
 
@@ -20,7 +20,7 @@ Blacksmith is the CLI that scaffolded and manages this project. It lives outside
 |---|---|
 | \`blacksmith init [name]\` | Create a new project (interactive prompts if no flags) |
 | \`blacksmith dev\` | Start development server(s) |
-| \`blacksmith sync\` | Regenerate frontend API client from the ${backendName} OpenAPI schema (fullstack only) |
+| \`blacksmith sync\` | Regenerate frontend API client from the ${backend.name} OpenAPI schema (fullstack only) |
 | \`blacksmith make:resource <Name>\` | Scaffold a resource (backend, frontend, or both depending on project type) |
 | \`blacksmith build\` | Production build |
 | \`blacksmith eject\` | Remove Blacksmith dependency, keep a clean project |
@@ -36,7 +36,7 @@ Project settings are stored in \`blacksmith.config.json\` at the project root:
   "name": "my-app",
   "version": "0.1.0",
   "type": "fullstack",
-  "backend": { "port": 8000, "framework": "${isExpress ? 'express' : 'django'}" },
+  "backend": { "port": 8000, "framework": "${framework}" },
   "frontend": { "port": 5173 }
 }
 \`\`\`
@@ -51,8 +51,8 @@ Project settings are stored in \`blacksmith.config.json\` at the project root:
 ### How \`blacksmith dev\` Works
 
 Depends on project type:
-- **Fullstack**: Runs three concurrent processes — ${backendName}, Vite, and an OpenAPI file watcher (auto-syncs types on \`${sourceExt}\` changes)
-- **Backend**: Runs ${backendName} only
+- **Fullstack**: Runs three concurrent processes — ${backend.name}, Vite, and an OpenAPI file watcher (auto-syncs types on \`${backend.sourceExt}\` changes)
+- **Backend**: Runs ${backend.name} only
 - **Frontend**: Runs Vite only
 
 All processes are managed by \`concurrently\` and stop together on Ctrl+C.
@@ -62,16 +62,7 @@ All processes are managed by \`concurrently\` and stop together on Ctrl+C.
 Given a PascalCase name (e.g. \`BlogPost\`), it scaffolds based on project type:
 
 **Backend (fullstack and backend projects):**
-${
-  isExpress
-    ? `- \`src/modules/blog-posts/\` — schemas, service, controller, routes, tests
-- Adds the Prisma model and the User back-relation to \`prisma/schema.prisma\`
-- Mounts the router in \`src/modules/index.ts\`
-- Runs \`prisma migrate dev\``
-    : `- \`apps/blog_posts/\` — model, serializer, viewset, urls, admin, tests
-- Wires the app into \`INSTALLED_APPS\` and \`config/urls.py\`
-- Runs \`makemigrations\` and \`migrate\``
-}
+${backend.resourceSteps}
 
 **Frontend (fullstack and frontend projects):**
 - \`src/api/hooks/blog-posts/\` — query and mutation hooks
@@ -82,7 +73,7 @@ ${
 
 ### How \`blacksmith sync\` Works (Fullstack Only)
 
-1. Generates the OpenAPI schema offline using \`${isExpress ? 'npm run openapi' : 'manage.py spectacular'}\` — no server needs to be running
+1. Generates the OpenAPI schema offline using \`${backend.schemaExport}\` — no server needs to be running
 2. Runs \`openapi-ts\` to generate TypeScript types, Zod schemas, SDK functions, and TanStack Query hooks
 3. Output goes to \`frontend/src/api/generated/\` — never edit these files manually
 
@@ -95,7 +86,7 @@ ${
 blacksmith init
 
 # Skip prompts with flags
-blacksmith init my-app --type fullstack --backend ${isExpress ? 'express' : 'django'} -b 9000 -f 3000 --ai
+blacksmith init my-app --type fullstack --backend ${framework} -b 9000 -f 3000 --ai
 \`\`\`
 
 | Flag | Description |

@@ -1,31 +1,9 @@
 import path from 'node:path'
 import fs from 'node:fs'
 import { log, spinner } from '../utils/logger.js'
-import type { Skill, SkillContext } from '../skills/types.js'
+import type { SkillContext } from '../skills/types.js'
 import type { BackendFramework, ProjectType } from '../utils/paths.js'
-import { coreRulesSkill } from '../skills/core-rules.js'
-import { projectOverviewSkill } from '../skills/project-overview.js'
-import { djangoSkill } from '../skills/django.js'
-import { djangoRestAdvancedSkill } from '../skills/django-rest-advanced.js'
-import { apiDocumentationSkill } from '../skills/api-documentation.js'
-import { backendModularizationSkill } from '../skills/backend-modularization.js'
-import { expressSkill } from '../skills/express.js'
-import { expressPrismaSkill } from '../skills/express-prisma.js'
-import { expressOpenApiSkill } from '../skills/express-openapi.js'
-import { reactSkill } from '../skills/react.js'
-import { reactQuerySkill } from '../skills/react-query.js'
-import { pageStructureSkill } from '../skills/page-structure.js'
-import { chakraUiReactSkill } from '../skills/chakra-ui-react.js'
-import { chakraUiFormsSkill } from '../skills/chakra-ui-forms.js'
-import { chakraUiAuthSkill } from '../skills/chakra-ui-auth.js'
-import { blacksmithHooksSkill } from '../skills/blacksmith-hooks.js'
-import { blacksmithCliSkill } from '../skills/blacksmith-cli.js'
-import { uiDesignSkill } from '../skills/ui-design.js'
-import { programmingParadigmsSkill } from '../skills/programming-paradigms.js'
-import { frontendModularizationSkill } from '../skills/frontend-modularization.js'
-import { frontendTestingSkill } from '../skills/frontend-testing.js'
-import { cleanCodeSkill } from '../skills/clean-code.js'
-import { aiGuidelinesSkill } from '../skills/ai-guidelines.js'
+import { selectSkills } from '../skills/selection.js'
 
 interface AiSetupOptions {
   projectDir: string
@@ -44,53 +22,8 @@ export async function setupAiDev({
 }: AiSetupOptions) {
   const aiSpinner = spinner('Setting up AI development environment...')
 
-  const needsBackend = projectType === 'fullstack' || projectType === 'backend'
-  const needsFrontend = projectType === 'fullstack' || projectType === 'frontend'
-
   try {
-    const skills: Skill[] = [
-      coreRulesSkill,
-      projectOverviewSkill,
-    ]
-
-    // Backend skills — Django and Express have entirely separate conventions,
-    // so shipping the wrong set is worse than shipping none
-    if (needsBackend) {
-      if (backendFramework === 'express') {
-        skills.push(expressSkill)
-        skills.push(expressPrismaSkill)
-        skills.push(expressOpenApiSkill)
-      } else {
-        skills.push(djangoSkill)
-        skills.push(djangoRestAdvancedSkill)
-        skills.push(apiDocumentationSkill)
-        skills.push(backendModularizationSkill)
-      }
-    }
-
-    // Frontend skills
-    if (needsFrontend) {
-      skills.push(reactSkill)
-      skills.push(reactQuerySkill)
-      skills.push(pageStructureSkill)
-      skills.push(frontendModularizationSkill)
-
-      if (includeChakraUiSkill) {
-        skills.push(chakraUiReactSkill)
-        skills.push(chakraUiFormsSkill)
-        skills.push(chakraUiAuthSkill)
-        skills.push(blacksmithHooksSkill)
-        skills.push(uiDesignSkill)
-      }
-
-      skills.push(frontendTestingSkill)
-    }
-
-    // Shared skills
-    skills.push(blacksmithCliSkill)
-    skills.push(programmingParadigmsSkill)
-    skills.push(cleanCodeSkill)
-    skills.push(aiGuidelinesSkill)
+    const skills = selectSkills({ projectType, backendFramework, includeChakraUiSkill })
 
     const ctx: SkillContext = { projectName, backendFramework }
 

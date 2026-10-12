@@ -4,10 +4,10 @@ sidebar_position: 4
 
 # Creating Resources
 
-:::note FastAPI backends
-`make:resource` is not available for FastAPI projects yet — the command exits with an
-error rather than generating Django files. The Django walkthrough below applies to Django
-projects; for the Express layout see the [make:resource command](/docs/commands/make-resource).
+:::note Express and FastAPI backends
+The walkthrough below uses Django. The command and the frontend steps are the same on
+every backend; for FastAPI, see [On a FastAPI backend](#on-a-fastapi-backend) below, and
+for the Express layout see the [make:resource command](/docs/commands/make-resource).
 :::
 
 The `blacksmith make:resource` command is the primary way to add new features to your project. This guide walks through the full workflow of creating and customizing a resource.
@@ -184,6 +184,56 @@ class ProductSerializer(serializers.ModelSerializer):
 ```
 
 Run `blacksmith sync` to update the frontend types with the new fields.
+
+## On a FastAPI Backend
+
+`blacksmith make:resource Product` creates a package and its tests:
+
+```
+backend/
+├── app/products/
+│   ├── models.py     # SQLAlchemy model
+│   ├── schemas.py    # Pydantic request and response schemas
+│   ├── service.py    # owner-scoped queries, search, ordering, pagination
+│   └── router.py     # CRUD endpoints, mounted in app/main.py
+├── migrations/versions/<rev>_add_products.py
+└── tests/test_products.py
+```
+
+The API, the frontend hooks and the pages are the same ones a Django project gets.
+
+**Add a field.** Edit the model and the schemas that expose it:
+
+```python
+# backend/app/products/models.py
+price: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
+```
+
+```python
+# backend/app/products/schemas.py: add to Product and ProductRequest,
+# and as `price: Decimal = Field(default=None)` to PatchedProductRequest
+price: Decimal
+```
+
+Then fill it in `serialize()` in `service.py`, which builds the response.
+
+**Migrate.** Tables are changed by Alembic migrations, never at startup:
+
+```bash
+blacksmith backend alembic revision --autogenerate -m "add product price"
+blacksmith backend alembic upgrade head
+```
+
+Read the generated file in `migrations/versions/` before applying it.
+Autogenerate is good, but it cannot tell a renamed column from a dropped one
+and a new one.
+
+If you forget to create the migration, `blacksmith test` fails.
+`tests/test_migrations.py` compares the models with the migrations and names
+the change that has none.
+
+**Sync types.** Run `blacksmith sync` (or keep `blacksmith dev` running) and the
+frontend types pick up the new field.
 
 ## Tips
 

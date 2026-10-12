@@ -11,7 +11,6 @@ const pathMocks = vi.hoisted(() => ({
   findProjectRoot: vi.fn(),
   loadConfig: vi.fn(),
   getProjectType: vi.fn(() => 'fullstack'),
-  hasBackend: vi.fn(() => true),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
 
@@ -121,7 +120,7 @@ describe('listSkills', () => {
 
   it('omits backend skills entirely on a frontend-only project', () => {
     pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
-    pathMocks.hasBackend.mockReturnValue(false)
+    pathMocks.getProjectType.mockReturnValue('frontend')
 
     listSkills()
 
@@ -130,6 +129,31 @@ describe('listSkills', () => {
     expect(listed).not.toContain('express/SKILL.md')
     expect(listed).toContain('react/SKILL.md')
 
-    pathMocks.hasBackend.mockReturnValue(true)
+    pathMocks.getProjectType.mockReturnValue('fullstack')
+  })
+
+  it('lists the FastAPI backend skills on a FastAPI project', () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+
+    listSkills()
+
+    const listed = (log.step as any).mock.calls.map((c: any[]) => c[0]).join('\n')
+    expect(listed).toContain('fastapi/SKILL.md')
+    expect(listed).toContain('fastapi-sqlalchemy/SKILL.md')
+    expect(listed).not.toContain('django/SKILL.md')
+
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+
+  it('lists the same skills setup:ai writes, frontend ones included', () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+
+    listSkills()
+
+    const listed = (log.step as any).mock.calls.map((c: any[]) => c[0]).join('\n')
+    for (const id of ['react-query', 'page-structure', 'ui-design', 'programming-paradigms']) {
+      expect(listed).toContain(`${id}/SKILL.md`)
+    }
   })
 })

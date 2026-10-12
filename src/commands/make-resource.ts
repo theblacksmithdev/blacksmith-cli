@@ -2,105 +2,10 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, getTemplatesDir, hasBackend, hasFrontend } from '../utils/paths.js'
 import { generateNames } from '../utils/names.js'
-import { renderDirectory, renderTemplateFile, appendAfterMarker, insertBeforeMarker } from '../utils/template.js'
-import { exec, execPython } from '../utils/exec.js'
-import { resourcePrismaTemplate, resourceTemplateDir } from '../utils/scaffold.js'
+import { renderDirectory, insertBeforeMarker } from '../utils/template.js'
+import { RESOURCE_BACKENDS } from '../utils/resource-backends.js'
 import { syncFrontendClient } from '../utils/openapi.js'
 import { log, spinner } from '../utils/logger.js'
-
-interface ExpressResourceArgs {
-  backendDir: string
-  moduleDir: string
-  templatesDir: string
-  names: ReturnType<typeof generateNames>
-  context: Record<string, unknown>
-}
-
-/**
- * Scaffold an Express resource: a module directory, a Prisma model, a mounted
- * router, and the migration that creates the table.
- */
-async function generateExpressResource({
-  backendDir,
-  moduleDir,
-  templatesDir,
-  names,
-  context,
-}: ExpressResourceArgs) {
-  // 1. Module (schemas, service, controller, routes, tests)
-  const moduleSpinner = spinner(`Creating backend module: src/modules/${names.kebabs}/`)
-  try {
-    renderDirectory(
-      path.join(templatesDir, resourceTemplateDir('express')),
-      moduleDir,
-      context
-    )
-    moduleSpinner.succeed(`Created src/modules/${names.kebabs}/`)
-  } catch (error: any) {
-    moduleSpinner.fail('Failed to create backend module')
-    log.error(error.message)
-    process.exit(1)
-  }
-
-  // 2. Prisma model, plus the back-relation the User model needs for it
-  const schemaSpinner = spinner('Adding the Prisma model...')
-  try {
-    const schemaPath = path.join(backendDir, 'prisma', 'schema.prisma')
-    const model = renderTemplateFile(
-      path.join(templatesDir, resourcePrismaTemplate()),
-      context
-    )
-    appendAfterMarker(schemaPath, '// blacksmith:models', model.trimEnd())
-    // Prisma requires both sides of a relation to be declared. snake_case to
-    // match every other field in the schema, per the express-prisma skill.
-    appendAfterMarker(
-      schemaPath,
-      '// blacksmith:user-relations',
-      `  ${names.snakes} ${names.Name}[]`
-    )
-    schemaSpinner.succeed(`Added the ${names.Name} model to prisma/schema.prisma`)
-  } catch (error: any) {
-    schemaSpinner.fail('Failed to add the Prisma model')
-    log.error(error.message)
-    process.exit(1)
-  }
-
-  // 3. Mount the router
-  const routeSpinner = spinner('Registering API routes...')
-  try {
-    const routerPath = path.join(backendDir, 'src', 'modules', 'index.ts')
-    insertBeforeMarker(
-      routerPath,
-      '// blacksmith:import',
-      `import { ${names.names}Router } from './${names.kebabs}/${names.kebabs}.routes.js'`
-    )
-    insertBeforeMarker(
-      routerPath,
-      '// blacksmith:routes',
-      `apiRouter.use('/${names.snakes}', ${names.names}Router)`
-    )
-    routeSpinner.succeed(`Registered /api/${names.snakes}/`)
-  } catch (error: any) {
-    routeSpinner.fail('Failed to register API routes')
-    log.error(error.message)
-    process.exit(1)
-  }
-
-  // 4. Migrate (which also regenerates the Prisma client)
-  const migrateSpinner = spinner('Running migrations...')
-  try {
-    await exec(
-      'npx',
-      ['prisma', 'migrate', 'dev', '--name', `add_${names.snakes}`, '--skip-seed'],
-      { cwd: backendDir, silent: true }
-    )
-    migrateSpinner.succeed('Migrations complete')
-  } catch (error: any) {
-    migrateSpinner.fail('Migration failed')
-    log.error(error.message)
-    process.exit(1)
-  }
-}
 
 export async function makeResource(name: string) {
   let root: string
@@ -116,34 +21,17 @@ export async function makeResource(name: string) {
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
   const backendFramework = projectHasBackend ? getBackendFramework(root) : 'django'
-  const isExpressBackend = backendFramework === 'express'
-
-  // FastAPI resource generation is out of scope for this ticket and gets its
-  // own planning and review later. Refuse up front rather than falling into
-  // the Django resource path, which would corrupt a FastAPI project.
-  if (projectHasBackend && backendFramework === 'fastapi') {
-    log.error(
-      'make:resource is not available yet for FastAPI backends (it ships in a later release).'
-    )
-    process.exit(1)
-  }
+  const resourceBackend = RESOURCE_BACKENDS[backendFramework]
 
   const context = { ...names, projectName: name }
 
   // Check if resources already exist
-  /** Where a resource's backend code lives, per framework. */
   const backendResourceDir = projectHasBackend
-    ? isExpressBackend
-      ? path.join(getBackendDir(root), 'src', 'modules', names.kebabs)
-      : path.join(getBackendDir(root), 'apps', names.snakes)
+    ? resourceBackend.dir(getBackendDir(root), names)
     : null
 
   if (backendResourceDir && fs.existsSync(backendResourceDir)) {
-    log.error(
-      isExpressBackend
-        ? `Backend module "${names.kebabs}" already exists.`
-        : `Backend app "${names.snakes}" already exists.`
-    )
+    log.error(resourceBackend.existsMessage(names))
     process.exit(1)
   }
 
@@ -157,76 +45,14 @@ export async function makeResource(name: string) {
   }
 
   // Backend resource generation
-  if (projectHasBackend && backendResourceDir && isExpressBackend) {
-    await generateExpressResource({
+  if (backendResourceDir) {
+    await resourceBackend.generate({
       backendDir: getBackendDir(root),
-      moduleDir: backendResourceDir,
+      resourceDir: backendResourceDir,
       templatesDir,
       names,
       context,
     })
-  } else if (projectHasBackend) {
-    const backendDir = getBackendDir(root)
-    const backendAppDir = path.join(backendDir, 'apps', names.snakes)
-
-    // 1. Generate backend app
-    const backendSpinner = spinner(`Creating backend app: apps/${names.snakes}/`)
-    try {
-      renderDirectory(
-        path.join(templatesDir, resourceTemplateDir('django')),
-        backendAppDir,
-        context
-      )
-      backendSpinner.succeed(`Created apps/${names.snakes}/`)
-    } catch (error: any) {
-      backendSpinner.fail('Failed to create backend app')
-      log.error(error.message)
-      process.exit(1)
-    }
-
-    // 2. Register app in settings
-    const registerSpinner = spinner('Registering app in Django settings...')
-    try {
-      const settingsPath = path.join(backendDir, 'config', 'settings', 'base.py')
-      appendAfterMarker(
-        settingsPath,
-        '# blacksmith:apps',
-        `    'apps.${names.snakes}',`
-      )
-      registerSpinner.succeed('Registered in INSTALLED_APPS')
-    } catch (error: any) {
-      registerSpinner.fail('Failed to register app in settings')
-      log.error(error.message)
-      process.exit(1)
-    }
-
-    // 3. Register URLs
-    const urlSpinner = spinner('Registering API URLs...')
-    try {
-      const urlsPath = path.join(backendDir, 'config', 'urls.py')
-      insertBeforeMarker(
-        urlsPath,
-        '# blacksmith:urls',
-        `    path('api/${names.snakes}/', include('apps.${names.snakes}.urls')),`
-      )
-      urlSpinner.succeed('Registered API URLs')
-    } catch (error: any) {
-      urlSpinner.fail('Failed to register URLs')
-      log.error(error.message)
-      process.exit(1)
-    }
-
-    // 4. Run migrations
-    const migrateSpinner = spinner('Running migrations...')
-    try {
-      await execPython(['manage.py', 'makemigrations', names.snakes], backendDir, true)
-      await execPython(['manage.py', 'migrate'], backendDir, true)
-      migrateSpinner.succeed('Migrations complete')
-    } catch (error: any) {
-      migrateSpinner.fail('Migration failed')
-      log.error(error.message)
-      process.exit(1)
-    }
   }
 
   // 5. Sync OpenAPI (only for fullstack projects)
