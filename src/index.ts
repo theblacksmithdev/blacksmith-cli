@@ -1,5 +1,6 @@
 import { Command } from 'commander'
 import { banner } from './utils/logger.js'
+import { BACKEND_FRAMEWORK_CHOICES } from './utils/backend-toolchains.js'
 import { init } from './commands/init.js'
 import { dev } from './commands/dev.js'
 import { sync } from './commands/sync.js'
@@ -29,7 +30,7 @@ program
   .command('init')
   .argument('[name]', 'Project name')
   .option('--type <type>', 'Project type: fullstack, backend, or frontend (default: fullstack)')
-  .option('--backend <framework>', 'Backend framework: django, express, or fastapi (default: django)')
+  .option('--backend <framework>', `Backend framework: ${BACKEND_FRAMEWORK_CHOICES} (default: django)`)
   .option('--ai', 'Set up AI development skills and documentation (CLAUDE.md)')
   .option('--no-chakra-ui-skill', 'Disable Chakra UI skill when using --ai')
   .option('-b, --backend-port <port>', 'Backend port (default: 8000)')

@@ -1,5 +1,6 @@
 import type { Skill, SkillContext } from './types.js'
 import { backendProfile } from './backend-profiles.js'
+import { BACKEND_FRAMEWORK_CHOICES } from '../utils/backend-toolchains.js'
 
 export const blacksmithCliSkill: Skill = {
   id: 'blacksmith-cli',
@@ -92,7 +93,7 @@ blacksmith init my-app --type fullstack --backend ${framework} -b 9000 -f 3000 -
 | Flag | Description |
 |---|---|
 | \`--type <type>\` | Project type: fullstack, backend, or frontend (default: fullstack) |
-| \`--backend <framework>\` | Backend framework: django, express, or fastapi (default: django) |
+| \`--backend <framework>\` | Backend framework: ${BACKEND_FRAMEWORK_CHOICES} (default: django) |
 | \`-b, --backend-port <port>\` | Backend port (default: 8000) |
 | \`-f, --frontend-port <port>\` | Vite port (default: 5173) |
 | \`-t, --theme-color <preset>\` | UI theme preset: default (OpenAI-style monochrome), neutral (monochrome, square corners), blue, green, red, violet. Lives in \`frontend/src/theme/presets.ts\` |

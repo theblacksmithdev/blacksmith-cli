@@ -1,6 +1,8 @@
 import chalk from 'chalk'
 import ora, { type Ora } from 'ora'
 import { createInterface } from 'node:readline'
+import { BACKEND_TOOLCHAINS } from './backend-toolchains.js'
+import type { BackendFramework } from './paths.js'
 
 export const log = {
   info: (msg: string) => console.log(chalk.blue('ℹ'), msg),
@@ -105,7 +107,7 @@ export function printNextSteps(
   projectType: string = 'fullstack',
   backendPort?: number,
   frontendPort?: number,
-  backendFramework: string = 'django'
+  backendFramework: BackendFramework = 'django'
 ) {
   log.blank()
   log.success('Project created successfully!')
@@ -117,13 +119,11 @@ export function printNextSteps(
   console.log()
 
   if (backendPort !== undefined) {
-    const label =
-      backendFramework === 'express' ? 'Express:' :
-      backendFramework === 'fastapi' ? 'FastAPI:' :
-      'Django: '
+    const toolchain = BACKEND_TOOLCHAINS[backendFramework]
+    const label = `${toolchain.label}:`.padEnd(8)
     console.log(chalk.dim(`  ${label}  http://localhost:${backendPort}`))
     console.log(chalk.dim(`  Swagger:  http://localhost:${backendPort}/api/docs/`))
-    if (backendFramework !== 'express') {
+    if (toolchain.redoc) {
       console.log(chalk.dim(`  ReDoc:    http://localhost:${backendPort}/api/redoc/`))
     }
   }

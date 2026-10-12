@@ -32,13 +32,6 @@ vi.mock('../ai-setup.js', () => ({
   setupAiDev: vi.fn(),
 }))
 
-vi.mock('node:child_process', () => ({
-  spawn: vi.fn(() => ({
-    pid: 12345,
-    unref: vi.fn(),
-  })),
-}))
-
 import { init } from '../init.js'
 import { log } from '../../utils/logger.js'
 
@@ -235,6 +228,32 @@ describe('init', () => {
       (c: any[]) => c[0] === '/templates/frontend'
     )
     expect(frontendCall![2]).toMatchObject({ projectDomain: 'my-cool-app' })
+  })
+
+  it('syncs a Django fullstack project offline, without starting a server', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', { type: 'fullstack', backend: 'django', backendPort: '8000', frontendPort: '5173', ai: false })
+
+    expect(execMocks.execPython).toHaveBeenCalledWith(
+      ['manage.py', 'spectacular', '--file', expect.stringContaining('_schema.yml')],
+      expect.any(String),
+      true
+    )
+    expect(execMocks.execPython).not.toHaveBeenCalledWith(
+      expect.arrayContaining(['runserver']),
+      expect.anything(),
+      expect.anything()
+    )
+  })
+
+  it('checks Node once for an Express fullstack project, and never Python', async () => {
+    setupSuccessfulInit()
+
+    await init('my-app', { type: 'fullstack', backend: 'express', backendPort: '8000', frontendPort: '5173', ai: false })
+
+    const checked = execMocks.commandExists.mock.calls.map((c: any[]) => c[0])
+    expect(checked).toEqual(['node', 'npm'])
   })
 
   it('should record the backend framework in the config', async () => {

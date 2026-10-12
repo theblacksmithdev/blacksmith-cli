@@ -16,6 +16,7 @@ vi.mock('../../utils/paths.js', () => pathMocks)
 
 const gitignoreMocks = vi.hoisted(() => ({
   ensureGitignore: vi.fn(() => false),
+  healBackendGitignore: vi.fn(),
 }))
 vi.mock('../../utils/gitignore.js', () => gitignoreMocks)
 

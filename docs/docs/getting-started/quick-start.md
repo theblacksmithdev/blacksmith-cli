@@ -104,7 +104,7 @@ blacksmith sync
 blacksmith build
 ```
 
-This runs the appropriate build steps for your project type — Vite build for frontend, `collectstatic` for backend, or both for fullstack.
+This runs the appropriate build steps for your project type — Vite build for the frontend, and the backend's own step (`collectstatic` for Django, `tsc` for Express, nothing for FastAPI), or both for fullstack.
 
 ## Next Steps
 

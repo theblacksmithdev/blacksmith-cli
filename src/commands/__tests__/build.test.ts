@@ -90,4 +90,19 @@ describe('build', () => {
     })
     expect(execMocks.execPython).not.toHaveBeenCalled()
   })
+
+  it('builds a FastAPI project without running any backend step', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    execMocks.exec.mockResolvedValue({})
+
+    await build()
+
+    expect(execMocks.exec).toHaveBeenCalledTimes(1)
+    expect(execMocks.execPython).not.toHaveBeenCalled()
+    expect(log.success).toHaveBeenCalledWith('Production build complete!')
+    expect(log.step).toHaveBeenCalledWith('Backend ready for deployment')
+  })
 })

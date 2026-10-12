@@ -1,6 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { getTemplatesDir } from './paths.js'
+import type { BackendFramework } from './paths.js'
+import { BACKEND_TOOLCHAINS } from './backend-toolchains.js'
+import { RUNTIMES } from './runtimes.js'
+import { log } from './logger.js'
 
 /**
  * Which template directory to take a `.gitignore` from. Backend kinds are
@@ -35,4 +39,16 @@ export function ensureGitignore(targetDir: string, kind: GitignoreKind): boolean
 
   fs.copyFileSync(srcPath, destPath)
   return true
+}
+
+/**
+ * The backend's dependency directory must be ignored before it is created,
+ * otherwise it lands in git. Projects generated before .gitignore shipped are
+ * healed here, and the user is told.
+ */
+export function healBackendGitignore(backendDir: string, framework: BackendFramework): void {
+  if (ensureGitignore(backendDir, `backend/${framework}`)) {
+    const { dependencyDir } = RUNTIMES[BACKEND_TOOLCHAINS[framework].runtime]
+    log.step(`Added backend/.gitignore (ignores ${dependencyDir}/)`)
+  }
 }

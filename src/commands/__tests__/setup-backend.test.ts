@@ -28,6 +28,7 @@ vi.mock('../../utils/exec.js', () => execMocks)
 
 const gitignoreMocks = vi.hoisted(() => ({
   ensureGitignore: vi.fn(() => false),
+  healBackendGitignore: vi.fn(),
 }))
 vi.mock('../../utils/gitignore.js', () => gitignoreMocks)
 
@@ -321,7 +322,7 @@ describe('setup:backend on an Express project', () => {
     await expect(setupBackendVenv()).rejects.toThrow('process.exit called')
 
     expect(log.error).toHaveBeenCalledWith(
-      '"setup:backend venv" applies to Django backends. This project uses Express.'
+      '"setup:backend venv" applies to Python backends. This project uses Express.'
     )
     pathMocks.getBackendFramework.mockReturnValue('django')
   })
@@ -333,7 +334,7 @@ describe('setup:backend on an Express project', () => {
     await expect(setupBackendPython()).rejects.toThrow('process.exit called')
 
     expect(log.error).toHaveBeenCalledWith(
-      '"setup:backend python" applies to Django backends. This project uses Express.'
+      '"setup:backend python" applies to Python backends. This project uses Express.'
     )
     pathMocks.getBackendFramework.mockReturnValue('django')
   })
@@ -395,6 +396,6 @@ describe('setup:backend on a FastAPI project', () => {
 
     await setupBackendVenv()
 
-    expect(gitignoreMocks.ensureGitignore).toHaveBeenCalledWith('/project/backend', 'backend/fastapi')
+    expect(gitignoreMocks.healBackendGitignore).toHaveBeenCalledWith('/project/backend', 'fastapi')
   })
 })

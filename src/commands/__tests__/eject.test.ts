@@ -47,4 +47,16 @@ describe('eject', () => {
     expect(log.error).toHaveBeenCalledWith('Not inside a Blacksmith project.')
     expect(mockExit).toHaveBeenCalledWith(1)
   })
+
+  it('names the FastAPI backend and how to start it', async () => {
+    pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+
+    await eject()
+
+    expect(log.step).toHaveBeenCalledWith('Your project is now a standard FastAPI + React project.')
+    expect(log.step).toHaveBeenCalledWith('Backend:  cd backend && ./venv/bin/uvicorn app.main:app --reload')
+
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
 })

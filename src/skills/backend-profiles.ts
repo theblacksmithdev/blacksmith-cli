@@ -1,5 +1,6 @@
 import type { BackendFramework } from '../utils/paths.js'
 import type { SkillContext } from './types.js'
+import { BACKEND_TOOLCHAINS } from '../utils/backend-toolchains.js'
 import { DJANGO_PARADIGMS, EXPRESS_PARADIGMS, FASTAPI_PARADIGMS } from './backend-paradigms.js'
 
 /**
@@ -37,7 +38,7 @@ export interface BackendProfile {
 
 export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
   django: {
-    name: 'Django',
+    name: BACKEND_TOOLCHAINS.django.label,
     sourceExt: '.py',
     tree: `│   ├── apps/             # Django apps (one per resource)
 │   ├── config/           # Django settings, urls, wsgi/asgi
@@ -67,7 +68,7 @@ export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
 - Use \`get_object_or_404\` instead of manual \`try/except DoesNotExist\``,
   },
   express: {
-    name: 'Express',
+    name: BACKEND_TOOLCHAINS.express.label,
     sourceExt: '.ts',
     tree: `│   ├── src/
 │   │   ├── config/       # env, Zod, OpenAPI registry
@@ -97,7 +98,7 @@ export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
 - Throw \`ApiError\` for expected failures; let Express 5 forward everything else to the error handler`,
   },
   fastapi: {
-    name: 'FastAPI',
+    name: BACKEND_TOOLCHAINS.fastapi.label,
     sourceExt: '.py',
     tree: `│   ├── app/
 │   │   ├── main.py       # FastAPI app; routers mounted here
@@ -111,7 +112,7 @@ export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
 ├── migrations/
 ├── tests/
 ├── venv/`,
-    build: 'not supported yet',
+    build: 'nothing to build',
     defineFeature: 'Define the SQLAlchemy model, Pydantic schemas, service, and router',
     resourceSteps: `- \`app/blog_posts/\` — model, schemas, service, router; \`tests/test_blog_posts.py\`
 - Mounts the router in \`app/main.py\`

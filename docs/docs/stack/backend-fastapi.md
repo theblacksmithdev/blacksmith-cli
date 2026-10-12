@@ -164,9 +164,9 @@ built by running the migrations. `conftest.py` provides `api_client`, `auth_clie
 and `other_client`; each signed-in client is a new user. The database lasts the whole
 session, so tests create the rows they need and never assume a table is empty.
 
-## Not Yet Supported
+## Building for Production
 
-`blacksmith build` still runs Django's `collectstatic` and fails on a FastAPI
-project. There is nothing to compile; deploy the backend directory with its
+There is nothing to compile: [`blacksmith build`](../commands/build.md) skips the
+backend and builds the frontend only. Deploy the backend directory with its
 `requirements.txt` and serve it with Uvicorn (see the
 [Deployment guide](../guides/deployment.md)).
