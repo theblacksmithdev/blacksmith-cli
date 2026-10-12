@@ -1,6 +1,6 @@
 {
   "name": "blacksmith-cli",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "description": "Fullstack Django, Express, or FastAPI + React framework — one command, one codebase, one mental model",
   "type": "module",
   "bin": {
