@@ -11,6 +11,8 @@ import { expressPrismaSkill } from './express-prisma.js'
 import { expressOpenApiSkill } from './express-openapi.js'
 import { fastapiSkill } from './fastapi.js'
 import { fastapiSqlalchemySkill } from './fastapi-sqlalchemy.js'
+import { springSkill } from './spring.js'
+import { springJpaSkill } from './spring-jpa.js'
 import { reactSkill } from './react.js'
 import { reactQuerySkill } from './react-query.js'
 import { pageStructureSkill } from './page-structure.js'
@@ -27,13 +29,14 @@ import { cleanCodeSkill } from './clean-code.js'
 import { aiGuidelinesSkill } from './ai-guidelines.js'
 
 /**
- * Backend conventions per framework. The three have entirely separate
+ * Backend conventions per framework. They have entirely separate
  * conventions, so shipping the wrong set is worse than shipping none.
  */
 const BACKEND_SKILLS: Record<BackendFramework, Skill[]> = {
   django: [djangoSkill, djangoRestAdvancedSkill, apiDocumentationSkill, backendModularizationSkill],
   express: [expressSkill, expressPrismaSkill, expressOpenApiSkill],
   fastapi: [fastapiSkill, fastapiSqlalchemySkill],
+  spring: [springSkill, springJpaSkill],
 }
 
 const CHAKRA_UI_SKILLS: Skill[] = [

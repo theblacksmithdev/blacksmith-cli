@@ -1,0 +1,10 @@
+package app.{{javaPackage}}.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+/** The body of a create or a full update. A description left out is kept as it is, or empty on create. */
+public record {{Name}}Request(
+        @NotBlank @Size(min = 1, max = 255) String title,
+        @Schema(defaultValue = "") String description) {}

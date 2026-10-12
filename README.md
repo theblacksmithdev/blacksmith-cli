@@ -1,9 +1,9 @@
 # Blacksmith CLI
 
-**Django, Express, or FastAPI + React framework — one command, one codebase, one mental model.**
+**Django, Express, FastAPI, or Spring Boot + React framework — one command, one codebase, one mental model.**
 
-Blacksmith scaffolds production-ready web applications with a Django, Express, or FastAPI backend, a React
-frontend, or both — wired together through automatic OpenAPI synchronization. Choose your project
+Blacksmith scaffolds production-ready web applications with a Django, Express, FastAPI, or Spring Boot backend, a
+React frontend, or both — wired together through automatic OpenAPI synchronization. Choose your project
 type and Blacksmith handles the rest.
 
 ## Why Blacksmith?
@@ -11,9 +11,9 @@ type and Blacksmith handles the rest.
 Building web apps usually means gluing together separate projects, manually keeping types in sync, and writing boilerplate. Blacksmith eliminates that friction:
 
 - **Flexible project types** — scaffold a fullstack app, a standalone API, or a standalone React frontend
-- **Three backends, one API** — Django (Python, DRF), Express (TypeScript, Prisma), or FastAPI
-  (Python, Pydantic). All three expose the same HTTP contract, so the generated frontend is
-  identical whichever you pick
+- **Four backends, one API** — Django (Python, DRF), Express (TypeScript, Prisma), FastAPI
+  (Python, Pydantic), or Spring Boot (Java, Spring Data JPA). All four expose the same HTTP
+  contract, so the generated frontend is identical whichever you pick
 - **Automatic API sync** — change a serializer or Zod schema, get updated TypeScript types and API client instantly (fullstack)
 - **Resource scaffolding** — `make:resource BlogPost` creates everything you need for the resource based on your project type
 - **AI-ready** — generates `CLAUDE.md` and skill files so AI coding assistants understand your entire stack
@@ -24,7 +24,8 @@ Building web apps usually means gluing together separate projects, manually keep
 ### Prerequisites
 
 - **Node.js** >= 20.5.0 and **npm**
-- **Python 3** — for a Django or FastAPI backend (not needed for Express)
+- **Python 3** — for a Django or FastAPI backend (not needed for Express or Spring Boot)
+- **Java 17+** (a JDK) — for a Spring Boot backend only
 
 ### Installation
 
@@ -49,6 +50,9 @@ blacksmith init my-app --type fullstack --backend express
 
 # Fullstack with a FastAPI + Pydantic backend
 blacksmith init my-app --type fullstack --backend fastapi
+
+# Fullstack with a Spring Boot (Java) backend
+blacksmith init my-app --type fullstack --backend spring
 
 # Backend only
 blacksmith init my-app --type backend --backend django
@@ -84,10 +88,10 @@ What starts depends on your project type:
 | `blacksmith eject` | Remove Blacksmith, keep a clean project |
 | `blacksmith setup` | Set up the entire project (backend + frontend) |
 | `blacksmith setup:ai` | Generate/regenerate CLAUDE.md with AI development skills |
-| `blacksmith setup:backend` | Set up the backend (install Python, create venv, install deps) |
+| `blacksmith setup:backend` | Set up the backend (Python venv + deps, `npm install`, or Gradle build, depending on the framework) |
 | `blacksmith setup:frontend` | Set up the frontend (install Node.js, install deps) |
 | `blacksmith skills` | List available AI skills |
-| `blacksmith backend <cmd>` | Run a backend command (`manage.py` for Django, `npm` for Express, `python -m` for FastAPI) |
+| `blacksmith backend <cmd>` | Run a backend command (`manage.py` for Django, `npm` for Express, `python -m` for FastAPI, `./gradlew` for Spring Boot) |
 | `blacksmith frontend <cmd>` | Run an npm command in the frontend |
 
 ## Project Structures
@@ -96,7 +100,7 @@ What starts depends on your project type:
 
 ```
 my-app/
-├── backend/                  # Django project (Express uses src/ + prisma/, FastAPI uses app/ + migrations/)
+├── backend/                  # Django project (Express uses src/ + prisma/, FastAPI uses app/ + migrations/, Spring Boot uses src/main/ + build.gradle)
 │   ├── config/               # Settings, URLs, WSGI/ASGI
 │   ├── apps/                 # Django apps (one per resource)
 │   │   └── users/            # Built-in user app with JWT auth
@@ -154,6 +158,10 @@ With `--backend express` the backend is instead **Express 5** + **Prisma** + **Z
 With `--backend fastapi` the backend is instead **FastAPI** + **Pydantic** +
 **SQLAlchemy**, in Python, exposing the same HTTP API.
 
+With `--backend spring` the backend is instead **Spring Boot 4** + **Spring Data JPA** +
+**Spring Security** (JWT) + **Flyway** + **springdoc-openapi**, in Java 17+ built with Gradle,
+exposing the same HTTP API.
+
 ### Frontend
 - **React 19** with TypeScript (strict mode)
 - **Vite** for fast builds and HMR
@@ -175,6 +183,7 @@ blacksmith make:resource BlogPost
 - `apps/blog_posts/` — model, serializer, viewset, urls, admin, tests
 - Automatically registered in `INSTALLED_APPS` and `config/urls.py`
 - Migrations run automatically
+- On Spring Boot: an `app.blogposts` package (entity, repository, service, controller, records, JUnit tests) and the next Flyway migration
 
 **Frontend** (fullstack and frontend projects):
 - `src/api/hooks/blog-posts/` — query and mutation hooks
@@ -188,7 +197,7 @@ blacksmith make:resource BlogPost
 Blacksmith bridges the backend and React through OpenAPI:
 
 1. The backend serves an OpenAPI schema — Django via `drf-spectacular`, Express via its
-   OpenAPI registry, FastAPI natively
+   OpenAPI registry, FastAPI natively, Spring Boot via `springdoc-openapi`
 2. `@hey-api/openapi-ts` generates a typed API client from that schema
 3. During `blacksmith dev`, a file watcher detects backend changes and re-syncs automatically
 

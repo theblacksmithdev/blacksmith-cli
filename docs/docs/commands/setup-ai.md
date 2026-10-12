@@ -54,6 +54,7 @@ the wrong framework are worse than none, so a project never gets another backend
 | Django | `django`, `django-rest-advanced`, `api-documentation`, `backend-modularization` |
 | Express | `express`, `express-prisma`, `express-openapi` |
 | FastAPI | `fastapi`, `fastapi-sqlalchemy` (models and Alembic migrations) |
+| Spring Boot | `spring`, `spring-jpa` (entities and Flyway migrations) |
 
 The project overview, CLI, guidelines, clean-code and programming-paradigms skills
 describe the project's own backend too.

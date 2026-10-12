@@ -1,0 +1,15 @@
+package app.{{javaPackage}}.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import org.openapitools.jackson.nullable.JsonNullable;
+
+/**
+ * A partial update: any subset of the writable fields. {@link JsonNullable} tells
+ * a field left out (undefined, unchanged) from one sent as {@code null}, which
+ * these fields reject because they are not nullable.
+ */
+public record Patched{{Name}}Request(
+        JsonNullable<@NotBlank @Size(min = 1, max = 255) String> title,
+        JsonNullable<@NotNull String> description) {}

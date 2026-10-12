@@ -21,16 +21,8 @@ export function StackOverview() {
       <InfoCard
         icon={<Database />}
         title="Backend"
-{{#if isExpress}}
-        badge="Express"
-        description="Express REST API with JWT auth, Prisma, and auto-generated OpenAPI docs."
-{{else if isFastapi}}
-        badge="FastAPI"
-        description="FastAPI with JWT auth, SQLAlchemy, and auto-generated OpenAPI docs."
-{{else}}
-        badge="Django"
-        description="Django REST API with JWT auth, serializers, and auto-generated OpenAPI docs."
-{{/if}}
+        badge="{{backendLabel}}"
+        description="{{backendSummary}}"
       >
         <Button asChild variant="outline" size="sm">
           <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer">

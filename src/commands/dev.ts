@@ -1,8 +1,9 @@
 import net from 'node:net'
 import concurrently from 'concurrently'
 import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, loadConfig, hasBackend, hasFrontend } from '../utils/paths.js'
-import path from 'node:path'
+import { openApiTsBin } from '../utils/openapi.js'
 import { log } from '../utils/logger.js'
+import { BACKEND_TOOLCHAINS } from '../utils/backend-toolchains.js'
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -37,10 +38,9 @@ export async function dev() {
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
   const backendFramework = projectHasBackend ? getBackendFramework(root) : 'django'
-  const isExpressBackend = backendFramework === 'express'
-  const isFastapiBackend = backendFramework === 'fastapi'
-  // The label column is 7 characters wide; Django's trailing space pads it.
-  const backendName = isExpressBackend ? 'Express' : isFastapiBackend ? 'FastAPI' : 'Django '
+  const toolchain = BACKEND_TOOLCHAINS[backendFramework]
+  // The label column is 7 characters wide
+  const backendName = toolchain.label.padEnd(7)
 
   let backendPort: number | undefined
   let frontendPort: number | undefined
@@ -73,7 +73,7 @@ export async function dev() {
     log.step(`Vite        → http://localhost:${frontendPort}`)
   }
   if (projectHasBackend && projectHasFrontend) {
-    log.step(`OpenAPI sync → watching backend ${isExpressBackend ? '.ts' : '.py'} files`)
+    log.step(`OpenAPI sync → watching backend ${toolchain.watch.ext} files`)
   }
   log.blank()
 
@@ -81,41 +81,16 @@ export async function dev() {
 
   if (projectHasBackend && backendPort) {
     const backendDir = getBackendDir(root)
-    let backendProcess: Parameters<typeof concurrently>[0][number]
-    if (isExpressBackend) {
-      backendProcess = {
-        command: 'npm run dev',
-        name: 'express',
-        cwd: backendDir,
-        // The generated server reads PORT, so a port collision resolved
-        // above is respected without editing .env
-        env: { PORT: String(backendPort) },
-        prefixColor: 'green',
-      }
-    } else if (isFastapiBackend) {
-      // uvicorn runs from the venv created by `blacksmith init`; --reload
-      // matches the hot reload the Django and Express dev servers provide.
-      backendProcess = {
-        command: `./venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${backendPort} --reload`,
-        name: 'fastapi',
-        cwd: backendDir,
-        prefixColor: 'green',
-      }
-    } else {
-      backendProcess = {
-        command: `./venv/bin/python manage.py runserver 0.0.0.0:${backendPort}`,
-        name: 'django',
-        cwd: backendDir,
-        prefixColor: 'green',
-      }
+    for (const devProcess of toolchain.devProcesses(backendPort)) {
+      processes.push({ ...devProcess, cwd: backendDir, prefixColor: 'green' })
     }
-    processes.push(backendProcess)
   }
 
   if (projectHasFrontend && frontendPort) {
     const frontendDir = getFrontendDir(root)
+    // The port findAvailablePort settled on, which vite.config.ts cannot know
     processes.push({
-      command: 'npm run dev',
+      command: `npm run dev -- --port ${frontendPort}`,
       name: 'vite',
       cwd: frontendDir,
       prefixColor: 'blue',
@@ -126,18 +101,12 @@ export async function dev() {
   if (projectHasBackend && projectHasFrontend) {
     const backendDir = getBackendDir(root)
     const frontendDir = getFrontendDir(root)
-    const syncCmd = `${process.execPath} ${path.join(frontendDir, 'node_modules', '.bin', 'openapi-ts')}`
+    const syncCmd = `${process.execPath} ${openApiTsBin(frontendDir)}`
 
     // Source extension and the paths worth ignoring differ per framework, but
     // the sync itself does not: openapi-ts reads /api/schema/ off whichever
     // dev server is running.
-    const watchExt = isExpressBackend ? '.ts' : '.py'
-    const ignoredPrefixes = isExpressBackend
-      ? ['node_modules/', 'dist/', '.git/']
-      : ['venv/']
-    const ignoredFragments = isExpressBackend
-      ? ['/node_modules/', '/dist/']
-      : ['__pycache__', '/migrations/']
+    const { ext: watchExt, ignoredPrefixes, ignoredFragments, settleMs } = toolchain.watch
 
     const watcherCode = [
       `const{watch}=require("fs"),{exec}=require("child_process");`,
@@ -155,7 +124,7 @@ export async function dev() {
       `if(err)console.error("Sync failed:",se||err.message);`,
       `else console.log("OpenAPI types synced");`,
       `})`,
-      `},2000)});`,
+      `},${settleMs})});`,
       `console.log("Watching for ${watchExt} changes...");`,
     ].join('')
 

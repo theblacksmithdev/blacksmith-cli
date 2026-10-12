@@ -1,5 +1,5 @@
 import type { BackendFramework } from './paths.js'
-import { exec, execPython } from './exec.js'
+import { exec, execGradle, execPython } from './exec.js'
 
 /** How `blacksmith backend <args>` reaches a framework's own toolchain. */
 export interface BackendPassthrough {
@@ -14,7 +14,7 @@ export interface BackendPassthrough {
  * commands, so they get `npm <args>` — the same passthrough the `frontend`
  * command provides, which covers scripts, installs and `npm exec prisma ...`.
  * FastAPI projects get `python -m <args>` in the venv, which covers Alembic
- * migrations, pytest and uvicorn.
+ * migrations, pytest and uvicorn. Spring projects get `./gradlew <args>`.
  */
 export const BACKEND_PASSTHROUGHS: Record<BackendFramework, BackendPassthrough> = {
   django: {
@@ -31,5 +31,10 @@ export const BACKEND_PASSTHROUGHS: Record<BackendFramework, BackendPassthrough> 
     needs: 'a Python module to run',
     examples: ['alembic upgrade head', 'alembic revision --autogenerate -m "add a field"'],
     run: (args, backendDir) => execPython(['-m', ...args], backendDir),
+  },
+  spring: {
+    needs: 'a Gradle task',
+    examples: ['test', 'dependencies'],
+    run: (args, backendDir) => execGradle(args, backendDir),
   },
 }

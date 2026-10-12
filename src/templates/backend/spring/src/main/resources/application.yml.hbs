@@ -1,0 +1,37 @@
+# Settings for every environment. Values in ${...} come from the environment or
+# from .env, which is read as a properties file.
+spring:
+  application:
+    name: app
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    # H2 in PostgreSQL mode for development; point DATABASE_URL at Postgres to deploy
+    url: ${DATABASE_URL:jdbc:h2:file:./data/db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH}
+  jpa:
+    # Flyway owns the schema. Hibernate only checks the entities match it.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+server:
+  port: {{backendPort}}
+
+app:
+  secret-key: ${SECRET_KEY}
+  cors-origins: ${CORS_ORIGINS:http://localhost:{{frontendPort}}}
+  access-token-minutes: 30
+  refresh-token-days: 7
+
+# The same documentation URLs as the Django, Express and FastAPI backends
+springdoc:
+  api-docs:
+    # Mapped without the slash, so springdoc's derived URLs (/api/schema/swagger-config,
+    # which Swagger UI loads) have no double slash; OpenApiConfig serves /api/schema/ too
+    path: /api/schema
+    version: openapi_3_0
+  swagger-ui:
+    path: /api/docs/
+  override-with-generic-response: false

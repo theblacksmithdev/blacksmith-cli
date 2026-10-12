@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url'
 import { useTmpDir } from './helpers.js'
 import { renderDirectory, renderTemplateFile } from '../utils/template.js'
 import { generateNames } from '../utils/names.js'
+import { projectLayout } from '../utils/scaffold.js'
+import type { BackendFramework } from '../utils/paths.js'
 
 const TEMPLATES_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -12,35 +14,24 @@ const TEMPLATES_DIR = path.resolve(
   'templates'
 )
 
-const PROJECT_CONTEXT = {
-  projectName: 'my-app',
-  projectDomain: 'my-app',
-  backendPort: 8000,
-  frontendPort: 5173,
-  themePreset: 'default',
-  projectType: 'fullstack',
-  needsBackend: true,
-  needsFrontend: true,
-  backendFramework: 'django',
-  isDjango: true,
-  isExpress: false,
+function projectContext(framework: BackendFramework) {
+  return {
+    projectName: 'my-app',
+    projectDomain: 'my-app',
+    backendPort: 8000,
+    frontendPort: 5173,
+    themePreset: 'default',
+    ...projectLayout('fullstack', framework),
+  }
 }
 
-const EXPRESS_CONTEXT = {
-  ...PROJECT_CONTEXT,
-  backendFramework: 'express',
-  isDjango: false,
-  isExpress: true,
-}
-
-const FASTAPI_CONTEXT = {
-  ...PROJECT_CONTEXT,
-  backendFramework: 'fastapi',
-  isDjango: false,
-  isExpress: false,
-}
+const PROJECT_CONTEXT = projectContext('django')
+const EXPRESS_CONTEXT = projectContext('express')
+const FASTAPI_CONTEXT = projectContext('fastapi')
+const SPRING_CONTEXT = projectContext('spring')
 
 const RESOURCE_CONTEXT = { ...generateNames('product'), projectName: 'my-app' }
+const SPRING_RESOURCE_CONTEXT = { ...RESOURCE_CONTEXT, javaPackage: 'products', migrationVersion: 2 }
 
 function walkFiles(dir: string): string[] {
   const out: string[] = []
@@ -61,9 +52,12 @@ describe.each([
   ['backend/django', path.join('backend', 'django'), PROJECT_CONTEXT],
   ['backend/express', path.join('backend', 'express'), EXPRESS_CONTEXT],
   ['backend/fastapi', path.join('backend', 'fastapi'), FASTAPI_CONTEXT],
+  ['backend/spring', path.join('backend', 'spring'), SPRING_CONTEXT],
   ['frontend', 'frontend', PROJECT_CONTEXT],
   ['resource/backend/django', path.join('resource', 'backend', 'django'), RESOURCE_CONTEXT],
   ['resource/backend/express', path.join('resource', 'backend', 'express'), RESOURCE_CONTEXT],
+  ['resource/backend/fastapi', path.join('resource', 'backend', 'fastapi'), RESOURCE_CONTEXT],
+  ['resource/backend/spring', path.join('resource', 'backend', 'spring'), SPRING_RESOURCE_CONTEXT],
   ['resource/pages', path.join('resource', 'pages'), RESOURCE_CONTEXT],
   ['resource/api-hooks', path.join('resource', 'api-hooks'), RESOURCE_CONTEXT],
 ])('%s templates', (_label, relDir, context) => {
@@ -98,6 +92,90 @@ describe.each([
     renderDirectory(path.join(TEMPLATES_DIR, relDir), dest, context)
 
     expect(walkFiles(dest).filter((f) => f.endsWith('.hbs'))).toEqual([])
+  })
+})
+
+describe('backend/spring templates', () => {
+  const getTmpDir = useTmpDir()
+
+  it('copy the Gradle wrapper byte for byte, with gradlew executable', () => {
+    const src = path.join(TEMPLATES_DIR, 'backend', 'spring')
+    const dest = path.join(getTmpDir(), 'out')
+    renderDirectory(src, dest, SPRING_CONTEXT)
+
+    const jar = path.join('gradle', 'wrapper', 'gradle-wrapper.jar')
+    expect(fs.readFileSync(path.join(dest, jar)).equals(fs.readFileSync(path.join(src, jar)))).toBe(true)
+    expect(fs.statSync(path.join(dest, 'gradlew')).mode & 0o111).not.toBe(0)
+  })
+})
+
+/**
+ * The ports chosen at `init` reach every file that names them: the Vite dev
+ * server and proxy, and each backend's default CORS origin. A backend that kept
+ * 5173 would reject every browser request from a frontend on another port.
+ */
+describe('ports chosen at init', () => {
+  const getTmpDir = useTmpDir()
+
+  function render(relDir: string, framework: BackendFramework) {
+    const dest = path.join(getTmpDir(), relDir)
+    renderDirectory(path.join(TEMPLATES_DIR, relDir), dest, {
+      ...projectContext(framework),
+      backendPort: 8099,
+      frontendPort: 5199,
+    })
+    return (file: string) => fs.readFileSync(path.join(dest, file), 'utf-8')
+  }
+
+  it('reach the Vite dev server and its proxy', () => {
+    const viteConfig = render('frontend', 'django')('vite.config.ts')
+
+    expect(viteConfig).toContain('port: 5199,')
+    expect(viteConfig).toContain("target: 'http://localhost:8099',")
+  })
+
+  it.each([
+    ['django', '.env.example', 'CORS_ALLOWED_ORIGINS=http://localhost:5199,'],
+    ['express', '.env.example', 'CORS_ALLOWED_ORIGINS=http://localhost:5199,'],
+    ['fastapi', '.env.example', 'CORS_ORIGINS=["http://localhost:5199"]'],
+    ['fastapi', 'app/config.py', '["http://localhost:5199"]'],
+    ['spring', '.env.example', 'CORS_ORIGINS=http://localhost:5199'],
+    ['spring', 'src/main/resources/application.yml', '${CORS_ORIGINS:http://localhost:5199}'],
+  ] as const)('reach the %s CORS default in %s', (framework, file, expected) => {
+    expect(render(path.join('backend', framework), framework)(file)).toContain(expected)
+  })
+})
+
+/**
+ * The generated hooks call the client in src/api/generated/client.gen.ts, so
+ * that is the one the token interceptors must sit on. A separate client would
+ * leave every generated request unauthenticated.
+ */
+describe('frontend API client', () => {
+  const getTmpDir = useTmpDir()
+
+  function renderClient(projectType: 'fullstack' | 'frontend') {
+    const dest = path.join(getTmpDir(), projectType)
+    renderDirectory(path.join(TEMPLATES_DIR, 'frontend'), dest, {
+      ...PROJECT_CONTEXT,
+      ...projectLayout(projectType, 'django'),
+    })
+    return fs.readFileSync(path.join(dest, 'src', 'api', 'client.ts'), 'utf-8')
+  }
+
+  it('configures the generated client in a fullstack project', () => {
+    const client = renderClient('fullstack')
+
+    expect(client).toContain("import { client } from './generated/client.gen'")
+    expect(client).toContain('client.setConfig({ baseUrl: API_URL })')
+    expect(client).not.toContain('createClient')
+  })
+
+  it('creates its own client in a frontend-only project, which may have no generated one', () => {
+    const client = renderClient('frontend')
+
+    expect(client).toContain('export const client = createClient(')
+    expect(client).not.toContain("import { client } from './generated/client.gen'")
   })
 })
 

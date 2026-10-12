@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { useTmpDir } from '../../__tests__/helpers.js'
-import { ensureGitignore } from '../gitignore.js'
+import { ensureGitignore, healBackendGitignore } from '../gitignore.js'
+import { log } from '../logger.js'
 import type { GitignoreKind } from '../gitignore.js'
 import { getTemplatesDir } from '../paths.js'
 
@@ -108,5 +109,27 @@ describe('gitignore templates', () => {
     for (const kind of kinds) {
       expect(fs.existsSync(path.join(templatesDir, kind, 'gitignore')), kind).toBe(true)
     }
+  })
+})
+
+describe('healBackendGitignore', () => {
+  const getTmpDir = useTmpDir()
+
+  it("writes the framework's .gitignore and names the dependency directory it ignores", () => {
+    const step = vi.spyOn(log, 'step').mockImplementation(() => {})
+
+    healBackendGitignore(getTmpDir(), 'express')
+
+    expect(fs.readFileSync(path.join(getTmpDir(), '.gitignore'), 'utf-8')).toContain('node_modules')
+    expect(step).toHaveBeenCalledWith('Added backend/.gitignore (ignores node_modules/)')
+  })
+
+  it('says nothing when the .gitignore is already there', () => {
+    const step = vi.spyOn(log, 'step').mockImplementation(() => {})
+    fs.writeFileSync(path.join(getTmpDir(), '.gitignore'), '# mine\n')
+
+    healBackendGitignore(getTmpDir(), 'fastapi')
+
+    expect(step).not.toHaveBeenCalled()
   })
 })

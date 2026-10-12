@@ -1,0 +1,28 @@
+package app.{{javaPackage}}.dto;
+
+import app.{{javaPackage}}.{{Name}};
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
+
+/** A {{name}} as the API returns it. The schema name matches the other backends. */
+@Schema(name = "{{Name}}")
+public record {{Name}}Response(
+        long id,
+        String title,
+        String description,
+        long createdBy,
+        String createdByEmail,
+        Instant createdAt,
+        Instant updatedAt) {
+
+    public static {{Name}}Response from({{Name}} {{name}}) {
+        return new {{Name}}Response(
+                {{name}}.getId(),
+                {{name}}.getTitle(),
+                {{name}}.getDescription(),
+                {{name}}.getCreatedBy().getId(),
+                {{name}}.getCreatedBy().getEmail(),
+                {{name}}.getCreatedAt(),
+                {{name}}.getUpdatedAt());
+    }
+}

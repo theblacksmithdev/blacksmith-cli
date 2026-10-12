@@ -1,5 +1,7 @@
 import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, hasBackend, hasFrontend } from '../utils/paths.js'
-import { exec, execPython } from '../utils/exec.js'
+import { exec } from '../utils/exec.js'
+import { BACKEND_TOOLCHAINS } from '../utils/backend-toolchains.js'
+import { runStep } from '../utils/steps.js'
 import { log, spinner } from '../utils/logger.js'
 
 export async function build() {
@@ -13,7 +15,6 @@ export async function build() {
 
   const projectHasBackend = hasBackend(root)
   const projectHasFrontend = hasFrontend(root)
-  const isExpressBackend = projectHasBackend && getBackendFramework(root) === 'express'
 
   // Build frontend
   if (projectHasFrontend) {
@@ -29,45 +30,16 @@ export async function build() {
     }
   }
 
-  // Compile the backend (Express) or collect static files (Django)
-  if (projectHasBackend) {
-    const backendDir = getBackendDir(root)
-
-    if (isExpressBackend) {
-      const backendSpinner = spinner('Building backend...')
-      try {
-        // The template's build script regenerates the Prisma client first, so
-        // a clean checkout compiles without a separate setup step.
-        await exec('npm', ['run', 'build'], { cwd: backendDir, silent: true })
-        backendSpinner.succeed('Backend built → dist/')
-      } catch (error: any) {
-        backendSpinner.fail('Backend build failed')
-        log.error(error.message || error)
-        process.exit(1)
-      }
-    } else {
-      const backendSpinner = spinner('Collecting static files...')
-      try {
-        await execPython(
-          ['manage.py', 'collectstatic', '--noinput'],
-          backendDir,
-          true
-        )
-        backendSpinner.succeed('Static files collected')
-      } catch (error: any) {
-        backendSpinner.fail('Failed to collect static files')
-        log.error(error.message || error)
-        process.exit(1)
-      }
-    }
+  // Compile or collect whatever the backend's production build needs
+  const toolchain = projectHasBackend ? BACKEND_TOOLCHAINS[getBackendFramework(root)] : null
+  if (toolchain?.build) {
+    await runStep(toolchain.build, getBackendDir(root))
   }
 
   log.blank()
   log.success('Production build complete!')
   log.blank()
   if (projectHasFrontend) log.step('Frontend assets: dist/')
-  if (projectHasBackend) {
-    log.step(isExpressBackend ? 'Backend output: dist/' : 'Backend ready for deployment')
-  }
+  if (toolchain) log.step(toolchain.buildOutput)
   log.blank()
 }

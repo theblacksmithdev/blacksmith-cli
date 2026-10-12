@@ -106,7 +106,7 @@ describe('setupAiDev', () => {
   })
 
   describe('backend framework selection', () => {
-    async function skillIds(backendFramework: 'django' | 'express' | 'fastapi') {
+    async function skillIds(backendFramework: 'django' | 'express' | 'fastapi' | 'spring') {
       await setupAiDev({
         projectDir: getTmpDir(),
         projectName: 'test-project',
@@ -180,6 +180,35 @@ describe('setupAiDev', () => {
       expect(ids).not.toContain('django-rest-advanced')
       expect(ids).not.toContain('backend-modularization')
       expect(ids).not.toContain('express')
+    })
+
+    it('writes the Spring skills and none of the other frameworks\' ones', async () => {
+      const ids = await skillIds('spring')
+
+      expect(ids).toContain('spring')
+      expect(ids).toContain('spring-jpa')
+      expect(ids).not.toContain('django')
+      expect(ids).not.toContain('express')
+      expect(ids).not.toContain('fastapi')
+      expect(ids).not.toContain('backend-modularization')
+    })
+
+    it('describes Spring make:resource in the CLI skill', async () => {
+      await setupAiDev({
+        projectDir: getTmpDir(),
+        projectName: 'test-project',
+        includeChakraUiSkill: true,
+        backendFramework: 'spring',
+      })
+
+      const cli = fs.readFileSync(
+        path.join(getTmpDir(), '.claude', 'skills', 'blacksmith-cli', 'SKILL.md'),
+        'utf-8'
+      )
+      expect(cli).toContain('"framework": "spring"')
+      expect(cli).toContain('src/main/java/app/blogposts/')
+      expect(cli).toContain('Flyway migration')
+      expect(cli).not.toContain('Not available')
     })
 
     it('describes FastAPI in every framework-neutral skill', async () => {

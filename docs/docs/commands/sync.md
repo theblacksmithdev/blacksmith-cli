@@ -15,6 +15,13 @@ URLs (`/api/schema/`, `/api/docs/`, `/api/redoc/`). Like Express, the export run
 offline — no server needs to be listening.
 :::
 
+:::note Spring Boot backends
+The schema is exported with `./gradlew exportOpenApi -Pout=<path>`, which runs the app
+in-process through MockMvc and writes the OpenAPI 3.0 JSON document — no server needs to be
+listening. It takes a few seconds, since it starts a JVM. springdoc-openapi serves the schema
+at the same URLs (`/api/schema/`, `/api/docs/`, `/api/redoc/`).
+:::
+
 
 Synchronize the OpenAPI schema between the backend and the React frontend.
 
@@ -34,7 +41,7 @@ The `sync` command performs a two-step process:
 
 ### Step 1: Generate OpenAPI Schema
 
-Uses Django's `drf-spectacular` to generate an OpenAPI 3.0 schema from your Django REST Framework serializers and viewsets. (Express exports the same schema from its OpenAPI registry, and FastAPI from its built-in schema.)
+Uses Django's `drf-spectacular` to generate an OpenAPI 3.0 schema from your Django REST Framework serializers and viewsets. (Express exports the same schema from its OpenAPI registry, FastAPI from its built-in schema, and Spring Boot through springdoc-openapi.)
 
 ### Step 2: Generate Frontend Code
 
@@ -51,7 +58,7 @@ All generated files are placed in `frontend/src/api/generated/`.
 
 ## When to Use
 
-The sync happens automatically during `blacksmith dev` whenever Python files change. You need to run `sync` manually when:
+The sync happens automatically during `blacksmith dev` whenever Python files change (`.ts` files for Express, `.java` files for Spring Boot). You need to run `sync` manually when:
 
 - You've made backend changes outside of `blacksmith dev`
 - The auto-sync encountered an error and you need to retry

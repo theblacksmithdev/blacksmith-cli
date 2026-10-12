@@ -27,6 +27,7 @@ vi.mock('../../utils/template.js', () => templateMocks)
 
 const execMocks = vi.hoisted(() => ({
   exec: vi.fn(),
+  execGradle: vi.fn(),
   execPython: vi.fn(),
 }))
 vi.mock('../../utils/exec.js', () => execMocks)
@@ -219,6 +220,63 @@ describe('makeResource', () => {
       await expect(makeResource('Product')).rejects.toThrow('process.exit called')
 
       expect(log.error).toHaveBeenCalledWith('Backend module "products" already exists.')
+    })
+  })
+
+  describe('on a Spring Boot backend', () => {
+    const migrationsDir = () =>
+      path.join(getTmpDir(), 'backend', 'src', 'main', 'resources', 'db', 'migration')
+
+    function setupSpring() {
+      pathMocks.findProjectRoot.mockReturnValue(getTmpDir())
+      pathMocks.getBackendDir.mockReturnValue(path.join(getTmpDir(), 'backend'))
+      pathMocks.getFrontendDir.mockReturnValue(path.join(getTmpDir(), 'frontend'))
+      pathMocks.getTemplatesDir.mockReturnValue('/templates')
+      pathMocks.getBackendFramework.mockReturnValue('spring')
+      execMocks.exec.mockResolvedValue({})
+      execMocks.execGradle.mockResolvedValue({})
+      fs.mkdirSync(migrationsDir(), { recursive: true })
+      fs.writeFileSync(path.join(migrationsDir(), 'V1__create_users.sql'), '')
+    }
+
+    it('renders the package, test and next migration into the backend root', async () => {
+      setupSpring()
+      fs.writeFileSync(path.join(migrationsDir(), 'V2__create_posts.sql'), '')
+
+      await makeResource('BlogPost')
+
+      expect(templateMocks.renderDirectory).toHaveBeenCalledWith(
+        path.join('/templates', 'resource', 'backend', 'spring'),
+        path.join(getTmpDir(), 'backend'),
+        expect.objectContaining({ Name: 'BlogPost', javaPackage: 'blogposts', migrationVersion: 3 })
+      )
+      // Spring finds the controller by component scan: nothing to register
+      expect(templateMocks.insertBeforeMarker).not.toHaveBeenCalledWith(
+        expect.stringContaining('backend'),
+        expect.anything(),
+        expect.anything()
+      )
+    })
+
+    it('compiles the new package before syncing the frontend', async () => {
+      setupSpring()
+
+      await makeResource('BlogPost')
+
+      const backendDir = path.join(getTmpDir(), 'backend')
+      expect(execMocks.execGradle.mock.calls[0]).toEqual([['classes', '--console=plain'], backendDir, true])
+      expect(execMocks.execGradle.mock.calls[1][0][0]).toBe('exportOpenApi')
+      expect(log.success).toHaveBeenCalledWith('Resource "BlogPost" created successfully!')
+    })
+
+    it('refuses to overwrite an existing package', async () => {
+      setupSpring()
+      fs.mkdirSync(path.join(getTmpDir(), 'backend', 'src', 'main', 'java', 'app', 'blogposts'), { recursive: true })
+
+      await expect(makeResource('BlogPost')).rejects.toThrow('process.exit called')
+
+      expect(log.error).toHaveBeenCalledWith('Backend package "app.blogposts" already exists.')
+      expect(templateMocks.renderDirectory).not.toHaveBeenCalled()
     })
   })
 

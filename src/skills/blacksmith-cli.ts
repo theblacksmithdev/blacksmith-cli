@@ -1,5 +1,6 @@
 import type { Skill, SkillContext } from './types.js'
 import { backendProfile } from './backend-profiles.js'
+import { BACKEND_FRAMEWORK_CHOICES, BACKEND_FRAMEWORK_CHOICES_QUOTED, BACKEND_TOOLCHAINS } from '../utils/backend-toolchains.js'
 
 export const blacksmithCliSkill: Skill = {
   id: 'blacksmith-cli',
@@ -44,14 +45,14 @@ Project settings are stored in \`blacksmith.config.json\` at the project root:
 - **\`type\`** — \`"fullstack"\`, \`"backend"\`, or \`"frontend"\`. Determines which commands and steps are available
 - **\`backend\`** — present for fullstack and backend projects. Absent for frontend-only
 - **\`frontend\`** — present for fullstack and frontend projects. Absent for backend-only
-- **\`backend.framework\`** — \`"django"\`, \`"express"\`, or \`"fastapi"\`. Absent means Django, for projects generated before Express support
+- **\`backend.framework\`** — ${BACKEND_FRAMEWORK_CHOICES_QUOTED}. Absent means Django, for projects generated before Express support
 - **Ports** are read by \`blacksmith dev\` — change them here, not in code
 - The CLI finds the project root by walking up directories looking for this file
 
 ### How \`blacksmith dev\` Works
 
 Depends on project type:
-- **Fullstack**: Runs three concurrent processes — ${backend.name}, Vite, and an OpenAPI file watcher (auto-syncs types on \`${backend.sourceExt}\` changes)
+- **Fullstack**: Runs ${backend.name}, Vite, and an OpenAPI file watcher concurrently (the watcher auto-syncs types on \`${BACKEND_TOOLCHAINS[framework].watch.ext}\` changes)
 - **Backend**: Runs ${backend.name} only
 - **Frontend**: Runs Vite only
 
@@ -92,7 +93,7 @@ blacksmith init my-app --type fullstack --backend ${framework} -b 9000 -f 3000 -
 | Flag | Description |
 |---|---|
 | \`--type <type>\` | Project type: fullstack, backend, or frontend (default: fullstack) |
-| \`--backend <framework>\` | Backend framework: django, express, or fastapi (default: django) |
+| \`--backend <framework>\` | Backend framework: ${BACKEND_FRAMEWORK_CHOICES} (default: django) |
 | \`-b, --backend-port <port>\` | Backend port (default: 8000) |
 | \`-f, --frontend-port <port>\` | Vite port (default: 5173) |
 | \`-t, --theme-color <preset>\` | UI theme preset: default (OpenAI-style monochrome), neutral (monochrome, square corners), blue, green, red, violet. Lives in \`frontend/src/theme/presets.ts\` |

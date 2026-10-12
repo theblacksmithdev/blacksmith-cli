@@ -1,0 +1,8 @@
+# Active for every test run (see build.gradle). Each run gets a fresh in-memory
+# database, built by the Flyway migrations exactly as production's is.
+spring:
+  datasource:
+    url: jdbc:h2:mem:test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+
+app:
+  secret-key: test-secret-key-at-least-32-bytes-long

@@ -3,7 +3,7 @@ import path from 'node:path'
 import { getTemplatesDir } from './paths.js'
 import type { BackendFramework, ProjectType } from './paths.js'
 import { renderToFile } from './template.js'
-import { schemaFileName } from './openapi.js'
+import { BACKEND_TOOLCHAINS } from './backend-toolchains.js'
 
 /**
  * Template context describing the shape of a project. Templates that differ
@@ -27,8 +27,11 @@ export function projectLayout(
     isDjango: backendFramework === 'django',
     isExpress: backendFramework === 'express',
     isFastapi: backendFramework === 'fastapi',
+    isSpring: backendFramework === 'spring',
+    backendLabel: BACKEND_TOOLCHAINS[backendFramework].label,
+    backendSummary: BACKEND_TOOLCHAINS[backendFramework].summary,
     // Filename the CI workflow exports the OpenAPI document to
-    schemaFile: schemaFileName(backendFramework),
+    schemaFile: BACKEND_TOOLCHAINS[backendFramework].schemaFile,
     // Paths relative to the project root, as CI working directories
     backendPath: isFullstack ? 'backend' : '.',
     frontendPath: isFullstack ? 'frontend' : '.',

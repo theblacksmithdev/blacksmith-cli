@@ -4,31 +4,32 @@ sidebar_position: 2
 
 # Choosing a Backend
 
-Blacksmith generates one of three backends: **Django**, **Express**, or **FastAPI**. All
-three expose the same HTTP API, so the React frontend is identical whichever you pick and
+Blacksmith generates one of four backends: **Django**, **Express**, **FastAPI**, or
+**Spring Boot**. All four expose the same HTTP API, so the React frontend is identical whichever you pick and
 you are choosing a team and an ecosystem, not an API design.
 
 ```bash
 blacksmith init my-app --backend django    # default
 blacksmith init my-app --backend express
 blacksmith init my-app --backend fastapi
+blacksmith init my-app --backend spring
 ```
 
 Omit the flag and `init` asks.
 
 ## At a Glance
 
-| | Django | Express | FastAPI |
-|---|--------|---------|---------|
-| Language | Python 3.8+ | TypeScript (Node 20+) | Python 3.8+ |
-| Framework | Django + Django REST Framework | Express 5 | FastAPI |
-| ORM | Django ORM | Prisma | SQLAlchemy 2.0 |
-| Validation | DRF serializers | Zod | Pydantic |
-| OpenAPI | drf-spectacular | zod-to-openapi | Built into FastAPI |
-| Auth | SimpleJWT | jsonwebtoken + bcrypt | PyJWT + bcrypt |
-| Admin UI | Django admin, included | none (use Prisma Studio) | none |
-| Tests | pytest + pytest-django | Vitest + Supertest | pytest + httpx |
-| Resource layout | `apps/<name>/` | `src/modules/<name>/` | `app/` package (no resource scaffold yet) |
+| | Django | Express | FastAPI | Spring Boot |
+|---|--------|---------|---------|-------------|
+| Language | Python 3.8+ | TypeScript (Node 20+) | Python 3.8+ | Java 17+ |
+| Framework | Django + Django REST Framework | Express 5 | FastAPI | Spring Boot 4.1 (Web MVC), built with Gradle 9 |
+| ORM | Django ORM | Prisma | SQLAlchemy 2.0 | Spring Data JPA (Hibernate) + Flyway |
+| Validation | DRF serializers | Zod | Pydantic | Bean Validation |
+| OpenAPI | drf-spectacular | zod-to-openapi | Built into FastAPI | springdoc-openapi |
+| Auth | SimpleJWT | jsonwebtoken + bcrypt | PyJWT + bcrypt | Spring Security + JWT |
+| Admin UI | Django admin, included | none (use Prisma Studio) | none | none |
+| Tests | pytest + pytest-django | Vitest + Supertest | pytest + httpx | JUnit 5 + MockMvc |
+| Resource layout | `apps/<name>/` | `src/modules/<name>/` | `app/<name>/` package | `app.<name>` package |
 
 ## Pick Django If
 
@@ -58,9 +59,17 @@ Omit the flag and `init` asks.
 - You want Django's Python tooling (venv, pip, pytest) with fewer batteries:
   a small `app/` package you own, no admin, and Alembic for migrations
 
+## Pick Spring Boot If
+
+- Your team writes Java, or the API has to live alongside existing JVM services
+- You want a statically typed, compiled backend with the Spring ecosystem behind
+  it: Spring Data JPA, Spring Security, Bean Validation, and Flyway migrations
+- You can live with a slower edit loop: a saved `.java` file is live a few
+  seconds later rather than in a second or two
+
 ## What Is Identical
 
-Because the Express and FastAPI backends reproduce DRF's wire format, these do not change:
+Because the Express, FastAPI and Spring Boot backends reproduce DRF's wire format, these do not change:
 
 - Every URL, including trailing slashes
 - Pagination — `{ count, next, previous, results }`
@@ -70,26 +79,28 @@ Because the Express and FastAPI backends reproduce DRF's wire format, these do n
 - The whole `frontend/` tree, the auth flow, and every generated page
 
 `blacksmith dev`, `sync`, `test` and `make:resource` behave the same on all
-three; only what they run underneath differs. `build` still assumes Django, so
-check the table below before using it on a FastAPI project.
+four; only what they run underneath differs. `build` runs each backend's own
+production step; see the Build row below.
 
 ## What Differs Day to Day
 
-| Task | Django | Express | FastAPI |
-|------|--------|---------|---------|
-| Add a resource | `blacksmith make:resource Post` | same command | same command |
-| Where the model goes | `apps/posts/models.py` | `prisma/schema.prisma` | `app/posts/models.py` |
-| Migrate | `blacksmith backend makemigrations && ... migrate` | `blacksmith backend exec prisma migrate dev` | `blacksmith backend alembic revision --autogenerate -m "..." && ... alembic upgrade head` |
-| Create an admin user | `blacksmith backend createsuperuser` | no admin; use Prisma Studio | no admin; use `POST /api/auth/register/` |
-| Browse data | Django admin at `/admin/` | `blacksmith backend exec prisma studio` | no admin; use your own SQL client |
-| Run a management command | `blacksmith backend <command>` | `blacksmith backend run <script>` | `blacksmith backend <module>` (`python -m`) |
+| Task | Django | Express | FastAPI | Spring Boot |
+|------|--------|---------|---------|-------------|
+| Add a resource | `blacksmith make:resource Post` | same command | same command | same command |
+| Where the model goes | `apps/posts/models.py` | `prisma/schema.prisma` | `app/posts/models.py` | `src/main/java/app/posts/Post.java` |
+| Migrate | `blacksmith backend makemigrations && ... migrate` | `blacksmith backend exec prisma migrate dev` | `blacksmith backend alembic revision --autogenerate -m "..." && ... alembic upgrade head` | add a Flyway file in `src/main/resources/db/migration/`; it applies when the app starts |
+| Create an admin user | `blacksmith backend createsuperuser` | no admin; use Prisma Studio | no admin; use `POST /api/auth/register/` | no admin; use `POST /api/auth/register/` |
+| Browse data | Django admin at `/admin/` | `blacksmith backend exec prisma studio` | no admin; use your own SQL client | no admin; use your own SQL client |
+| Run a management command | `blacksmith backend <command>` | `blacksmith backend run <script>` | `blacksmith backend <module>` (`python -m`) | `blacksmith backend <task>` (`./gradlew`) |
+| Build for production | `collectstatic` | `tsc` into `dist/` | nothing to build | `bootJar` into `build/libs/app.jar` |
 
 ## Switching Later
 
-There is no automated migration between the three. The frontend and the API
+There is no automated migration between the four. The frontend and the API
 contract carry over unchanged, but the backend is a rewrite — Django models
-become a Prisma schema or SQLAlchemy models, DRF serializers become Zod or
-Pydantic schemas, viewsets become service/controller pairs or FastAPI routers.
+become a Prisma schema, SQLAlchemy models or JPA entities, DRF serializers become
+Zod or Pydantic schemas or Java records, viewsets become service/controller pairs,
+FastAPI routers or Spring controllers.
 
 Because the contract is identical, a gradual migration is possible: run both
 backends and move endpoints across behind a proxy. That is a manual exercise;
@@ -99,5 +110,5 @@ Blacksmith does not automate it.
 
 Projects generated before Express support have no `backend.framework` field in
 `blacksmith.config.json`. That absence reads as `django`, so they keep working
-untouched — nothing to migrate. Express and FastAPI projects record their
+untouched — nothing to migrate. Express, FastAPI and Spring Boot projects record their
 framework in the field, so the CLI always knows which toolchain to use.

@@ -1,93 +1,9 @@
-import fs from 'node:fs'
-import path from 'node:path'
 import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, hasBackend, hasFrontend } from '../utils/paths.js'
-import { exec, execPython } from '../utils/exec.js'
 import { log } from '../utils/logger.js'
-
-export interface TestOptions {
-  backend?: boolean
-  frontend?: boolean
-  coverage?: boolean
-  watch?: boolean
-}
-
-/**
- * Run the Python backend's pytest suite — Django and FastAPI share this
- * runner, which is why it carries no framework flag.
- *
- * pytest lives in venv/bin, but invoking it as `python -m pytest` also puts the
- * backend directory on sys.path: for Django that is what lets `conftest.py`
- * and the `apps.*` imports resolve the same way they do under manage.py, and
- * for FastAPI it is what makes the `app.*` package importable. FastAPI's
- * generated tests point DATABASE_URL at a throwaway sqlite file and build it
- * by running the Alembic migrations, so — like Django's test settings —
- * no database setup is needed before pytest starts.
- */
-async function runBackendTests(backendDir: string, options: TestOptions): Promise<boolean> {
-  if (!fs.existsSync(path.join(backendDir, 'venv'))) {
-    log.error('Virtual environment not found. Run "blacksmith setup:backend" first.')
-    return false
-  }
-
-  const args = ['-m', 'pytest']
-  if (options.coverage) {
-    args.push('--cov', '--cov-report=term-missing')
-  }
-
-  log.info('Running backend tests (pytest)...')
-  try {
-    await execPython(args, backendDir)
-    return true
-  } catch {
-    return false
-  }
-}
-
-/**
- * Run the Express backend's vitest suite.
- *
- * Its globalSetup rebuilds the SQLite test database from the Prisma schema,
- * so no migration step is needed here.
- */
-async function runExpressBackendTests(
-  backendDir: string,
-  options: TestOptions
-): Promise<boolean> {
-  if (!fs.existsSync(path.join(backendDir, 'node_modules'))) {
-    log.error('Dependencies not installed. Run "blacksmith setup:backend" first.')
-    return false
-  }
-
-  log.info('Running backend tests (vitest)...')
-  try {
-    await exec('npm', ['run', npmTestScript(options)], { cwd: backendDir })
-    return true
-  } catch {
-    return false
-  }
-}
-
-/** The package.json script matching the requested test mode. */
-function npmTestScript(options: TestOptions): string {
-  if (options.watch) return 'test:watch'
-  if (options.coverage) return 'test:coverage'
-  return 'test'
-}
-
-async function runFrontendTests(frontendDir: string, options: TestOptions): Promise<boolean> {
-  if (!fs.existsSync(path.join(frontendDir, 'node_modules'))) {
-    log.error('Dependencies not installed. Run "blacksmith setup:frontend" first.')
-    return false
-  }
-
-  log.info('Running frontend tests (vitest)...')
-  try {
-    await exec('npm', ['run', npmTestScript(options)], { cwd: frontendDir })
-    return true
-  } catch {
-    return false
-  }
-}
+import { BACKEND_TOOLCHAINS } from '../utils/backend-toolchains.js'
+import { RUNTIMES } from '../utils/runtimes.js'
+import { runNpmTests } from '../utils/test-runners.js'
+import type { TestOptions } from '../utils/test-runners.js'
 
 export async function test(options: TestOptions = {}) {
   let root: string
@@ -121,21 +37,14 @@ export async function test(options: TestOptions = {}) {
 
   if (runBackend) {
     const backendDir = getBackendDir(root)
-    let ok: boolean
-    if (getBackendFramework(root) === 'express') {
-      ok = await runExpressBackendTests(backendDir, options)
-    } else {
-      // Django and FastAPI: both run pytest through the project venv. The
-      // FastAPI suite is the same shape as Django's — a real API exercise,
-      // not a placeholder — so the same runner is the right one for it.
-      ok = await runBackendTests(backendDir, options)
-    }
+    const { runtime } = BACKEND_TOOLCHAINS[getBackendFramework(root)]
+    const ok = await RUNTIMES[runtime].runTests(backendDir, options)
     if (!ok) failed.push('backend')
     log.blank()
   }
 
   if (runFrontend) {
-    const ok = await runFrontendTests(getFrontendDir(root), options)
+    const ok = await runNpmTests(getFrontendDir(root), options, 'frontend')
     if (!ok) failed.push('frontend')
     log.blank()
   }

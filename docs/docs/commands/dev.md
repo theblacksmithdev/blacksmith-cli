@@ -15,6 +15,15 @@ development server. Swagger UI stays at `/api/docs/` and the OpenAPI watcher fol
 files, so everything else is the same.
 :::
 
+:::note Spring Boot backends
+The backend runs as two processes: `./gradlew bootRun` (with Spring DevTools) and
+`./gradlew --continuous classes`, a continuous compile. Saving a `.java` file recompiles it
+and DevTools restarts the app, so a change is live a few seconds after you save — slower
+than the Python and Node backends, which reload in a second or two. The first start is
+slower still while Gradle warms up. The OpenAPI watcher follows `.java` files and waits
+about 8 seconds after the last change before syncing.
+:::
+
 
 Start the development server with hot reloading and automatic type synchronization.
 
@@ -73,7 +82,7 @@ If you see port conflict errors, either stop the process using the port or confi
 
 ### Python Virtual Environment Not Found
 
-Ensure you've run `blacksmith init` first, which creates the virtual environment at `venv/` in the backend directory.
+Ensure you've run `blacksmith init` first, which creates the virtual environment at `venv/` in the backend directory. (Spring Boot backends have no virtual environment; they need Java 17 or newer.)
 
 ### Sync Errors (Fullstack Only)
 

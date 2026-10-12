@@ -21,6 +21,17 @@ the test settings module, `manage.py` fixtures) does not apply; the workflow and
 `blacksmith test` usage are the same.
 :::
 
+:::note Spring Boot backends
+Backend tests use JUnit 5, run with `./gradlew test`. The suite (`ApiTest`,
+`MigrationsTest`, `OpenApiDocumentTest`, `auth/AuthApiTest` under `src/test/java/app/`)
+builds an in-memory H2 database from the Flyway migrations. Hibernate runs with
+`ddl-auto: validate`, so when an entity changes without a migration the app fails to start
+and `MigrationsTest` fails. `blacksmith test --backend --watch` runs
+`./gradlew test --continuous`, and `--coverage` runs JaCoCo (`./gradlew test
+jacocoTestReport`), prints the total line coverage and writes the HTML report to
+`backend/build/reports/jacoco/test/html/`. The pytest stack below does not apply.
+:::
+
 
 Blacksmith projects ship with a working test suite on both sides: **pytest** for the
 Django backend and **Vitest** with React Testing Library for the React frontend. A
@@ -498,6 +509,13 @@ clone, so CI rebuilds it before type-checking the frontend:
 `manage.py spectacular` writes the schema offline — no server needs to be
 running. This is the same path [`blacksmith sync`](../commands/sync.md) takes
 locally.
+
+:::note Spring Boot backends
+The backend job is "Backend (JUnit)": it sets up Java with `actions/setup-java` (Temurin 17)
+and `gradle/actions/setup-gradle`, then runs `./gradlew test` and `./gradlew bootJar`. In a
+fullstack project the frontend job exports the schema with
+`./gradlew exportOpenApi -Pout=../frontend/_schema.json` instead of `manage.py spectacular`.
+:::
 
 ## Customizing
 

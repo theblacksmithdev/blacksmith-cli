@@ -10,11 +10,15 @@ There is no `collectstatic` step.
 :::
 
 :::note FastAPI backends
-`blacksmith build` is not usable on a FastAPI project yet. The backend step still runs
-Django's `manage.py collectstatic` on any non-Express backend, and a FastAPI project has
-no `manage.py` — the command exits 1 with "Failed to collect static files". Build the
-frontend directly with `blacksmith frontend build` (or `npm run build` in `frontend/`);
-a FastAPI backend has no build step of its own.
+A FastAPI backend has nothing to compile or collect, so the backend step is skipped and
+the backend directory is deployed as it is. On a fullstack project, `blacksmith build`
+builds the frontend only.
+:::
+
+:::note Spring Boot backends
+The backend step runs `./gradlew bootJar` and emits a single runnable jar at
+`build/libs/app.jar` (start it with `java -jar build/libs/app.jar`). There is no
+`collectstatic` step.
 :::
 
 

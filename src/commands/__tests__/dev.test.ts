@@ -66,6 +66,23 @@ describe('dev', () => {
     )
   })
 
+  it('starts Vite on the configured frontend port, not its built-in default', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.loadConfig.mockReturnValue({
+      name: 'test',
+      backend: { port: 8000 },
+      frontend: { port: 51999 },
+    })
+    concurrentlyMocks.default.mockReturnValue({ result: Promise.resolve() })
+
+    await dev()
+
+    const vite = concurrentlyMocks.default.mock.calls.at(-1)![0].find((c: any) => c.name === 'vite')
+    expect(vite.command).toBe('npm run dev -- --port 51999')
+  })
+
   it('should find alternative port when configured port is in use', async () => {
     const server = net.createServer()
     await new Promise<void>((resolve) => server.listen(8000, resolve))
@@ -168,5 +185,35 @@ describe('dev', () => {
     // binary lives at node_modules/.bin/openapi-ts, so assert on the
     // FastAPI-specific ignore fragment instead.
     expect(watcher.command).toContain('__pycache__')
+  })
+
+  it('runs Spring Boot beside a continuous compile, so DevTools restarts on save', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.getBackendFramework.mockReturnValue('spring')
+    pathMocks.loadConfig.mockReturnValue({
+      name: 'test',
+      backend: { port: 8300, framework: 'spring' },
+      frontend: { port: 5373 },
+    })
+    concurrentlyMocks.default.mockReturnValue({ result: Promise.resolve() })
+
+    await dev()
+
+    const commands = concurrentlyMocks.default.mock.calls.at(-1)![0]
+    const server = commands.find((c: any) => c.name === 'spring')
+    const compiler = commands.find((c: any) => c.name === 'javac')
+    expect(server.command).toContain('bootRun')
+    expect(server.env.SERVER_PORT).toMatch(/^\d+$/)
+    expect(compiler.command).toContain('--continuous classes')
+    expect(compiler.cwd).toBe('/project/backend')
+
+    const watcher = commands.find((c: any) => c.name === 'sync')
+    expect(watcher.command).toContain('.java')
+    // Compile and restart take longer than a Python reload
+    expect(watcher.command).toContain('},8000)')
+
+    pathMocks.getBackendFramework.mockReturnValue('django')
   })
 })

@@ -17,6 +17,7 @@ vi.mock('../../utils/paths.js', () => pathMocks)
 const execMocks = vi.hoisted(() => ({
   exec: vi.fn(),
   execPython: vi.fn(),
+  execGradle: vi.fn(),
 }))
 vi.mock('../../utils/exec.js', () => execMocks)
 
@@ -89,5 +90,34 @@ describe('build', () => {
       silent: true,
     })
     expect(execMocks.execPython).not.toHaveBeenCalled()
+  })
+
+  it('builds a FastAPI project without running any backend step', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    execMocks.exec.mockResolvedValue({})
+
+    await build()
+
+    expect(execMocks.exec).toHaveBeenCalledTimes(1)
+    expect(execMocks.execPython).not.toHaveBeenCalled()
+    expect(log.success).toHaveBeenCalledWith('Production build complete!')
+    expect(log.step).toHaveBeenCalledWith('Backend ready for deployment')
+  })
+
+  it('packages a Spring Boot backend into one jar', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.getBackendFramework.mockReturnValue('spring')
+    execMocks.exec.mockResolvedValue({})
+    execMocks.execGradle.mockResolvedValue({})
+
+    await build()
+
+    expect(execMocks.execGradle).toHaveBeenCalledWith(['bootJar', '--console=plain'], '/project/backend', true)
+    expect(log.step).toHaveBeenCalledWith('Backend output: build/libs/app.jar')
   })
 })

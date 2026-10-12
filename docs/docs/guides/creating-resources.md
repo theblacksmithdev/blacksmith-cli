@@ -4,10 +4,12 @@ sidebar_position: 4
 
 # Creating Resources
 
-:::note Express and FastAPI backends
+:::note Express, FastAPI and Spring Boot backends
 The walkthrough below uses Django. The command and the frontend steps are the same on
-every backend; for FastAPI, see [On a FastAPI backend](#on-a-fastapi-backend) below, and
-for the Express layout see the [make:resource command](/docs/commands/make-resource).
+every backend; for FastAPI and Spring Boot, see
+[On a FastAPI backend](#on-a-fastapi-backend) and
+[On a Spring Boot backend](#on-a-spring-boot-backend) below, and for the Express layout see
+the [make:resource command](/docs/commands/make-resource).
 :::
 
 The `blacksmith make:resource` command is the primary way to add new features to your project. This guide walks through the full workflow of creating and customizing a resource.
@@ -231,6 +233,58 @@ and a new one.
 If you forget to create the migration, `blacksmith test` fails.
 `tests/test_migrations.py` compares the models with the migrations and names
 the change that has none.
+
+**Sync types.** Run `blacksmith sync` (or keep `blacksmith dev` running) and the
+frontend types pick up the new field.
+
+## On a Spring Boot Backend
+
+`blacksmith make:resource Product` creates a package, its test and a migration:
+
+```
+backend/src/
+├── main/java/app/products/
+│   ├── Product.java               # JPA entity
+│   ├── ProductRepository.java     # owner-scoped search and lookup
+│   ├── ProductService.java        # ordering, pagination, transactions
+│   ├── ProductController.java     # CRUD endpoints, found by component scan
+│   └── dto/                       # ProductResponse, ProductRequest,
+│                                  # PatchedProductRequest, PaginatedProductList
+├── main/resources/db/migration/V2__create_products.sql
+└── test/java/app/products/ProductApiTest.java
+```
+
+The API, the frontend hooks and the pages are the same ones a Django project gets.
+
+**Add a field.** Add the column with the next migration, then the field to the entity
+and the records that expose it:
+
+```sql
+-- backend/src/main/resources/db/migration/V3__add_product_price.sql
+ALTER TABLE products ADD COLUMN price NUMERIC(10, 2) NOT NULL DEFAULT 0;
+```
+
+```java
+// Product.java
+@Column(nullable = false, precision = 10, scale = 2)
+private BigDecimal price = BigDecimal.ZERO;
+
+// ProductResponse and ProductRequest
+BigDecimal price
+
+// PatchedProductRequest: wrapped, so a field left out is left alone
+JsonNullable<@NotNull BigDecimal> price
+```
+
+Then copy it across in `ProductResponse.from()` and in the service's create, update and
+partial-update methods.
+
+**Migrate.** Flyway applies the new file when the application next starts; there is
+no command to run. Flyway does not generate migrations, so write the SQL yourself, in
+a form both H2's PostgreSQL mode and PostgreSQL accept.
+
+If the entity and the migrations disagree, the application refuses to start
+(`ddl-auto: validate`), and `blacksmith test` fails in `MigrationsTest`.
 
 **Sync types.** Run `blacksmith sync` (or keep `blacksmith dev` running) and the
 frontend types pick up the new field.
