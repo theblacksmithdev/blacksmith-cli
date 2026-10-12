@@ -60,7 +60,7 @@ describe('CI workflow template', () => {
     const workflow = YAML.parse(yaml)
 
     expect(workflow.jobs.backend.name).toBe('Backend (JUnit)')
-    expect(yaml).toContain('run: ./gradlew test')
+    expect(yaml).toContain('run: ./gradlew test jacocoTestReport')
     expect(yaml).toContain('run: ./gradlew exportOpenApi -Pout=../frontend/_schema.json')
     expect(yaml).toContain("java-version: '17'")
     expect(yaml).not.toContain('pytest')

@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { exec, execGradle, execPython } from './exec.js'
 import { log } from './logger.js'
+import { JACOCO_HTML_REPORT, readJacocoLineCoverage } from './jacoco.js'
 
 export interface TestOptions {
   backend?: boolean
@@ -68,20 +69,30 @@ export async function runNpmTests(
 /**
  * Run a Spring backend's JUnit suite through the Gradle wrapper. The suite
  * builds an in-memory database from the Flyway migrations, so nothing needs
- * setting up first.
+ * setting up first. With --coverage, JaCoCo reports alongside and the total
+ * line coverage is printed, as pytest-cov prints its own.
  */
 export async function runGradleTests(backendDir: string, options: TestOptions): Promise<boolean> {
-  if (options.coverage) {
-    log.warn('--coverage is not set up for Spring backends yet; running the tests without it.')
-  }
-
   log.info('Running backend tests (JUnit)...')
   try {
-    await execGradle(options.watch ? ['test', '--continuous'] : ['test'], backendDir)
-    return true
+    await execGradle(gradleTestTasks(options), backendDir)
   } catch {
     return false
   }
+  if (options.coverage) {
+    const coverage = readJacocoLineCoverage(backendDir)
+    if (coverage !== null) {
+      log.info(`Backend line coverage: ${coverage.toFixed(1)}% (${path.join(backendDir, JACOCO_HTML_REPORT)})`)
+    }
+  }
+  return true
+}
+
+/** The Gradle tasks matching the requested test mode. */
+function gradleTestTasks(options: TestOptions): string[] {
+  if (options.watch) return ['test', '--continuous']
+  if (options.coverage) return ['test', 'jacocoTestReport']
+  return ['test']
 }
 
 /** The package.json script matching the requested test mode. */

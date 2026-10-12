@@ -54,11 +54,10 @@ the wrong framework are worse than none, so a project never gets another backend
 | Django | `django`, `django-rest-advanced`, `api-documentation`, `backend-modularization` |
 | Express | `express`, `express-prisma`, `express-openapi` |
 | FastAPI | `fastapi`, `fastapi-sqlalchemy` (models and Alembic migrations) |
-| Spring Boot | none yet — they arrive with `make:resource` support |
+| Spring Boot | `spring`, `spring-jpa` (entities and Flyway migrations) |
 
 The project overview, CLI, guidelines, clean-code and programming-paradigms skills
-describe the project's own backend too. A Spring Boot project gets these shared skills,
-written with Spring-specific content, but no Spring conventions skills yet.
+describe the project's own backend too.
 
 ## When to Use
 

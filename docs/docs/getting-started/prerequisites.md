@@ -6,6 +6,13 @@ sidebar_position: 3
 
 Blacksmith CLI requires a few tools to be installed on your system. The exact requirements depend on your project type.
 
+## Operating System
+
+Blacksmith runs on macOS and Linux. On Windows, run it inside
+[WSL](https://learn.microsoft.com/windows/wsl/install): the CLI calls Unix tools
+(`which`, the Python virtual environment's `venv/bin/`, the Gradle wrapper's
+`./gradlew`) that a native Windows shell does not have.
+
 ## Required for All Projects
 
 ### Node.js (>= 20.5.0)

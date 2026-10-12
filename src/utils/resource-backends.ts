@@ -3,9 +3,10 @@ import fs from 'node:fs'
 import type { BackendFramework } from './paths.js'
 import type { NameVariants } from './names.js'
 import { renderDirectory, renderTemplateFile, appendAfterMarker, insertBeforeMarker } from './template.js'
-import { exec, execPython } from './exec.js'
+import { exec, execGradle, execPython } from './exec.js'
 import { alembicAutogenerate, alembicUpgrade } from './alembic.js'
 import { resourcePrismaTemplate, resourceTemplateDir } from './scaffold.js'
+import { FLYWAY_MIGRATIONS_DIR, nextFlywayVersion, springResourceDir, springResourcePackage } from './spring.js'
 import { log, spinner } from './logger.js'
 
 export interface ResourceBackendArgs {
@@ -253,6 +254,44 @@ async function generateFastapiResource({
   }
 }
 
+/**
+ * Scaffold a Spring Boot resource: a package under `app` (entity, repository,
+ * request and response records, service, controller), its API test, and the
+ * Flyway migration that creates the table. Spring finds the controller by
+ * component scanning, so nothing needs registering, and Flyway applies the
+ * migration when the application next starts.
+ */
+async function generateSpringResource({ backendDir, templatesDir, names, context }: ResourceBackendArgs) {
+  const javaPackage = springResourcePackage(names)
+  const migrationVersion = nextFlywayVersion(backendDir)
+
+  // 1. Package, test and migration. The template tree mirrors the backend root.
+  const packageSpinner = spinner(`Creating backend package: app.${javaPackage}`)
+  try {
+    renderDirectory(
+      path.join(templatesDir, resourceTemplateDir('spring')),
+      backendDir,
+      { ...context, javaPackage, migrationVersion }
+    )
+    packageSpinner.succeed(`Created app.${javaPackage}, its test, and migration V${migrationVersion} in ${FLYWAY_MIGRATIONS_DIR}`)
+  } catch (error: any) {
+    packageSpinner.fail('Failed to create backend package')
+    log.error(error.message)
+    process.exit(1)
+  }
+
+  // 2. Compile, so a name that clashes with Java or Spring fails here, not at the next start
+  const compileSpinner = spinner('Compiling...')
+  try {
+    await execGradle(['classes', '--console=plain'], backendDir, true)
+    compileSpinner.succeed('Compiled')
+  } catch (error: any) {
+    compileSpinner.fail('Compilation failed')
+    log.error(error.message)
+    process.exit(1)
+  }
+}
+
 export const RESOURCE_BACKENDS: Record<BackendFramework, ResourceBackend> = {
   django: {
     dir: (backendDir, names) => path.join(backendDir, 'apps', names.snakes),
@@ -270,12 +309,8 @@ export const RESOURCE_BACKENDS: Record<BackendFramework, ResourceBackend> = {
     generate: generateFastapiResource,
   },
   spring: {
-    dir: (backendDir, names) => path.join(backendDir, 'src', 'main', 'java', 'app', names.snakes),
-    existsMessage: (names) => `Backend package "app.${names.snakes}" already exists.`,
-    generate: async () => {
-      log.error('make:resource does not support Spring Boot backends yet.')
-      log.step('Add the package by hand under src/main/java/app/ for now.')
-      process.exit(1)
-    },
+    dir: springResourceDir,
+    existsMessage: (names) => `Backend package "app.${springResourcePackage(names)}" already exists.`,
+    generate: generateSpringResource,
   },
 }

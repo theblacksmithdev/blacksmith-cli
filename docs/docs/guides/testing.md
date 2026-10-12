@@ -27,8 +27,9 @@ Backend tests use JUnit 5, run with `./gradlew test`. The suite (`ApiTest`,
 builds an in-memory H2 database from the Flyway migrations. Hibernate runs with
 `ddl-auto: validate`, so when an entity changes without a migration the app fails to start
 and `MigrationsTest` fails. `blacksmith test --backend --watch` runs
-`./gradlew test --continuous`; `--coverage` is not set up for Spring yet (it warns and runs
-the tests). The pytest stack below does not apply.
+`./gradlew test --continuous`, and `--coverage` runs JaCoCo (`./gradlew test
+jacocoTestReport`), prints the total line coverage and writes the HTML report to
+`backend/build/reports/jacoco/test/html/`. The pytest stack below does not apply.
 :::
 
 

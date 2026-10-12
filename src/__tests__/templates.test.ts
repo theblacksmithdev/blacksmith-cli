@@ -31,6 +31,7 @@ const FASTAPI_CONTEXT = projectContext('fastapi')
 const SPRING_CONTEXT = projectContext('spring')
 
 const RESOURCE_CONTEXT = { ...generateNames('product'), projectName: 'my-app' }
+const SPRING_RESOURCE_CONTEXT = { ...RESOURCE_CONTEXT, javaPackage: 'products', migrationVersion: 2 }
 
 function walkFiles(dir: string): string[] {
   const out: string[] = []
@@ -55,6 +56,8 @@ describe.each([
   ['frontend', 'frontend', PROJECT_CONTEXT],
   ['resource/backend/django', path.join('resource', 'backend', 'django'), RESOURCE_CONTEXT],
   ['resource/backend/express', path.join('resource', 'backend', 'express'), RESOURCE_CONTEXT],
+  ['resource/backend/fastapi', path.join('resource', 'backend', 'fastapi'), RESOURCE_CONTEXT],
+  ['resource/backend/spring', path.join('resource', 'backend', 'spring'), SPRING_RESOURCE_CONTEXT],
   ['resource/pages', path.join('resource', 'pages'), RESOURCE_CONTEXT],
   ['resource/api-hooks', path.join('resource', 'api-hooks'), RESOURCE_CONTEXT],
 ])('%s templates', (_label, relDir, context) => {
@@ -103,6 +106,43 @@ describe('backend/spring templates', () => {
     const jar = path.join('gradle', 'wrapper', 'gradle-wrapper.jar')
     expect(fs.readFileSync(path.join(dest, jar)).equals(fs.readFileSync(path.join(src, jar)))).toBe(true)
     expect(fs.statSync(path.join(dest, 'gradlew')).mode & 0o111).not.toBe(0)
+  })
+})
+
+/**
+ * The ports chosen at `init` reach every file that names them: the Vite dev
+ * server and proxy, and each backend's default CORS origin. A backend that kept
+ * 5173 would reject every browser request from a frontend on another port.
+ */
+describe('ports chosen at init', () => {
+  const getTmpDir = useTmpDir()
+
+  function render(relDir: string, framework: BackendFramework) {
+    const dest = path.join(getTmpDir(), relDir)
+    renderDirectory(path.join(TEMPLATES_DIR, relDir), dest, {
+      ...projectContext(framework),
+      backendPort: 8099,
+      frontendPort: 5199,
+    })
+    return (file: string) => fs.readFileSync(path.join(dest, file), 'utf-8')
+  }
+
+  it('reach the Vite dev server and its proxy', () => {
+    const viteConfig = render('frontend', 'django')('vite.config.ts')
+
+    expect(viteConfig).toContain('port: 5199,')
+    expect(viteConfig).toContain("target: 'http://localhost:8099',")
+  })
+
+  it.each([
+    ['django', '.env.example', 'CORS_ALLOWED_ORIGINS=http://localhost:5199,'],
+    ['express', '.env.example', 'CORS_ALLOWED_ORIGINS=http://localhost:5199,'],
+    ['fastapi', '.env.example', 'CORS_ORIGINS=["http://localhost:5199"]'],
+    ['fastapi', 'app/config.py', '["http://localhost:5199"]'],
+    ['spring', '.env.example', 'CORS_ORIGINS=http://localhost:5199'],
+    ['spring', 'src/main/resources/application.yml', '${CORS_ORIGINS:http://localhost:5199}'],
+  ] as const)('reach the %s CORS default in %s', (framework, file, expected) => {
+    expect(render(path.join('backend', framework), framework)(file)).toContain(expected)
   })
 })
 

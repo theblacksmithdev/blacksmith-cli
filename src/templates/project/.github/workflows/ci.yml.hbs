@@ -95,8 +95,9 @@ jobs:
 
       # The test database is built by the Flyway migrations and Hibernate
       # validates every entity against it, so a missing migration fails here.
+      # JaCoCo writes its coverage report to build/reports/jacoco/.
       - name: Run tests
-        run: ./gradlew test
+        run: ./gradlew test jacocoTestReport
 
       - name: Build
         run: ./gradlew bootJar

@@ -1,5 +1,6 @@
 package app;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -22,6 +23,14 @@ class OpenApiDocumentTest extends ApiTest {
                 .andExpect(jsonPath("$.openapi", startsWith("3.0")))
                 .andExpect(jsonPath("$.components.schemas.RegisterRequest.properties", hasKey("first_name")))
                 .andExpect(jsonPath("$.paths['/api/auth/me/'].get.operationId").value("auth_me_retrieve"));
+    }
+
+    @Test
+    void marksEveryResponseFieldRequiredButNotRequestFields() throws Exception {
+        api.perform(get("/api/schema/"))
+                .andExpect(jsonPath("$.components.schemas.User.required",
+                        containsInAnyOrder("id", "email", "first_name", "last_name")))
+                .andExpect(jsonPath("$.components.schemas.PatchedUserRequest", not(hasKey("required"))));
     }
 
     @Test

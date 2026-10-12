@@ -21,7 +21,7 @@ server:
 
 app:
   secret-key: ${SECRET_KEY}
-  cors-origins: ${CORS_ORIGINS:http://localhost:5173}
+  cors-origins: ${CORS_ORIGINS:http://localhost:{{frontendPort}}}
   access-token-minutes: 30
   refresh-token-days: 7
 

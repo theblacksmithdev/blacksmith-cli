@@ -72,7 +72,7 @@ What gets generated depends on your project type:
 
 For fullstack projects, it also syncs the OpenAPI schema to generate TypeScript types.
 
-`make:resource` does not support Spring Boot backends yet — on a Spring project it stops before writing anything.
+On a Spring Boot project the backend half is an `app.products` package (entity, repository, service, controller, request and response records, a JUnit test) and the next Flyway migration, which applies when the application starts.
 
 ## Customize Your Model
 

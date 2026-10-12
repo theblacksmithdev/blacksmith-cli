@@ -1,0 +1,19 @@
+package app.{{javaPackage}}.dto;
+
+import app.pagination.Pagination;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import org.springframework.data.domain.Page;
+
+/** One page of {{snakes}} in DRF's envelope. The class name is the schema name the other backends publish. */
+public record Paginated{{Name}}List(
+        long count,
+        @Schema(nullable = true) String next,
+        @Schema(nullable = true) String previous,
+        List<{{Name}}Response> results) {
+
+    public static Paginated{{Name}}List of(Page<{{Name}}Response> page) {
+        return new Paginated{{Name}}List(
+                page.getTotalElements(), Pagination.next(page), Pagination.previous(page), page.getContent());
+    }
+}

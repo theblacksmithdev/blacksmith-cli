@@ -22,8 +22,11 @@ class OpenApiExport extends ApiTest {
         String document = api.perform(get("/api/schema/"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        Path out = Path.of(System.getProperty("openapi.out"));
-        Files.createDirectories(out.toAbsolutePath().getParent());
+        Path out = Path.of(System.getProperty("openapi.out")).toAbsolutePath();
+        // createDirectories refuses a directory reached through a symlink (/tmp on macOS)
+        if (!Files.isDirectory(out.getParent())) {
+            Files.createDirectories(out.getParent());
+        }
         Files.writeString(out, document);
     }
 }

@@ -183,7 +183,7 @@ blacksmith make:resource BlogPost
 - `apps/blog_posts/` — model, serializer, viewset, urls, admin, tests
 - Automatically registered in `INSTALLED_APPS` and `config/urls.py`
 - Migrations run automatically
-- Not yet supported for Spring Boot backends (planned next)
+- On Spring Boot: an `app.blogposts` package (entity, repository, service, controller, records, JUnit tests) and the next Flyway migration
 
 **Frontend** (fullstack and frontend projects):
 - `src/api/hooks/blog-posts/` — query and mutation hooks

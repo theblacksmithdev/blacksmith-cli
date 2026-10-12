@@ -11,6 +11,8 @@ import { expressPrismaSkill } from './express-prisma.js'
 import { expressOpenApiSkill } from './express-openapi.js'
 import { fastapiSkill } from './fastapi.js'
 import { fastapiSqlalchemySkill } from './fastapi-sqlalchemy.js'
+import { springSkill } from './spring.js'
+import { springJpaSkill } from './spring-jpa.js'
 import { reactSkill } from './react.js'
 import { reactQuerySkill } from './react-query.js'
 import { pageStructureSkill } from './page-structure.js'
@@ -34,9 +36,7 @@ const BACKEND_SKILLS: Record<BackendFramework, Skill[]> = {
   django: [djangoSkill, djangoRestAdvancedSkill, apiDocumentationSkill, backendModularizationSkill],
   express: [expressSkill, expressPrismaSkill, expressOpenApiSkill],
   fastapi: [fastapiSkill, fastapiSqlalchemySkill],
-  // Spring conventions skills arrive with Spring's make:resource; until then the
-  // shared skills carry the Spring profile
-  spring: [],
+  spring: [springSkill, springJpaSkill],
 }
 
 const CHAKRA_UI_SKILLS: Skill[] = [

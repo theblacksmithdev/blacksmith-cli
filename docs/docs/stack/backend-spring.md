@@ -10,12 +10,6 @@ Security for JWT auth. It speaks exactly the same HTTP contract as the Django,
 Express and FastAPI backends, so the React frontend is identical whichever you pick.
 See [Choosing a Backend](../guides/choosing-a-backend.md) for how the four compare.
 
-:::note Not yet available
-`blacksmith make:resource` does not support Spring Boot yet, and Spring projects
-get no Spring-specific AI skill yet. Both are the next piece of work. Until then,
-add resources by hand following the [package anatomy](#package-anatomy) below.
-:::
-
 ## Stack
 
 | Layer | Technology |
@@ -45,7 +39,9 @@ backend/
 │   ├── config/                # security, OpenAPI, the app.* settings
 │   ├── errors/                # DRF-shaped error bodies
 │   ├── docs/                  # ReDoc page
-│   └── users/                 # User entity and repository
+│   ├── pagination/            # DRF's page envelope and ordering
+│   ├── users/                 # User entity and repository
+│   └── posts/                 # one package per resource (make:resource)
 ├── src/main/resources/
 │   ├── application.yml        # settings; ${...} values come from .env
 │   └── db/migration/          # Flyway migrations: V1__create_users.sql, ...
@@ -58,7 +54,9 @@ backend/
 
 ## Package Anatomy
 
-Each resource is a package under `app`, split by responsibility:
+Each resource is a package under `app`, split by responsibility.
+`blacksmith make:resource BlogPost` creates one, `app.blogposts`, with its JUnit
+test and the next Flyway migration:
 
 | Class | Responsibility |
 |-------|----------------|
@@ -69,7 +67,9 @@ Each resource is a package under `app`, split by responsibility:
 | Controller | Endpoints: bind and validate the request, call the service, return a record |
 
 Classes take their dependencies through the constructor, and entities never leave
-the service: controllers return records. Look at `app.auth` for the pattern.
+the service: controllers return records. Spring finds controllers by component
+scanning, so a new package needs no registering. Projects created with `--ai` get
+the `spring` and `spring-jpa` skills, which describe these conventions.
 
 ## The API Contract
 
@@ -87,6 +87,15 @@ Spring's RFC 7807 problem document:
 A path id that is not a number answers 404, as DRF does, not 400. Throw
 `ApiException` for expected failures.
 
+**Lists** use DRF's envelope, `{ count, next, previous, results }`, 20 rows a page
+with absolute `next` and `previous` links (`app.pagination.Pagination`), and DRF's
+`?ordering=-created_at` (`Ordering`). Each resource has its own
+`Paginated<Name>List` record, so the schema name matches the other backends.
+
+**PATCH** bodies wrap each field in `JsonNullable`, which tells a field left out
+(keep the current value) from one sent as `null`. A field that is not nullable
+rejects an explicit `null` with "This field may not be null.", as DRF does.
+
 **Field names** are snake_case in both the API and the OpenAPI document. The Java
 code stays camelCase: `application.yml` sets Jackson's naming strategy, and
 `OpenApiConfig` documents the same names. **Timestamps** are `Instant`, serialized
@@ -96,7 +105,9 @@ in UTC with a `Z`. **URLs** keep their trailing slash: `/api/auth/me/`.
 `auth_me_partial_update`), set with `@Operation(operationId = ...)` on each
 endpoint. That is what gives the generated React hooks the same names on every
 backend. Error responses are left out of the document, so the generated hooks'
-error types match the other backends.
+error types match the other backends. Every field of a response schema is marked
+required (`config/RequiredResponseFields`), as drf-spectacular does, so response
+types never read `string | undefined`.
 
 ## OpenAPI Without a Server
 
@@ -174,9 +185,6 @@ second. A change is live a few seconds after you save. That is slower than the
 Python and Node backends, which reload in a second or two. The first start, which
 compiles everything, takes longer still.
 
-DevTools logs a `Socket accept failed` error from Tomcat on each restart. It is
-harmless.
-
 ## Moving to Postgres
 
 Set `DATABASE_URL` to a JDBC URL, for example
@@ -194,6 +202,9 @@ JUnit drives the whole application through MockMvc against an in-memory database
 built by the Flyway migrations. `ApiTest` is the base class: `signUp()` registers a
 new user and returns its `Authorization` header. The database lasts the whole run,
 so tests create the rows they need and never assume a table is empty.
+
+`blacksmith test --coverage` runs JaCoCo, prints the total line coverage and
+writes the HTML report to `build/reports/jacoco/test/html/index.html`.
 
 ## Building for Production
 

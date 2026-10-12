@@ -1,0 +1,23 @@
+package app.{{javaPackage}};
+
+import app.users.User;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+public interface {{Name}}Repository extends JpaRepository<{{Name}}, Long> {
+
+    /** The user's {{snakes}} whose title or description contains {@code search}, ignoring case. */
+    @Query("""
+            select p from {{Name}} p
+            where p.createdBy = :owner
+              and (:search = ''
+                   or lower(p.title) like lower(concat('%', :search, '%'))
+                   or lower(p.description) like lower(concat('%', :search, '%')))
+            """)
+    Page<{{Name}}> search(User owner, String search, Pageable pageable);
+
+    Optional<{{Name}}> findByIdAndCreatedBy(long id, User owner);
+}

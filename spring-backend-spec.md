@@ -6,7 +6,7 @@ The parity contract and the open decisions for the fourth backend, Spring Boot. 
 
 It is written before the sprint opens on purpose. Several of the decisions below change the size of the work rather than the shape of a ticket, and settling them after the board exists means rewriting tickets.
 
-The second revision added a recommendation to each open decision, a sixth decision the first draft missed (the development database), the parity traps that Spring's defaults set, and a ticket 0 that landed in the CLI. This third revision records that the scaffold was built on those recommendations (ticket 1), with what building it measured and what it left for the `make:resource` ticket.
+The second revision added a recommendation to each open decision, a sixth decision the first draft missed (the development database), the parity traps that Spring's defaults set, and a ticket 0 that landed in the CLI. This third revision records that the scaffold was built on those recommendations (ticket 1), with what building it measured and what it left for the `make:resource` ticket. The fourth records ticket 2: `make:resource`, the skills, coverage, and the verification on PostgreSQL, clean Linux machines and the generated CI.
 
 ## What Spring Boot is here
 
@@ -141,7 +141,7 @@ The Handlebars templates still branch on `isDjango`, `isExpress` and `isFastapi`
 - The three documentation URLs.
 - An offline export through `./gradlew exportOpenApi`.
 
-Every CLI command works on it except `make:resource`, which refuses with a clear message before writing anything.
+Every CLI command works on it except `make:resource`, which refused with a clear message before writing anything until ticket 2.
 
 What building it measured, on a machine with Gradle and the dependencies already cached:
 
@@ -169,11 +169,63 @@ Left for the `make:resource` ticket:
 - **The Spring conventions skill**, now that the code it describes exists.
 - **`--coverage`.** JaCoCo is not set up yet, so `blacksmith test --coverage` warns and runs the tests without it.
 
-Found along the way, and not Spring's: the generated `vite.config.ts` hard-codes port 5173, so the frontend port chosen at `init` is ignored on every backend.
+Found along the way, and not Spring's: the generated `vite.config.ts` hard-coded port 5173, so the frontend port chosen at `init` was ignored on every backend. Fixed in ticket 2.
+
+## Ticket 2: `make:resource` and full support (landed)
+
+`blacksmith make:resource BlogPost` on a Spring project writes:
+- an `app.blogposts` package, holding the entity, repository, service and controller;
+- the response, request, PATCH and page records, in `dto/`;
+- a JUnit API test;
+- the next Flyway migration, numbered one past the highest version present.
+
+It then compiles the backend and syncs the frontend. Nothing is registered, because component scanning finds the controller. The package name is the plural with the words run together, since Java packages do not take underscores by convention. The table and the URL stay snake_case.
+
+How each item left by ticket 1 landed:
+
+- **Required response fields.** A schema customizer, `config/RequiredResponseFields`, marks every property of every schema reachable from a response required, which is drf-spectacular's rule. Request schemas keep springdoc's rule, where only constrained properties are required. The rule applies to the scaffold's own `User` and `TokenPair` too, which had every field optional before. `OpenApiDocumentTest` pins it.
+- **Pagination.** `app.pagination.Pagination` matches DRF on four points: a page size of 20, a 1-based `?page=`, absolute links, and no `page=1` on the first page. `Ordering` reads `?ordering=`, falls back to the default for an unknown field, and breaks ties on id. Each resource has its own `Paginated<Name>List` record, so the component name matches the other backends.
+- **PATCH.** Fields are `JsonNullable` (jackson-databind-nullable 0.2.12, the first release with a Jackson 3 module). Constraints sit inside the type argument, so they validate only a field that was sent. `FieldErrors` now returns one DRF message per field:
+  - "This field may not be null." for a null that was sent;
+  - "This field is required." for a missing field;
+  - "This field may not be blank." for an empty one;
+  - "Ensure this field has no more than N characters." for `@Size`.
+
+  Telling a sent null from a missing field is done by reading the `JsonNullable` off the request record. Hibernate Validator's path does not mark the unwrapped value as a container element, so the path alone cannot tell them apart.
+- **Skills.** `spring` covers the conventions, contract, errors, PATCH, pagination and testing. `spring-jpa` covers entities, Flyway, repositories and transactions.
+- **`--coverage`.** It runs `./gradlew test jacocoTestReport` (JaCoCo 0.8.15) and prints the report-wide line coverage from the XML. Generated CI runs the same.
+
+Also fixed along the way:
+- **Symlinked output paths.** `exportOpenApi` failed when the output directory's path ran through a symlink (`/tmp` on macOS), because `Files.createDirectories` refuses one.
+- **Development log noise.** `bootRun` now silences Tomcat's "Socket accept failed", which a DevTools restart can race into, and Flyway's notice that H2 is newer than the versions it has verified. Production logging is unchanged.
+- **The frontend port chosen at `init`.** It now reaches Vite's port and proxy and every backend's default CORS origin; before, only Express's got it. `dev` passes the port it settled on to Vite.
+
+Verified, beyond the unit and end-to-end suites:
+
+- **Parity.** The generated TypeScript for a `Post` resource (`Post`, `PostRequest`, `PatchedPostRequest`, `PaginatedPostList` and the operation data types) is identical to FastAPI's, character for character.
+- **The generated suite.** A project with three resources runs 76 JUnit tests. One of the resources is `Order`, which is a JPQL keyword, used as an entity name.
+- **PostgreSQL 17.**
+  - The same 76 tests pass against it, with the datasource overridden by environment variable.
+  - All four migrations apply, and Hibernate's validation accepts them.
+  - The production jar migrates an empty schema and serves the API.
+- **Clean Linux machines** (Docker, arm64, no Gradle cache), on JDK 21 and on JDK 25:
+
+  | Step | Result |
+  |---|---|
+  | `init`, fullstack | about 2 minutes, including the Gradle download, the dependencies and `npm install` |
+  | `make:resource` | 15 seconds |
+  | `test --coverage` | passes, with 87.7% backend line coverage |
+  | `build` | produces the jar |
+
+- **Generated CI.** The workflow runs green under `act` 0.2.89: JUnit with JaCoCo, `bootJar`, the schema export, client generation, then the frontend tests and build. `act`'s git library cannot parse the `gradle/actions` `v4` tag object, so the local run pinned it to a commit. GitHub resolves the tag normally.
+
+Not done, deliberately:
+- **Windows.** The CLI is Unix-only for every backend, not just this one. The prerequisites page now says macOS, Linux, or WSL.
+- **Studio**, as the open question below says.
 
 ## Open questions
 
-- Does the frontend need anything Spring-specific at all once parity is met, or is it byte-identical to the FastAPI one? For the scaffold, the answer is no: the generated frontend typechecks, builds and passes its tests unchanged. `make:resource` answers it for resources.
+- Does the frontend need anything Spring-specific at all once parity is met, or is it byte-identical to the FastAPI one? Answered: nothing Spring-specific. The scaffold's frontend typechecks, builds and passes unchanged, and a resource's generated types are identical to FastAPI's.
 - Studio's runner starts a Python virtual environment and labels the backend Django in its UI. Recommended answer: this belongs to the Studio stream (`studio-backend-inventory.md`), not to this phase. That stream's first ticket, "run any backend", should be designed for a JVM runner from the start rather than as a venv runner with branches.
 
 ## Out of scope

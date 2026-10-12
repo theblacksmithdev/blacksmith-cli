@@ -88,8 +88,9 @@ export async function dev() {
 
   if (projectHasFrontend && frontendPort) {
     const frontendDir = getFrontendDir(root)
+    // The port findAvailablePort settled on, which vite.config.ts cannot know
     processes.push({
-      command: 'npm run dev',
+      command: `npm run dev -- --port ${frontendPort}`,
       name: 'vite',
       cwd: frontendDir,
       prefixColor: 'blue',

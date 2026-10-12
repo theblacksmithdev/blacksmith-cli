@@ -130,7 +130,9 @@ export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
 │   │   ├── auth/         # auth endpoints, tokens, request filter
 │   │   ├── config/       # security, OpenAPI, settings
 │   │   ├── errors/       # DRF-shaped error bodies
-│   │   └── users/        # User entity and repository
+│   │   ├── pagination/   # DRF page envelope, ordering
+│   │   ├── users/        # User entity and repository
+│   │   └── <resource>/   # one package per resource
 │   ├── src/main/resources/
 │   │   ├── application.yml
 │   │   └── db/migration/ # Flyway migrations
@@ -142,9 +144,11 @@ export const BACKEND_PROFILES: Record<BackendFramework, BackendProfile> = {
 ├── build.gradle`,
     build: 'bootJar',
     defineFeature: 'Define the JPA entity, Flyway migration, request and response records, service, and controller',
-    resourceSteps: `- Not available for Spring Boot yet: write the package by hand under \`src/main/java/app/\``,
+    resourceSteps: `- \`src/main/java/app/blogposts/\` — entity, repository, service, controller, request and response records; \`BlogPostApiTest\`
+- Adds the next Flyway migration, \`V<n>__create_blog_posts.sql\`, applied when the application starts
+- Compiles the backend`,
     schemaExport: 'gradlew exportOpenApi',
-    codeStyle: 'Java 17. Constructor injection, records for request and response types, thin controllers, logic and transactions in services',
+    codeStyle: 'Java 17. Follow the package layout in the `spring` skill: constructor injection, records for request and response types, thin controllers, logic and transactions in services',
     toolchain: 'Gradle wrapper: run tasks with `blacksmith backend <task>` (e.g. `blacksmith backend test`), which runs `./gradlew <task>` in the backend directory',
     paradigmSummary: '**Backend (Spring Boot/Java): layered OOP.** Injected classes for the layers, immutable records for the data between them.',
     paradigms: SPRING_PARADIGMS,

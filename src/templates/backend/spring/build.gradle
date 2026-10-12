@@ -3,6 +3,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.1.1'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'app'
@@ -20,6 +21,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-flyway'
     implementation 'org.springframework.security:spring-security-oauth2-jose'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
+    // PATCH bodies: JsonNullable tells a field left out from one sent as null
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.12'
 
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
@@ -42,6 +45,14 @@ tasks.withType(JavaCompile).configureEach {
 tasks.named('jar') { enabled = false }
 tasks.named('bootJar') { archiveFileName = 'app.jar' }
 
+// `blacksmith dev` runs bootRun, so this quiets two harmless development-only
+// messages: Tomcat's "Socket accept failed" when a DevTools restart races its
+// acceptor thread, and Flyway noting that the H2 version is newer than it lists
+tasks.named('bootRun') {
+    systemProperty 'logging.level.org.apache.tomcat.util.net.Acceptor', 'off'
+    systemProperty 'logging.level.org.flywaydb.core.internal.database.base.Database', 'error'
+}
+
 // Tests run against an in-memory database built by the Flyway migrations
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
@@ -50,6 +61,19 @@ tasks.withType(Test).configureEach {
 
 tasks.named('test', Test) {
     useJUnitPlatform { excludeTags 'openapi-export' }
+}
+
+// Coverage, for `blacksmith test --coverage`: ./gradlew test jacocoTestReport
+// writes build/reports/jacoco/test/html/index.html
+jacoco {
+    toolVersion = '0.8.15'
+}
+
+tasks.named('jacocoTestReport') {
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
 
 // Write the OpenAPI document without starting a server, for `blacksmith sync`:
@@ -63,4 +87,5 @@ tasks.register('exportOpenApi', Test) {
     systemProperty 'openapi.out', providers.gradleProperty('out')
         .orElse(layout.buildDirectory.file('openapi.json').map { it.asFile.path }).get()
     outputs.upToDateWhen { false }
+    jacoco.enabled = false
 }

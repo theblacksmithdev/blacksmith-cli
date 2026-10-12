@@ -66,6 +66,23 @@ describe('dev', () => {
     )
   })
 
+  it('starts Vite on the configured frontend port, not its built-in default', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    pathMocks.getFrontendDir.mockReturnValue('/project/frontend')
+    pathMocks.loadConfig.mockReturnValue({
+      name: 'test',
+      backend: { port: 8000 },
+      frontend: { port: 51999 },
+    })
+    concurrentlyMocks.default.mockReturnValue({ result: Promise.resolve() })
+
+    await dev()
+
+    const vite = concurrentlyMocks.default.mock.calls.at(-1)![0].find((c: any) => c.name === 'vite')
+    expect(vite.command).toBe('npm run dev -- --port 51999')
+  })
+
   it('should find alternative port when configured port is in use', async () => {
     const server = net.createServer()
     await new Promise<void>((resolve) => server.listen(8000, resolve))

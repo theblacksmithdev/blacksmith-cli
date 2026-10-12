@@ -29,7 +29,7 @@ Omit the flag and `init` asks.
 | Auth | SimpleJWT | jsonwebtoken + bcrypt | PyJWT + bcrypt | Spring Security + JWT |
 | Admin UI | Django admin, included | none (use Prisma Studio) | none | none |
 | Tests | pytest + pytest-django | Vitest + Supertest | pytest + httpx | JUnit 5 + MockMvc |
-| Resource layout | `apps/<name>/` | `src/modules/<name>/` | `app/<name>/` package | `src/main/java/app/` (no resource scaffold yet) |
+| Resource layout | `apps/<name>/` | `src/modules/<name>/` | `app/<name>/` package | `app.<name>` package |
 
 ## Pick Django If
 
@@ -64,9 +64,8 @@ Omit the flag and `init` asks.
 - Your team writes Java, or the API has to live alongside existing JVM services
 - You want a statically typed, compiled backend with the Spring ecosystem behind
   it: Spring Data JPA, Spring Security, Bean Validation, and Flyway migrations
-- You can live with a slower edit loop — a saved `.java` file is live a few
-  seconds later rather than in a second or two — and with
-  [`make:resource`](../commands/make-resource.md) not supporting Spring yet
+- You can live with a slower edit loop: a saved `.java` file is live a few
+  seconds later rather than in a second or two
 
 ## What Is Identical
 
@@ -79,18 +78,16 @@ Because the Express, FastAPI and Spring Boot backends reproduce DRF's wire forma
 - OpenAPI operation IDs, so the generated React hooks have the same names
 - The whole `frontend/` tree, the auth flow, and every generated page
 
-`blacksmith dev`, `sync`, `test` and `make:resource` behave the same on
-Django, Express and FastAPI; only what they run underneath differs. Spring Boot
-supports `dev`, `sync` and `test` the same way, but `make:resource` refuses on a
-Spring project for now. `build` runs each backend's own production step; see
-the Build row below.
+`blacksmith dev`, `sync`, `test` and `make:resource` behave the same on all
+four; only what they run underneath differs. `build` runs each backend's own
+production step; see the Build row below.
 
 ## What Differs Day to Day
 
 | Task | Django | Express | FastAPI | Spring Boot |
 |------|--------|---------|---------|-------------|
-| Add a resource | `blacksmith make:resource Post` | same command | same command | not supported yet; write it by hand |
-| Where the model goes | `apps/posts/models.py` | `prisma/schema.prisma` | `app/posts/models.py` | a JPA entity under `src/main/java/app/` |
+| Add a resource | `blacksmith make:resource Post` | same command | same command | same command |
+| Where the model goes | `apps/posts/models.py` | `prisma/schema.prisma` | `app/posts/models.py` | `src/main/java/app/posts/Post.java` |
 | Migrate | `blacksmith backend makemigrations && ... migrate` | `blacksmith backend exec prisma migrate dev` | `blacksmith backend alembic revision --autogenerate -m "..." && ... alembic upgrade head` | add a Flyway file in `src/main/resources/db/migration/`; it applies when the app starts |
 | Create an admin user | `blacksmith backend createsuperuser` | no admin; use Prisma Studio | no admin; use `POST /api/auth/register/` | no admin; use `POST /api/auth/register/` |
 | Browse data | Django admin at `/admin/` | `blacksmith backend exec prisma studio` | no admin; use your own SQL client | no admin; use your own SQL client |

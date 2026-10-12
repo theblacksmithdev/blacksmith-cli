@@ -20,11 +20,15 @@ identical. Projects created before resource support have no Alembic setup; the c
 stops before writing anything and says so.
 :::
 
-:::warning Spring Boot backends
-`make:resource` does not support Spring Boot backends yet. On a Spring project the command
-exits with "make:resource does not support Spring Boot backends yet." before writing
-anything, frontend included. Support is planned next; until then, add entities, controllers
-and Flyway migrations by hand (see [Spring Boot Backend](../stack/backend-spring.md)).
+:::note Spring Boot backends
+On a Spring Boot project the backend half creates a package under
+`src/main/java/app/` named after the plural with the words run together (`BlogPost` →
+`app.blogposts`): the entity, repository, service and controller, and in `dto/` the
+response, request, PATCH and page records. It adds `src/test/java/app/<package>/` with a
+JUnit API test, writes the next Flyway migration (`V<n>__create_blog_posts.sql`, one past
+the highest version present), and compiles the backend. Spring finds the controller by
+component scanning, so nothing is registered, and Flyway applies the migration when the
+application starts. The frontend half is identical.
 :::
 
 
