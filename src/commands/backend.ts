@@ -1,13 +1,10 @@
 import { findProjectRoot, getBackendDir, getBackendFramework, hasBackend } from '../utils/paths.js'
+import { BACKEND_PASSTHROUGHS } from '../utils/backend-passthrough.js'
 import { log } from '../utils/logger.js'
-import { exec, execPython } from '../utils/exec.js'
 
 /**
- * Run a command against the backend's own toolchain.
- *
- * Django projects get `manage.py <args>`. Express projects have no management
- * commands, so they get `npm <args>` — the same passthrough the `frontend`
- * command provides, which covers scripts, installs and `npm exec prisma ...`.
+ * Run a command against the backend's own toolchain: `manage.py` for Django,
+ * `npm` for Express, `python -m` for FastAPI (see BACKEND_PASSTHROUGHS).
  */
 export async function backend(args: string[]) {
   let root: string
@@ -22,30 +19,19 @@ export async function backend(args: string[]) {
     process.exit(1)
   }
 
-  const isExpress = getBackendFramework(root) === 'express'
+  const passthrough = BACKEND_PASSTHROUGHS[getBackendFramework(root)]
 
   if (args.length === 0) {
-    if (isExpress) {
-      log.error('Please provide an npm command.')
-      log.step('Usage: blacksmith backend <command> [args...]')
-      log.step('Example: blacksmith backend run migrate')
-      log.step('Example: blacksmith backend exec prisma studio')
-    } else {
-      log.error('Please provide a Django management command.')
-      log.step('Usage: blacksmith backend <command> [args...]')
-      log.step('Example: blacksmith backend createsuperuser')
+    log.error(`Please provide ${passthrough.needs}.`)
+    log.step('Usage: blacksmith backend <command> [args...]')
+    for (const example of passthrough.examples) {
+      log.step(`Example: blacksmith backend ${example}`)
     }
     process.exit(1)
   }
 
-  const backendDir = getBackendDir(root)
-
   try {
-    if (isExpress) {
-      await exec('npm', args, { cwd: backendDir })
-    } else {
-      await execPython(['manage.py', ...args], backendDir)
-    }
+    await passthrough.run(args, getBackendDir(root))
   } catch {
     process.exit(1)
   }

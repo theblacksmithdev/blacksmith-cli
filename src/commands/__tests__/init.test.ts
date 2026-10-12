@@ -307,7 +307,7 @@ describe('init', () => {
     expect(calls.find((c: any[]) => c[0] === path.join('/templates', 'backend', 'express'))).toBeUndefined()
   })
 
-  it('should install Python dependencies and create tables for a FastAPI backend', async () => {
+  it('should install Python dependencies and run Alembic migrations for a FastAPI backend', async () => {
     setupSuccessfulInit()
 
     await init('my-app', { type: 'backend', backend: 'fastapi', backendPort: '8000', ai: false })
@@ -328,7 +328,7 @@ describe('init', () => {
     )
 
     expect(execMocks.execPython).toHaveBeenCalledWith(
-      ['scripts.py', 'init-db'],
+      ['-m', 'alembic', 'upgrade', 'head'],
       backendDir,
       true
     )

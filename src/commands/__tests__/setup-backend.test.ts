@@ -359,3 +359,42 @@ describe('setup:backend on an Express project', () => {
     pathMocks.getBackendFramework.mockReturnValue('django')
   })
 })
+
+describe('setup:backend on a FastAPI project', () => {
+  afterEach(() => {
+    pathMocks.getBackendFramework.mockReturnValue('django')
+  })
+
+  it('applies the Alembic migrations instead of manage.py migrate', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    fsMocks.existsSync.mockReturnValue(true)
+    execMocks.execPip.mockResolvedValue({})
+    execMocks.execPython.mockResolvedValue({})
+
+    await setupBackendDeps()
+
+    expect(execMocks.execPython).toHaveBeenCalledWith(
+      ['-m', 'alembic', 'upgrade', 'head'],
+      '/project/backend',
+      true
+    )
+    expect(execMocks.execPython).not.toHaveBeenCalledWith(
+      ['manage.py', 'migrate'],
+      expect.anything(),
+      expect.anything()
+    )
+  })
+
+  it("restores FastAPI's .gitignore, not Django's, before creating the venv", async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.getBackendFramework.mockReturnValue('fastapi')
+    pathMocks.getBackendDir.mockReturnValue('/project/backend')
+    fsMocks.existsSync.mockReturnValue(true) // venv already exists
+
+    await setupBackendVenv()
+
+    expect(gitignoreMocks.ensureGitignore).toHaveBeenCalledWith('/project/backend', 'backend/fastapi')
+  })
+})

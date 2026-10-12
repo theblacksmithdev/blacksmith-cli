@@ -75,7 +75,7 @@ The `init` command performs the following steps based on the selected project ty
    - *Express*: app and module layout, Prisma schema, JWT auth, Zod validation, OpenAPI registry
    - *FastAPI*: `app/` package (main, config, db, routers), SQLAlchemy models, JWT auth, Pydantic validation, built-in OpenAPI
 5. **Creates Python virtual environment** and installs dependencies (Django and FastAPI)
-6. **Runs initial database setup** — Django migrations, Prisma migrate for Express, `scripts.py init-db` for FastAPI
+6. **Runs initial database setup** — Django migrations, Prisma migrate for Express, Alembic migrations for FastAPI
 
 ### Frontend steps (fullstack and frontend)
 7. **Scaffolds React project** — Vite, TypeScript, React Router, TanStack React Query, React Hook Form + Zod, Chakra UI, auth pages

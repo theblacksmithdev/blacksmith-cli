@@ -11,14 +11,16 @@ project's backend framework:
 |-----------|------|
 | Django | `manage.py <args>` inside the virtual environment |
 | Express | `npm <args>` in the backend directory |
-| FastAPI | not available yet (see the note below) |
+| FastAPI | `python -m <args>` inside the virtual environment |
 
-:::note FastAPI backends
-The `backend` passthrough is not available for FastAPI projects yet — it still assumes
-Django's `manage.py`. The generated `scripts.py` covers maintenance (`init-db`,
-`export-openapi`); run it through the virtual environment with
-`./venv/bin/python scripts.py <command>`.
-:::
+**FastAPI examples:**
+
+```bash
+blacksmith backend alembic revision --autogenerate -m "add a field"   # write a migration
+blacksmith backend alembic upgrade head                               # apply migrations
+blacksmith backend alembic downgrade -1                               # undo the last one
+blacksmith backend pytest -k blog_posts                               # run some tests
+```
 
 **Express examples:**
 

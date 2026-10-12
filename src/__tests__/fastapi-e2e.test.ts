@@ -38,6 +38,7 @@ vi.mock('concurrently', () => concurrentlyMocks)
 import { init } from '../commands/init.js'
 import { dev } from '../commands/dev.js'
 import { test as runTests } from '../commands/test.js'
+import { makeResource } from '../commands/make-resource.js'
 import { log } from '../utils/logger.js'
 
 describe('FastAPI support end to end', () => {
@@ -116,7 +117,7 @@ describe('FastAPI support end to end', () => {
     // Nothing Django-shaped leaks into a FastAPI tree
     expect(fs.existsSync(path.join(backendDir, 'manage.py'))).toBe(false)
 
-    // Install path: venv + pip + scripts.py init-db, never manage.py migrations
+    // Install path: venv + pip + Alembic migrations, never manage.py migrations
     expect(execMocks.exec).toHaveBeenCalledWith(
       'python3',
       ['-m', 'venv', 'venv'],
@@ -127,7 +128,15 @@ describe('FastAPI support end to end', () => {
       backendDir,
       true
     )
-    expect(execMocks.execPython).toHaveBeenCalledWith(['scripts.py', 'init-db'], backendDir, true)
+    expect(fs.existsSync(path.join(backendDir, 'alembic.ini'))).toBe(true)
+    expect(
+      fs.existsSync(path.join(backendDir, 'migrations', 'versions', '0001_create_users.py'))
+    ).toBe(true)
+    expect(execMocks.execPython).toHaveBeenCalledWith(
+      ['-m', 'alembic', 'upgrade', 'head'],
+      backendDir,
+      true
+    )
     expect(execMocks.execPython).not.toHaveBeenCalledWith(
       ['manage.py', 'makemigrations', 'users'],
       backendDir,
@@ -148,6 +157,49 @@ describe('FastAPI support end to end', () => {
 
     // And the CI workflow was generated at scaffold time
     expect(fs.existsSync(path.join(projectRoot, '.github', 'workflows', 'ci.yml'))).toBe(true)
+  })
+
+  it('make:resource adds a mounted, migrated resource to the scaffolded project', async () => {
+    const { projectRoot, backendDir, frontendDir } = await scaffold()
+    process.chdir(projectRoot)
+    execMocks.execPython.mockClear()
+
+    await makeResource('BlogPost')
+
+    // The package and its tests land beside the scaffold's own code
+    const pkg = path.join(backendDir, 'app', 'blog_posts')
+    for (const file of ['__init__.py', 'models.py', 'schemas.py', 'service.py', 'router.py']) {
+      expect(fs.existsSync(path.join(pkg, file))).toBe(true)
+    }
+    const tests = fs.readFileSync(path.join(backendDir, 'tests', 'test_blog_posts.py'), 'utf-8')
+    expect(tests).toContain('LIST_URL = "/api/blog_posts/"')
+
+    // Mounted through the markers the scaffold planted in main.py: the import
+    // sits with the other imports, the router after the auth router
+    const main = fs.readFileSync(path.join(backendDir, 'app', 'main.py'), 'utf-8')
+    const importLine = 'from app.blog_posts.router import router as blog_posts_router'
+    const mountLine =
+      'app.include_router(blog_posts_router, prefix="/api/blog_posts", tags=["blog_posts"])'
+    expect(main.indexOf(importLine)).toBeGreaterThan(-1)
+    expect(main.indexOf(importLine)).toBeLessThan(main.indexOf('app = FastAPI('))
+    expect(main.indexOf(mountLine)).toBeGreaterThan(main.indexOf('app.include_router(auth.router'))
+
+    // The operation ids are the ones the frontend hooks are generated from
+    const router = fs.readFileSync(path.join(pkg, 'router.py'), 'utf-8')
+    for (const op of ['list', 'create', 'retrieve', 'update', 'partial_update', 'destroy']) {
+      expect(router).toContain(`operation_id="blog_posts_${op}"`)
+    }
+
+    // Alembic writes and applies the migration, then the client is rebuilt
+    expect(execMocks.execPython.mock.calls).toEqual([
+      [['-m', 'alembic', 'revision', '--autogenerate', '-m', 'add blog_posts'], backendDir, true],
+      [['-m', 'alembic', 'upgrade', 'head'], backendDir, true],
+      [['scripts.py', 'export-openapi', path.join(frontendDir, '_schema.json')], backendDir, true],
+    ])
+
+    // And the frontend half is the same one Django and Express get
+    expect(fs.existsSync(path.join(frontendDir, 'src', 'pages', 'blog-posts'))).toBe(true)
+    expect(fs.existsSync(path.join(frontendDir, 'src', 'api', 'hooks', 'blog-posts'))).toBe(true)
   })
 
   it('dev starts the scaffolded FastAPI backend with uvicorn', async () => {

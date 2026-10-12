@@ -9,6 +9,7 @@ import type { GitignoreKind } from '../utils/gitignore.js'
 import { backendTemplateDir, ensureCiWorkflow, projectLayout } from '../utils/scaffold.js'
 import { syncFrontendClient } from '../utils/openapi.js'
 import { exec, execPython, execPip, commandExists } from '../utils/exec.js'
+import { alembicUpgrade } from '../utils/alembic.js'
 import { getTemplatesDir } from '../utils/paths.js'
 import type { BackendFramework, ProjectType } from '../utils/paths.js'
 import { log, spinner, printNextSteps, promptText, promptYesNo, promptSelect, printConfig } from '../utils/logger.js'
@@ -279,13 +280,13 @@ export async function init(name: string | undefined, options: InitOptions) {
       }
 
       if (isFastapiBackend) {
-        // 5. Create the database tables (SQLAlchemy models need no migrations)
-        const dbSpinner = spinner('Setting up the database...')
+        // 5. Run the Alembic migrations
+        const dbSpinner = spinner('Running initial migrations...')
         try {
-          await execPython(['scripts.py', 'init-db'], backendDir, true)
-          dbSpinner.succeed('Database tables created')
+          await alembicUpgrade(backendDir)
+          dbSpinner.succeed('Database migrated')
         } catch (error: any) {
-          dbSpinner.fail('Failed to set up the database')
+          dbSpinner.fail('Failed to run migrations')
           log.error(error.message)
           process.exit(1)
         }

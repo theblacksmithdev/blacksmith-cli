@@ -87,7 +87,7 @@ What starts depends on your project type:
 | `blacksmith setup:backend` | Set up the backend (install Python, create venv, install deps) |
 | `blacksmith setup:frontend` | Set up the frontend (install Node.js, install deps) |
 | `blacksmith skills` | List available AI skills |
-| `blacksmith backend <cmd>` | Run a backend command (`manage.py` for Django, `npm` for Express; not available for FastAPI yet) |
+| `blacksmith backend <cmd>` | Run a backend command (`manage.py` for Django, `npm` for Express, `python -m` for FastAPI) |
 | `blacksmith frontend <cmd>` | Run an npm command in the frontend |
 
 ## Project Structures
@@ -96,7 +96,7 @@ What starts depends on your project type:
 
 ```
 my-app/
-├── backend/                  # Django project (Express uses src/ + prisma/, FastAPI uses app/ + scripts.py)
+├── backend/                  # Django project (Express uses src/ + prisma/, FastAPI uses app/ + migrations/)
 │   ├── config/               # Settings, URLs, WSGI/ASGI
 │   ├── apps/                 # Django apps (one per resource)
 │   │   └── users/            # Built-in user app with JWT auth

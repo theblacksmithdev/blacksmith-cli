@@ -12,8 +12,12 @@ On an Express project the backend half of the command creates
 :::
 
 :::note FastAPI backends
-The command is not available for FastAPI projects yet — it exits with an error rather
-than generating Django files into a FastAPI project (it ships in a later release).
+On a FastAPI project the backend half creates an `app/<name>/` package (`models.py`,
+`schemas.py`, `service.py`, `router.py`) and `tests/test_<name>.py`, mounts the router in
+`app/main.py`, and writes and applies an Alembic migration
+(`alembic revision --autogenerate`, then `alembic upgrade head`). The frontend half is
+identical. Projects created before resource support have no Alembic setup; the command
+stops before writing anything and says so.
 :::
 
 
