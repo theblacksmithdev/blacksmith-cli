@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { useTmpDir } from '../../__tests__/helpers.js'
-import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, getProjectType, hasBackend, hasFrontend, loadConfig, dirExists, fileExists } from '../paths.js'
+import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, getFrontendFramework, getProjectType, hasBackend, hasFrontend, loadConfig, dirExists, fileExists } from '../paths.js'
 
 describe('findProjectRoot', () => {
   const getTmpDir = useTmpDir()
@@ -60,6 +60,24 @@ describe('getBackendFramework', () => {
   it('should return the configured framework', () => {
     writeConfig(getTmpDir(), { name: 'test', backend: { port: 8000, framework: 'express' } })
     expect(getBackendFramework(getTmpDir())).toBe('express')
+  })
+})
+
+describe('getFrontendFramework', () => {
+  const getTmpDir = useTmpDir()
+
+  function writeConfig(dir: string, config: Record<string, unknown>) {
+    fs.writeFileSync(path.join(dir, 'blacksmith.config.json'), JSON.stringify(config))
+  }
+
+  it('should return "react" for a project generated before Vue support', () => {
+    writeConfig(getTmpDir(), { name: 'test', frontend: { port: 5173 } })
+    expect(getFrontendFramework(getTmpDir())).toBe('react')
+  })
+
+  it('should return the configured framework', () => {
+    writeConfig(getTmpDir(), { name: 'test', frontend: { port: 5173, framework: 'react' } })
+    expect(getFrontendFramework(getTmpDir())).toBe('react')
   })
 })
 

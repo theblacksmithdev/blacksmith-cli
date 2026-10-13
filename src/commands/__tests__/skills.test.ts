@@ -8,6 +8,7 @@ vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
   getBackendFramework: vi.fn(() => 'django'),
+  getFrontendFramework: vi.fn(() => 'react'),
   findProjectRoot: vi.fn(),
   loadConfig: vi.fn(),
   getProjectType: vi.fn(() => 'fullstack'),
@@ -33,14 +34,29 @@ describe('setupSkills', () => {
     expect(aiMocks.setupAiDev).toHaveBeenCalledWith({
       projectDir: '/project',
       projectName: 'my-project',
-      includeChakraUiSkill: true,
+      includeUiSkill: true,
       projectType: 'fullstack',
       backendFramework: 'django',
+      frontendFramework: 'react',
     })
     expect(log.success).toHaveBeenCalled()
   })
 
-  it('should respect chakraUiSkill option', async () => {
+  it('should respect the uiSkill option', async () => {
+    pathMocks.findProjectRoot.mockReturnValue('/project')
+    pathMocks.loadConfig.mockReturnValue({ name: 'my-project' })
+    aiMocks.setupAiDev.mockResolvedValue(undefined)
+
+    await setupSkills({ uiSkill: false })
+
+    expect(aiMocks.setupAiDev).toHaveBeenCalledWith(
+      expect.objectContaining({
+        includeUiSkill: false,
+      })
+    )
+  })
+
+  it('still accepts the old chakraUiSkill option', async () => {
     pathMocks.findProjectRoot.mockReturnValue('/project')
     pathMocks.loadConfig.mockReturnValue({ name: 'my-project' })
     aiMocks.setupAiDev.mockResolvedValue(undefined)
@@ -49,7 +65,7 @@ describe('setupSkills', () => {
 
     expect(aiMocks.setupAiDev).toHaveBeenCalledWith(
       expect.objectContaining({
-        includeChakraUiSkill: false,
+        includeUiSkill: false,
       })
     )
   })

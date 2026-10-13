@@ -9,8 +9,12 @@ Generate AI development documentation for AI coding assistants.
 ## Usage
 
 ```bash
-blacksmith setup:ai
+blacksmith setup:ai [--no-ui-skill]
 ```
+
+| Option | Description |
+|--------|-------------|
+| `--no-ui-skill` | Leave out the UI kit skills (Chakra UI for React, Nuxt UI for Vue). The older `--no-chakra-ui-skill` still works |
 
 ## What It Does
 
@@ -34,14 +38,8 @@ A directory of detailed skill files organized by topic:
 | Core Rules | Fundamental project rules and conventions |
 | Project Overview | Architecture and directory structure |
 | Backend skills | One set for the project's backend framework (below) |
-| React Basics | Component patterns and conventions |
-| React Query | Data fetching and mutation patterns |
-| Page Structure | Page layout and routing conventions |
-| Blacksmith UI | Component library usage |
-| Blacksmith Forms | Form handling with React Hook Form + Zod |
-| Blacksmith Auth | Authentication flow and guards |
-| Blacksmith Hooks | Custom hooks for common patterns |
-| UI Design | Design system and styling guidelines |
+| Frontend skills | One set for the project's frontend framework (below) |
+| UI Design | Design system and styling guidelines, in the frontend's UI kit |
 | Programming Paradigms | Code style and architectural patterns |
 | Clean Code | Code quality guidelines |
 | AI Guidelines | How AI assistants should interact with the codebase |
@@ -56,8 +54,17 @@ the wrong framework are worse than none, so a project never gets another backend
 | FastAPI | `fastapi`, `fastapi-sqlalchemy` (models and Alembic migrations) |
 | Spring Boot | `spring`, `spring-jpa` (entities and Flyway migrations) |
 
-The project overview, CLI, guidelines, clean-code and programming-paradigms skills
-describe the project's own backend too.
+Frontend skills work the same way. Skills with the same id (`page-structure`,
+`frontend-modularization`, `frontend-testing`, `ui-design`) are written for the project's
+framework:
+
+| Framework | Skills | UI kit skills (`--no-ui-skill` leaves these out) |
+|-----------|--------|---------------------------------------------------|
+| React | `react`, `react-query`, `page-structure`, `frontend-modularization`, `frontend-testing` | `chakra-ui-react`, `chakra-ui-forms`, `chakra-ui-auth`, `blacksmith-hooks`, `ui-design` |
+| Vue | `vue`, `vue-query`, `page-structure`, `frontend-modularization`, `frontend-testing` | `nuxt-ui`, `nuxt-ui-forms`, `vue-auth`, `blacksmith-composables`, `ui-design` |
+
+The project overview, core rules, CLI, guidelines, clean-code and programming-paradigms
+skills describe the project's own backend and frontend too.
 
 ## When to Use
 

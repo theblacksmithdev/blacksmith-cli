@@ -1,0 +1,10 @@
+import type { RouteRecordRaw } from 'vue-router'
+import { Path } from '@/router/paths'
+
+export const authRoutes: RouteRecordRaw[] = [
+  { path: Path.Login, component: () => import('./pages/LoginPage.vue') },
+  { path: Path.Register, component: () => import('./pages/RegisterPage.vue') },
+  { path: Path.ForgotPassword, component: () => import('./pages/ForgotPasswordPage.vue') },
+  // `props: true` passes the `:token` param to the page as a prop
+  { path: Path.ResetPassword, component: () => import('./pages/ResetPasswordPage.vue'), props: true },
+]

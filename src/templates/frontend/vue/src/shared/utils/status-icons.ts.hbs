@@ -1,0 +1,10 @@
+/** The icon each alert status is shown with. */
+export const STATUS_ICONS = {
+  error: 'i-lucide-circle-alert',
+  success: 'i-lucide-circle-check',
+  info: 'i-lucide-info',
+  warning: 'i-lucide-triangle-alert',
+  neutral: 'i-lucide-info',
+} as const
+
+export type AlertStatus = keyof typeof STATUS_ICONS

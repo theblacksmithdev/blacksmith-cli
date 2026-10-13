@@ -1,0 +1,28 @@
+import { createMemoryHistory, createRouter } from 'vue-router'
+import MainLayout from '@/router/layouts/MainLayout.vue'
+import AuthLayout from '@/router/layouts/AuthLayout.vue'
+import { routes } from '../routes'
+import { Path } from '../paths'
+
+function layoutOf(path: string) {
+  const router = createRouter({ history: createMemoryHistory(), routes })
+  return router.resolve(path).matched[0]?.components?.default
+}
+
+describe('routes', () => {
+  it('opens the home page in the app layout', () => {
+    expect(layoutOf(Path.Home)).toBe(MainLayout)
+  })
+
+  it('opens the auth pages in the auth layout', () => {
+    expect(layoutOf(Path.Login)).toBe(AuthLayout)
+    expect(layoutOf(Path.Register)).toBe(AuthLayout)
+  })
+
+  it('marks private pages as requiring sign-in', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+
+    expect(router.resolve(Path.Dashboard).meta.requiresAuth).toBe(true)
+    expect(router.resolve(Path.Terms).meta.requiresAuth).toBeUndefined()
+  })
+})

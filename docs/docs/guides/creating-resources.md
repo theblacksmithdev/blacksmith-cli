@@ -107,7 +107,11 @@ interface Product {
 
 ## Step 6: Customize the Frontend
 
-Update the generated pages and forms to use your new fields. The generated API hooks in `src/api/hooks/products/` are ready to use:
+Update the generated pages, the form and its schema (`src/pages/products/schemas.ts`) to use your new fields. The list page already has a **New product** dialog and pagination, and the detail page has **Edit** and **Delete**.
+
+### React
+
+The generated API hooks in `src/api/hooks/products/` are ready to use:
 
 ```typescript
 // API hooks wrap the auto-generated query options with pagination, search, and cache invalidation
@@ -137,6 +141,31 @@ You can also import directly from the auto-generated layer for lower-level acces
 ```typescript
 import { productsRetrieveOptions } from '@/api/generated/@tanstack/react-query.gen';
 ```
+
+### Vue
+
+The generated API composables in `src/api/composables/products/` are the same, as composables. Pass the parameters as a getter, so the list refetches when they change:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useProducts } from '@/api/composables/products'
+
+const page = ref(1)
+const { data, isLoading } = useProducts(() => ({ page: page.value, ordering: '-created_at' }))
+</script>
+
+<template>
+  <p v-if="isLoading">Loading...</p>
+  <div v-for="product in data?.products ?? []" v-else :key="product.id">
+    <h3>{{ product.name }}</h3>
+    <p>${{ product.price }}</p>
+    <span>{{ product.in_stock ? 'In Stock' : 'Out of Stock' }}</span>
+  </div>
+</template>
+```
+
+The lower-level generated layer is `@/api/generated/@tanstack/vue-query.gen`.
 
 ## Step 7: Customize the Viewset
 
@@ -202,7 +231,7 @@ backend/
 └── tests/test_products.py
 ```
 
-The API, the frontend hooks and the pages are the same ones a Django project gets.
+The API, the frontend's API code and the pages are the same ones a Django project gets.
 
 **Add a field.** Edit the model and the schemas that expose it:
 
@@ -254,7 +283,7 @@ backend/src/
 └── test/java/app/products/ProductApiTest.java
 ```
 
-The API, the frontend hooks and the pages are the same ones a Django project gets.
+The API, the frontend's API code and the pages are the same ones a Django project gets.
 
 **Add a field.** Add the column with the next migration, then the field to the entity
 and the records that expose it:

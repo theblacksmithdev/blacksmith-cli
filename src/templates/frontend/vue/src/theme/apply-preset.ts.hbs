@@ -1,0 +1,11 @@
+import { activePreset } from './presets'
+
+/**
+ * Expose the active preset to main.css, which draws the `mono` accent and
+ * square corners from these attributes. Call once before mounting.
+ */
+export function applyThemePreset() {
+  const root = document.documentElement
+  root.dataset.accent = activePreset.accent
+  root.dataset.corners = activePreset.rounded ? 'rounded' : 'square'
+}

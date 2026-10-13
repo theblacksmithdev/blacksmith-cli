@@ -49,7 +49,7 @@ describe('ensureGitignore', () => {
 
   it('should ignore node_modules/ in the frontend .gitignore', () => {
     const dir = getTmpDir()
-    ensureGitignore(dir, 'frontend')
+    ensureGitignore(dir, 'frontend/common')
 
     const content = fs.readFileSync(path.join(dir, '.gitignore'), 'utf-8')
     expect(content).toMatch(/^node_modules\/$/m)
@@ -100,10 +100,11 @@ describe('gitignore templates', () => {
     // to compile rather than silently skipping the check.
     const kinds: GitignoreKind[] = [
       'project',
-      'frontend',
+      'frontend/common',
       'backend/django',
       'backend/express',
       'backend/fastapi',
+      'backend/spring',
     ]
 
     for (const kind of kinds) {

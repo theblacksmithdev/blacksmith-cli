@@ -1,5 +1,6 @@
 import { exec, execGradle, execPython } from './exec.js'
 import { alembicUpgrade } from './alembic.js'
+import { orList } from './lists.js'
 import type { BackendFramework } from './paths.js'
 import type { Runtime } from './runtimes.js'
 import type { Step } from './steps.js'
@@ -209,10 +210,8 @@ export const BACKEND_TOOLCHAINS: Record<BackendFramework, BackendToolchain> = {
 /** Every framework `--backend` accepts, in the order they are offered. */
 export const BACKEND_FRAMEWORKS = Object.keys(BACKEND_TOOLCHAINS) as BackendFramework[]
 
-const listWithOr = new Intl.ListFormat('en', { type: 'disjunction' })
-
 /** The frameworks as a sentence: "django, express, or fastapi". */
-export const BACKEND_FRAMEWORK_CHOICES = listWithOr.format(BACKEND_FRAMEWORKS)
+export const BACKEND_FRAMEWORK_CHOICES = orList(BACKEND_FRAMEWORKS)
 
 /** The same, as markdown config values: `"django"`, `"express"`, or `"fastapi"`. */
-export const BACKEND_FRAMEWORK_CHOICES_QUOTED = listWithOr.format(BACKEND_FRAMEWORKS.map((framework) => `\`"${framework}"\``))
+export const BACKEND_FRAMEWORK_CHOICES_QUOTED = orList(BACKEND_FRAMEWORKS.map((framework) => `\`"${framework}"\``))

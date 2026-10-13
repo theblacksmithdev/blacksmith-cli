@@ -1,19 +1,21 @@
 # Blacksmith CLI
 
-**Django, Express, FastAPI, or Spring Boot + React framework — one command, one codebase, one mental model.**
+**Django, Express, FastAPI, or Spring Boot + React or Vue framework — one command, one codebase, one mental model.**
 
 Blacksmith scaffolds production-ready web applications with a Django, Express, FastAPI, or Spring Boot backend, a
-React frontend, or both — wired together through automatic OpenAPI synchronization. Choose your project
+React or Vue frontend, or both — wired together through automatic OpenAPI synchronization. Choose your project
 type and Blacksmith handles the rest.
 
 ## Why Blacksmith?
 
 Building web apps usually means gluing together separate projects, manually keeping types in sync, and writing boilerplate. Blacksmith eliminates that friction:
 
-- **Flexible project types** — scaffold a fullstack app, a standalone API, or a standalone React frontend
+- **Flexible project types** — scaffold a fullstack app, a standalone API, or a standalone frontend
 - **Four backends, one API** — Django (Python, DRF), Express (TypeScript, Prisma), FastAPI
   (Python, Pydantic), or Spring Boot (Java, Spring Data JPA). All four expose the same HTTP
   contract, so the generated frontend is identical whichever you pick
+- **Two frontends** — React (Chakra UI) or Vue (Nuxt UI). Same pages, same auth flow, same
+  generated API client, with any backend
 - **Automatic API sync** — change a serializer or Zod schema, get updated TypeScript types and API client instantly (fullstack)
 - **Resource scaffolding** — `make:resource BlogPost` creates everything you need for the resource based on your project type
 - **AI-ready** — generates `CLAUDE.md` and skill files so AI coding assistants understand your entire stack
@@ -59,6 +61,9 @@ blacksmith init my-app --type backend --backend django
 
 # Frontend only (React)
 blacksmith init my-app --type frontend
+
+# Fullstack with a Vue frontend
+blacksmith init my-app --type fullstack --frontend vue
 
 # With all options
 blacksmith init my-app --type fullstack --backend express -b 8000 -f 5173 --theme-color blue --ai
@@ -106,12 +111,12 @@ my-app/
 │   │   └── users/            # Built-in user app with JWT auth
 │   ├── manage.py
 │   └── venv/                 # Python virtual environment
-├── frontend/                 # React + Vite project
+├── frontend/                 # React or Vue + Vite project
 │   ├── src/
-│   │   ├── api/              # Auto-generated API client + hooks
+│   │   ├── api/              # Auto-generated API client + hooks (composables in Vue)
 │   │   ├── features/         # Feature modules (auth, etc.)
 │   │   ├── pages/            # Top-level page components
-│   │   ├── router/           # React Router with auth guards
+│   │   ├── router/           # Router with auth guards
 │   │   └── shared/           # Shared components, hooks, utils
 │   └── package.json
 ├── blacksmith.config.json
@@ -135,9 +140,9 @@ my-app/
 ```
 my-app/
 ├── src/
-│   ├── api/                  # API hooks
+│   ├── api/                  # API hooks or composables
 │   ├── pages/                # Page components
-│   ├── router/               # React Router
+│   ├── router/               # Router
 │   └── shared/               # Shared components, hooks, utils
 ├── package.json
 └── blacksmith.config.json
@@ -171,6 +176,10 @@ exposing the same HTTP API.
 - **Chakra UI v3** for components, with an OpenAI-inspired light/dark theme
 - **@hey-api/openapi-ts** for API client generation
 
+With `--frontend vue` the frontend is instead **Vue 3.5** (`<script setup>`) + **Vue Router 4** +
+**Pinia** + **TanStack Vue Query** + **Nuxt UI v4** on **Tailwind CSS v4**, type-checked with
+`vue-tsc` and tested with `@testing-library/vue`, with the same pages and theme presets.
+
 ## Resource Scaffolding
 
 The `make:resource` command generates files based on your project type:
@@ -186,15 +195,15 @@ blacksmith make:resource BlogPost
 - On Spring Boot: an `app.blogposts` package (entity, repository, service, controller, records, JUnit tests) and the next Flyway migration
 
 **Frontend** (fullstack and frontend projects):
-- `src/api/hooks/blog-posts/` — query and mutation hooks
-- `src/pages/blog-posts/` — list and detail pages
+- `src/api/hooks/blog-posts/` (React) or `src/api/composables/blog-posts/` (Vue) — query and mutation code
+- `src/pages/blog-posts/` — paginated list page with a create dialog, detail page with edit and delete, form, tests
 - Routes auto-registered
 
 **Fullstack**: Also runs `blacksmith sync` to generate TypeScript types from the new endpoint.
 
 ## OpenAPI Sync (Fullstack Only)
 
-Blacksmith bridges the backend and React through OpenAPI:
+Blacksmith bridges the backend and the frontend through OpenAPI:
 
 1. The backend serves an OpenAPI schema — Django via `drf-spectacular`, Express via its
    OpenAPI registry, FastAPI natively, Spring Boot via `springdoc-openapi`
@@ -215,7 +224,7 @@ blacksmith setup:ai
 
 This creates:
 - **CLAUDE.md** — project overview, commands, workflow, and conventions
-- **.claude/skills/** — detailed skill files tailored to your project type (skills for the project's own backend framework, React skills for the frontend, both for fullstack)
+- **.claude/skills/** — detailed skill files tailored to your project type (skills for the project's own backend framework, React or Vue skills for its frontend, both for fullstack)
 
 ## Configuration
 
@@ -226,14 +235,14 @@ Project settings live in `blacksmith.config.json`:
   "name": "my-app",
   "version": "0.1.0",
   "type": "fullstack",
-  "backend": { "port": 8000 },
-  "frontend": { "port": 5173 }
+  "backend": { "port": 8000, "framework": "django" },
+  "frontend": { "port": 5173, "framework": "react" }
 }
 ```
 
 - `type` — `"fullstack"`, `"backend"`, or `"frontend"`
-- `backend` — present for fullstack and backend projects
-- `frontend` — present for fullstack and frontend projects
+- `backend` — present for fullstack and backend projects; `framework` is `django`, `express`, `fastapi`, or `spring` (absent means `django`)
+- `frontend` — present for fullstack and frontend projects; `framework` is `react` or `vue` (absent means `react`)
 
 ## Ejecting
 

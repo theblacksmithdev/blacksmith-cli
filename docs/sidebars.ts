@@ -38,6 +38,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'guides/project-structure',
         'guides/choosing-a-backend',
+        'guides/choosing-a-frontend',
         'guides/openapi-sync',
         'guides/authentication',
         'guides/creating-resources',
@@ -63,6 +64,7 @@ const sidebars: SidebarsConfig = {
         'stack/backend-fastapi',
         'stack/backend-spring',
         'stack/frontend',
+        'stack/frontend-vue',
       ],
     },
   ],

@@ -38,7 +38,7 @@ blacksmith build
 ```
 
 This command:
-1. Builds the React frontend with Vite (output in `frontend/dist/`)
+1. Builds the frontend with Vite (output in `frontend/dist/`)
 2. Collects Django static files (including the built frontend)
 
 ## Production Checklist
@@ -149,4 +149,4 @@ If you prefer not to have Blacksmith as a dependency in production:
 blacksmith eject
 ```
 
-This converts your project to a standard Django + React project. See the [eject command](/docs/commands/eject) for details.
+This converts your project to a standard backend + frontend project. See the [eject command](/docs/commands/eject) for details.

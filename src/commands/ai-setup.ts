@@ -2,30 +2,32 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { log, spinner } from '../utils/logger.js'
 import type { SkillContext } from '../skills/types.js'
-import type { BackendFramework, ProjectType } from '../utils/paths.js'
+import type { BackendFramework, FrontendFramework, ProjectType } from '../utils/paths.js'
 import { selectSkills } from '../skills/selection.js'
 
 interface AiSetupOptions {
   projectDir: string
   projectName: string
-  includeChakraUiSkill: boolean
+  includeUiSkill: boolean
   projectType?: ProjectType
   backendFramework?: BackendFramework
+  frontendFramework?: FrontendFramework
 }
 
 export async function setupAiDev({
   projectDir,
   projectName,
-  includeChakraUiSkill,
+  includeUiSkill,
   projectType = 'fullstack',
   backendFramework = 'django',
+  frontendFramework = 'react',
 }: AiSetupOptions) {
   const aiSpinner = spinner('Setting up AI development environment...')
 
   try {
-    const skills = selectSkills({ projectType, backendFramework, includeChakraUiSkill })
+    const skills = selectSkills({ projectType, backendFramework, frontendFramework, includeUiSkill })
 
-    const ctx: SkillContext = { projectName, backendFramework }
+    const ctx: SkillContext = { projectName, backendFramework, frontendFramework }
 
     // Separate inline skills (CLAUDE.md) from file-based skills (.claude/skills/[id]/SKILL.md)
     const inlineSkills = skills.filter((s) => !s.name)

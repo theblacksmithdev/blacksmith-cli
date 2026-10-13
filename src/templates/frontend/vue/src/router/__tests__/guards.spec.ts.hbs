@@ -1,0 +1,52 @@
+import { createPinia, setActivePinia } from 'pinia'
+import { createMemoryHistory, createRouter } from 'vue-router'
+import { setTokens } from '@/api/token-storage'
+
+const me = { id: 1, email: 'ada@example.com', first_name: 'Ada', last_name: '' }
+
+/** A router with one public and one private page, guarded like the app's. */
+async function guardedRouter() {
+  // Fresh modules: the auth adapter keeps the session in module state
+  vi.resetModules()
+  const { installAuthGuard } = await import('../guards')
+
+  setActivePinia(createPinia())
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/login', component: { render: () => null } },
+      { path: '/dashboard', meta: { requiresAuth: true }, component: { render: () => null } },
+    ],
+  })
+  installAuthGuard(router)
+  return router
+}
+
+describe('auth guard', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('sends a signed-out visitor to log in, remembering the page', async () => {
+    const router = await guardedRouter()
+
+    await router.push('/dashboard')
+
+    expect(router.currentRoute.value.path).toBe('/login')
+    expect(router.currentRoute.value.query.redirect).toBe('/dashboard')
+  })
+
+  it('waits for the stored session on a hard refresh instead of redirecting', async () => {
+    setTokens('access-1', 'refresh-1')
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(me), { status: 200 })))
+    const router = await guardedRouter()
+
+    await router.push('/dashboard')
+
+    expect(router.currentRoute.value.path).toBe('/dashboard')
+  })
+})

@@ -36,7 +36,7 @@ The build steps depend on your project type:
 
 ### Fullstack Projects
 
-1. **Build React frontend** — Runs `npm run build` via Vite (bundle, minify, optimize)
+1. **Build the frontend** — Runs `npm run build`: type-checks (`tsc` for React, `vue-tsc` for Vue), then bundles, minifies and optimizes with Vite
 2. **Collect Django static files** — Runs `manage.py collectstatic` to gather all static files
 
 ### Backend-Only Projects
@@ -45,7 +45,7 @@ The build steps depend on your project type:
 
 ### Frontend-Only Projects
 
-1. **Build React frontend** — Runs `npm run build` via Vite
+1. **Build the frontend** — Runs `npm run build` (type-check, then Vite)
 
 ## Output
 

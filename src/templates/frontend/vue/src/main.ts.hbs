@@ -1,0 +1,21 @@
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import '@fontsource-variable/inter'
+import '@/theme/main.css'
+import { applyColorMode } from '@/shared/utils/color-mode'
+import { applyThemePreset } from '@/theme/apply-preset'
+import { queryClient } from '@/api/query-client'
+import { router } from '@/router'
+import { installPlugins } from './plugins'
+import App from './App.vue'
+
+// Initialize API client (registers interceptors)
+import '@/api/client'
+
+// Set light/dark and the preset before the first paint so there's no flash
+applyColorMode()
+applyThemePreset()
+
+const app = createApp(App)
+installPlugins(app, { pinia: createPinia(), router, queryClient })
+app.mount('#root')

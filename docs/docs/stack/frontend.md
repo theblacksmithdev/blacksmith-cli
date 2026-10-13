@@ -2,9 +2,11 @@
 sidebar_position: 2
 ---
 
-# Frontend Stack
+# Frontend Stack: React
 
-Blacksmith's frontend is a modern React application built with TypeScript and Vite, using best-in-class libraries for routing, data fetching, forms, and styling.
+The default frontend is a React application built with TypeScript and Vite, with Chakra UI for components. It is what `blacksmith init` generates when you pick `--frontend react` or leave the flag out.
+
+Blacksmith can also generate a Vue frontend. See [Frontend Stack: Vue](/docs/stack/frontend-vue), and [Choosing a Frontend](/docs/guides/choosing-a-frontend) to compare the two.
 
 ## Core Technologies
 
@@ -90,7 +92,8 @@ frontend/
 │   ├── pages/                  # Route pages
 │   ├── router/                 # Routing config
 │   ├── shared/                 # Shared components, hooks, utils
-│   │   └── components/ui/      # Chakra glue: Provider, ColorModeButton, RouterLink
+│   │   ├── components/ui/      # Chakra glue: Provider, ColorModeButton, RouterLink
+│   │   └── utils/              # api-error, color-mode, format-date, pagination (shared with Vue)
 │   ├── theme/                  # Chakra UI design system (tokens, recipes, presets)
 │   ├── app.tsx                 # Root component
 │   └── main.tsx                # Entry point

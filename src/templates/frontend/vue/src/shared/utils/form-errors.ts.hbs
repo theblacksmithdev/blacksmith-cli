@@ -1,0 +1,11 @@
+import type { FormError } from '@nuxt/ui'
+
+/**
+ * Turn the API's field errors (`{ title: ["This field is required."] }`) into
+ * the errors `UForm` shows under each field.
+ */
+export function toFormErrors(fieldErrors: Record<string, string[]>): FormError[] {
+  return Object.entries(fieldErrors).flatMap(([name, messages]) =>
+    messages.map((message) => ({ name, message })),
+  )
+}

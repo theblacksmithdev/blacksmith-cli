@@ -1,0 +1,8 @@
+import 'vue-router'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    /** Only signed-in users may open the route; set on a parent to cover its children. */
+    requiresAuth?: boolean
+  }
+}

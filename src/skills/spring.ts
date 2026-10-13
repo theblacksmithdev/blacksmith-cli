@@ -61,7 +61,7 @@ field \`@Autowired\`.
 
 ### OpenAPI Is the Frontend's Contract
 
-\`blacksmith sync\` runs \`./gradlew exportOpenApi\` and generates the React
+\`blacksmith sync\` runs \`./gradlew exportOpenApi\` and generates the frontend
 client from the document, so the annotations *are* the frontend API:
 
 - Set \`@Operation(operationId = ...)\` on every endpoint to what drf-spectacular
@@ -72,8 +72,8 @@ client from the document, so the annotations *are* the frontend API:
   \`@Schema(name = "BlogPost")\`; request records are \`BlogPostRequest\` and
   \`PatchedBlogPostRequest\`; the list is \`PaginatedBlogPostList\`.
 - Document path ids as strings, \`@PathVariable @Parameter(schema = @Schema(type
-  = "string")) long id\`. The React hooks pass route params straight from
-  \`useParams\`; a non-numeric id answers 404.
+  = "string")) long id\`. The frontend passes route params straight from
+  the URL; a non-numeric id answers 404.
 - Keep trailing slashes on every path (\`"/"\`, \`"/{id}/"\`), as Django does.
 - Every property of a response schema is marked required automatically
   (\`config/RequiredResponseFields\`), so response fields are never
@@ -86,7 +86,7 @@ JSON field names are snake_case (\`spring.jackson.property-naming-strategy\`), a
 
 ### Errors Are a Contract
 
-The React client parses Django REST Framework's error shapes, and
+The frontend client parses Django REST Framework's error shapes, and
 \`errors/ApiExceptionHandler\` produces them for every failure. Throw
 \`ApiException\` for expected failures:
 
@@ -159,7 +159,7 @@ return PaginatedBlogPostList.of(results);
 \`next\` / \`previous\` links. \`Ordering\` reads DRF's \`?ordering=-created_at\`;
 \`ORDERING_FIELDS\` maps the JSON names a client may sort by to entity
 properties. Never return a bare list or Spring's \`Page\` JSON: the generated
-React hooks read \`results\` and \`count\`.
+frontend queries read \`results\` and \`count\`.
 
 ### Testing
 

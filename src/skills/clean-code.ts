@@ -1,5 +1,6 @@
 import type { Skill, SkillContext } from './types.js'
 import { backendProfile } from './backend-profiles.js'
+import { frontendProfile } from './frontend-profiles.js'
 
 export const cleanCodeSkill: Skill = {
   id: 'clean-code',
@@ -8,6 +9,7 @@ export const cleanCodeSkill: Skill = {
 
   render(ctx: SkillContext): string {
     const backend = backendProfile(ctx)
+    const frontend = frontendProfile(ctx)
 
     return `## Clean Code Principles
 
@@ -30,15 +32,7 @@ Write code that is easy to read, easy to change, and easy to delete. Treat clari
 - Pure functions are easier to test, reason about, and reuse. Prefer them where possible
 - Don't use flags (boolean parameters) to make a function do two different things — write two functions instead
 
-### Components (React-specific)
-- One component per file. The file name should match the component name
-- Keep components under 100 lines of JSX. Extract sub-components when they grow beyond this
-- Separate data logic (hooks) from presentation (components). A component should mostly be JSX, not logic
-- **Page components are orchestrators** — they should be ~20-30 lines, composing child components from \`components/\` and calling hooks from \`hooks/\`. Never build a 200-line page monolith
-- Props interfaces should be explicit and narrow — accept only what the component needs, not entire objects
-- Avoid prop drilling beyond 2 levels — use context or restructure the component tree
-- Destructure props in the function signature for clarity
-- Use \`@chakra-ui/react\` layout components (\`Stack\`, \`HStack\`, \`Flex\`, \`SimpleGrid\`) with \`gap\` — never styled \`<div>\`s or utility classes
+${frontend.componentRules}
 
 ### File Organization
 - Keep files short. If a file exceeds 200 lines, it is likely doing too much — split it
@@ -90,7 +84,7 @@ Write code that is easy to read, easy to change, and easy to delete. Treat clari
 
 ${backend.languageRules}
 
-### TypeScript-Specific (React)
+### TypeScript-Specific (${frontend.name})
 - Use strict TypeScript. Don't use \`any\` — use \`unknown\` and narrow, or define a proper type
 - Define interfaces for component props, API responses, and form schemas
 - Use \`const\` by default. Only use \`let\` when reassignment is necessary. Never use \`var\`

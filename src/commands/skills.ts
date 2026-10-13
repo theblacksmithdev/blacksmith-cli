@@ -1,14 +1,11 @@
 import fs from 'node:fs'
-import { findProjectRoot, loadConfig, getBackendFramework, getProjectType } from '../utils/paths.js'
+import { findProjectRoot, loadConfig, getBackendFramework, getFrontendFramework, getProjectType } from '../utils/paths.js'
 import { setupAiDev } from './ai-setup.js'
 import { log } from '../utils/logger.js'
 import { selectSkills } from '../skills/selection.js'
+import { wantsUiSkill, type UiSkillOptions } from '../utils/cli-options.js'
 
-interface SetupOptions {
-  chakraUiSkill?: boolean
-}
-
-export async function setupSkills(options: SetupOptions) {
+export async function setupSkills(options: UiSkillOptions) {
   let root: string
   try {
     root = findProjectRoot()
@@ -22,9 +19,10 @@ export async function setupSkills(options: SetupOptions) {
   await setupAiDev({
     projectDir: root,
     projectName: config.name,
-    includeChakraUiSkill: options.chakraUiSkill !== false,
+    includeUiSkill: wantsUiSkill(options),
     projectType: getProjectType(root),
     backendFramework: getBackendFramework(root),
+    frontendFramework: getFrontendFramework(root),
   })
 
   log.blank()
@@ -45,12 +43,13 @@ export function listSkills() {
   const hasClaude = fs.existsSync(`${root}/CLAUDE.md`)
   const hasSkillsDir = fs.existsSync(`${root}/.claude/skills`)
 
-  // Chakra UI skills are listed as expected; `setup:ai --no-chakra-ui-skill`
-  // leaves them unwritten, which shows as ✗ below.
+  // UI kit skills are listed as expected; `setup:ai --no-ui-skill` leaves
+  // them unwritten, which shows as ✗ below.
   const skills = selectSkills({
     projectType: getProjectType(root),
     backendFramework: getBackendFramework(root),
-    includeChakraUiSkill: true,
+    frontendFramework: getFrontendFramework(root),
+    includeUiSkill: true,
   })
   const inlineSkills = skills.filter((s) => !s.name)
   const fileSkills = skills.filter((s) => s.name)

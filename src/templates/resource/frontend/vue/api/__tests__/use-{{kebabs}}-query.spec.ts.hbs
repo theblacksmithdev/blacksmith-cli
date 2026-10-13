@@ -1,0 +1,38 @@
+import { defineComponent, ref } from 'vue'
+import { renderWithProviders } from '@/__tests__/test-utils'
+import { use{{Names}} } from '../use-{{kebabs}}-query'
+
+function page(results: unknown[], count = results.length) {
+  return new Response(JSON.stringify({ count, next: null, previous: null, results }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+describe('use{{Names}}', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('refetches when the page passed as a getter changes', async () => {
+    const fetchMock = vi.fn<(request: Request) => Promise<Response>>(async () => page([]))
+    vi.stubGlobal('fetch', fetchMock)
+    const current = ref(1)
+
+    renderWithProviders(
+      defineComponent({
+        setup() {
+          use{{Names}}(() => ({ page: current.value }))
+          return () => null
+        },
+      }),
+    )
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+
+    current.value = 2
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+
+    const pages = fetchMock.mock.calls.map(([request]) => new URL(request.url).searchParams.get('page'))
+    expect(pages).toEqual(['1', '2'])
+  })
+})

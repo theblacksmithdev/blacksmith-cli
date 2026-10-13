@@ -1,0 +1,54 @@
+<script setup lang="ts">
+import UButton from '@nuxt/ui/components/Button.vue'
+import { Path } from '@/router/paths'
+import InfoCard from '@/shared/components/InfoCard.vue'
+import CommandSnippet from '@/shared/components/CommandSnippet.vue'
+import { API_DOCS_URL } from '@/shared/utils/api-url'
+</script>
+
+<template>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <InfoCard
+      icon="i-lucide-rocket"
+      title="Quick start"
+      badge="Guide"
+      description="Scaffold a new resource with models, API, and pages in one command."
+    >
+      <CommandSnippet command="blacksmith make:resource Post" />
+    </InfoCard>
+
+    <InfoCard
+      icon="i-lucide-database"
+      title="Backend"
+      badge="{{backendLabel}}"
+      description="{{backendSummary}}"
+    >
+      <UButton
+        :to="API_DOCS_URL"
+        target="_blank"
+        variant="outline"
+        color="neutral"
+        size="sm"
+        trailing-icon="i-lucide-arrow-up-right"
+      >
+        View API docs
+      </UButton>
+    </InfoCard>
+
+    <InfoCard
+      icon="i-lucide-layout"
+      title="Frontend"
+      badge="Vue"
+      description="Vue + TypeScript with TanStack Query, Vue Router, Pinia, and Nuxt UI."
+    >
+      <UButton
+        :to="Path.Home"
+        variant="outline"
+        color="neutral"
+        size="sm"
+      >
+        Home page
+      </UButton>
+    </InfoCard>
+  </div>
+</template>

@@ -1,0 +1,17 @@
+import { globalIgnores } from 'eslint/config'
+import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
+import pluginVue from 'eslint-plugin-vue'
+
+export default defineConfigWithVueTs(
+  globalIgnores(['dist/**', 'coverage/**', 'src/api/generated/**']),
+  pluginVue.configs['flat/recommended'],
+  vueTsConfigs.recommended,
+  {
+    rules: {
+      // Destructuring props loses their reactivity
+      'vue/no-setup-props-reactivity-loss': 'error',
+      // Short tags stay on one line; longer ones put one attribute per line
+      'vue/max-attributes-per-line': ['warn', { singleline: { max: 3 } }],
+    },
+  },
+)

@@ -59,6 +59,17 @@ export function getBackendFramework(projectRoot?: string): BackendFramework {
 }
 
 /**
+ * Get the frontend framework from config.
+ *
+ * Projects generated before Vue support have no `framework` field, so an
+ * absent value reads as React, as an absent backend framework reads as Django.
+ */
+export function getFrontendFramework(projectRoot?: string): FrontendFramework {
+  const config = loadConfig(projectRoot)
+  return config.frontend?.framework || 'react'
+}
+
+/**
  * Check if the project has a backend
  */
 export function hasBackend(projectRoot?: string): boolean {
@@ -103,12 +114,15 @@ export type ProjectType = 'fullstack' | 'backend' | 'frontend'
 /** Backend framework a project's API is built with. */
 export type BackendFramework = 'django' | 'express' | 'fastapi' | 'spring'
 
+/** Frontend framework a project's UI is built with. */
+export type FrontendFramework = 'react' | 'vue'
+
 export interface BlacksmithConfig {
   name: string
   version: string
   type?: ProjectType
   backend?: { port: number; framework?: BackendFramework }
-  frontend?: { port: number }
+  frontend?: { port: number; framework?: FrontendFramework }
 }
 
 export function loadConfig(projectRoot?: string): BlacksmithConfig {

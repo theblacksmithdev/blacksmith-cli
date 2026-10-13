@@ -21,7 +21,8 @@ Every Blacksmith project has a `blacksmith.config.json` file in the project root
     "framework": "django"
   },
   "frontend": {
-    "port": 5173
+    "port": 5173,
+    "framework": "react"
   }
 }
 ```
@@ -46,7 +47,8 @@ Every Blacksmith project has a `blacksmith.config.json` file in the project root
   "version": "0.1.0",
   "type": "frontend",
   "frontend": {
-    "port": 5173
+    "port": 5173,
+    "framework": "react"
   }
 }
 ```
@@ -63,17 +65,19 @@ Every Blacksmith project has a `blacksmith.config.json` file in the project root
 | `backend.framework` | string | No | `django`, `express`, `fastapi`, or `spring`. Absent means `django` |
 | `frontend` | object | No | Present for fullstack and frontend projects |
 | `frontend.port` | number | — | Port for the Vite development server |
+| `frontend.framework` | string | No | `react` or `vue`. Absent means `react` |
 
 :::info Backward Compatibility
 Projects created before the `type` field was introduced default to `fullstack` behavior.
 Projects created before Express support have no `backend.framework` field; its absence reads
-as `django`, so they keep working untouched.
+as `django`, so they keep working untouched. In the same way, an absent `frontend.framework`
+reads as `react`.
 :::
 
 :::warning
-`backend.framework` records which backend was generated — it does not switch one. Changing it
+`backend.framework` and `frontend.framework` record which stack was generated — they do not switch one. Changing either
 on an existing project points the CLI at a toolchain the code does not use. See
-[Choosing a Backend](../guides/choosing-a-backend.md).
+[Choosing a Backend](../guides/choosing-a-backend.md) and [Choosing a Frontend](../guides/choosing-a-frontend.md).
 :::
 
 ### Changing Ports

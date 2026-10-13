@@ -1,0 +1,43 @@
+/// <reference types="vitest/config" />
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import ui from '@nuxt/ui/vite'
+import { resolve } from 'path'
+import { uiConfig } from './src/theme/ui-config'
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    ui({
+      ui: uiConfig,
+      // Nothing is registered globally: every component and composable,
+      // Nuxt UI's included, is imported where it is used, so vue-tsc checks
+      // each one without generated declaration files.
+      autoImport: false,
+      components: false,
+      // `@/shared/utils/color-mode` owns the `dark` class on <html>
+      colorMode: false,
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+  server: {
+    port: {{frontendPort}},
+    proxy: {
+      '/api': {
+        target: 'http://localhost:{{backendPort}}',
+        changeOrigin: true,
+      },
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/__tests__/setup.ts'],
+    include: ['src/**/*.spec.ts'],
+    css: true,
+  },
+})

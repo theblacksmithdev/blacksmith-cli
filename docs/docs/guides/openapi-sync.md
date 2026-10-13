@@ -8,7 +8,7 @@ sidebar_position: 2
 OpenAPI synchronization is only available for fullstack projects (`type: "fullstack"`). Backend-only and frontend-only projects do not use this feature.
 :::
 
-OpenAPI is the bridge between your backend and React frontend. Blacksmith uses it to automatically generate type-safe client code from your backend API definitions.
+OpenAPI is the bridge between your backend and frontend. Blacksmith uses it to automatically generate type-safe client code from your backend API definitions.
 
 :::note Backend frameworks
 The pipeline is the same whichever backend you chose: Django exports the schema with
@@ -19,7 +19,7 @@ schema, and Spring Boot uses `springdoc-openapi` — all at `/api/schema/`.
 ## How It Works
 
 ```
-Django Serializers → OpenAPI Schema → TypeScript Types + API Client + React Query Hooks
+Django Serializers → OpenAPI Schema → TypeScript Types + API Client + TanStack Query Helpers
 ```
 
 ### 1. Schema Generation
@@ -35,11 +35,11 @@ The OpenAPI schema is then fed to `@hey-api/openapi-ts`, which generates four ca
 | `types.gen.ts` | TypeScript interfaces for every serializer |
 | `zod.gen.ts` | Zod schemas for runtime validation |
 | `sdk.gen.ts` | Typed API client functions |
-| `@tanstack/react-query.gen.ts` | React Query hooks for every endpoint |
+| `@tanstack/react-query.gen.ts` (React) or `@tanstack/vue-query.gen.ts` (Vue) | TanStack Query options, mutations and keys for every endpoint |
 
 ### 3. Frontend Usage
 
-Your React components import from the generated files:
+Your components import from the generated files (React shown; Vue imports from `@tanstack/vue-query.gen`):
 
 ```typescript
 // Types
@@ -118,7 +118,7 @@ The code generation is configured in `frontend/openapi-ts.config.ts`. This file 
 
 - Input schema source (the Django-generated OpenAPI file)
 - Output directory (`src/api/generated/`)
-- Plugins to use (TypeScript types, Zod, SDK, React Query)
+- Plugins to use (TypeScript types, Zod, SDK, and `@tanstack/react-query` or `@tanstack/vue-query`)
 
 ## Troubleshooting
 

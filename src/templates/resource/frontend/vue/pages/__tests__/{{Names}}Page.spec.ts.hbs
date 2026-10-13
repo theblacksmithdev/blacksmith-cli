@@ -1,0 +1,74 @@
+import { computed, ref } from 'vue'
+import { screen, renderWithProviders } from '@/__tests__/test-utils'
+
+vi.mock('@/api/composables/{{kebabs}}')
+
+import { use{{Names}}, useCreate{{Name}} } from '@/api/composables/{{kebabs}}'
+import {{Names}}Page from '../{{Names}}Page.vue'
+
+const items = [
+  { id: '1', title: 'First {{Name}}', description: '', created_at: '2024-01-15T10:00:00Z' },
+  { id: '2', title: 'Second {{Name}}', description: '', created_at: '2024-02-20T10:00:00Z' },
+]
+
+/** Stand in for the list query: the refs the page reads. */
+function mockQuery(overrides: { data?: unknown; errorMessage?: string | null } = {}) {
+  vi.mocked(use{{Names}}).mockReturnValue({
+    data: ref({ {{names}}: items, total: items.length }),
+    isLoading: ref(false),
+    errorMessage: computed(() => null),
+    ...('data' in overrides ? { data: ref(overrides.data) } : {}),
+    ...('errorMessage' in overrides ? { errorMessage: computed(() => overrides.errorMessage) } : {}),
+  } as unknown as ReturnType<typeof use{{Names}}>)
+}
+
+describe('{{Names}}Page', () => {
+  beforeEach(() => {
+    mockQuery()
+    vi.mocked(useCreate{{Name}}).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: ref(false),
+      errorMessage: computed(() => null),
+      fieldErrors: computed(() => ({})),
+      reset: vi.fn(),
+    } as unknown as ReturnType<typeof useCreate{{Name}}>)
+  })
+
+  it('renders the page heading', () => {
+    renderWithProviders({{Names}}Page)
+
+    expect(screen.getByRole('heading', { name: '{{Labels}}' })).toBeInTheDocument()
+  })
+
+  it('renders each {{name}}', () => {
+    renderWithProviders({{Names}}Page)
+
+    expect(screen.getByText('First {{Name}}')).toBeInTheDocument()
+    expect(screen.getByText('Second {{Name}}')).toBeInTheDocument()
+  })
+
+  it('shows the error message when the request fails', () => {
+    mockQuery({ data: undefined, errorMessage: 'Failed to load {{labels}}' })
+
+    renderWithProviders({{Names}}Page)
+
+    expect(screen.getByText('Failed to load {{labels}}')).toBeInTheDocument()
+  })
+
+  it('shows the empty state when there are no {{names}}', () => {
+    mockQuery({ data: { {{names}}: [], total: 0 } })
+
+    renderWithProviders({{Names}}Page)
+
+    expect(screen.getByText(/no {{labels}} yet/i)).toBeInTheDocument()
+  })
+
+  it('opens the form to create a {{name}}', async () => {
+    const { user } = renderWithProviders({{Names}}Page)
+
+    await user.click(screen.getByRole('button', { name: /new {{label}}/i }))
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByLabelText(/title/i)).toBeInTheDocument()
+  })
+})

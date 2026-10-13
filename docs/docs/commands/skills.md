@@ -14,7 +14,7 @@ blacksmith skills
 
 ## What It Does
 
-Displays a table of all available AI development skills showing:
+Lists the skills for the project's backend and frontend framework, showing:
 
 - **Skill name** — The topic or area covered
 - **Description** — What the skill provides

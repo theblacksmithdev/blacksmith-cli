@@ -18,8 +18,10 @@ export function renderTemplate(templateStr: string, context: Record<string, any>
   // Replace literal JSX braces adjacent to Handlebars expressions:
   //   `{ {{var}}` → `OPEN_BRACE {{var}}`  (prevents `{{{` triple-brace parse)
   //   `{{var}}} ` → `{{var}} CLOSE_BRACE` (prevents `}}}` triple-brace parse)
+  // A brace of an escaped Vue interpolation (`\{{ {{name}}.title }}`) is left
+  // alone: Handlebars emits it literally and still renders the `{{name}}` after it.
   let safeStr = templateStr
-    .replace(/\{(\s*)(?=\{\{[^{])/g, 'BLACKSMITH_OB$1')
+    .replace(/(?<!\\)(?<!\\\{)\{(\s*)(?=\{\{[^{])/g, 'BLACKSMITH_OB$1')
     .replace(/([^}]\}\})(\s*)\}/g, '$1$2BLACKSMITH_CB')
 
   const template = Handlebars.compile(safeStr, { noEscape: true })

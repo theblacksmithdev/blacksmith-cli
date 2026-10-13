@@ -14,7 +14,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeChakraUiSkill: true,
+      includeUiSkill: true,
     })
 
     const claudeMd = path.join(getTmpDir(), 'CLAUDE.md')
@@ -29,7 +29,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeChakraUiSkill: true,
+      includeUiSkill: true,
     })
 
     const skillsDir = path.join(getTmpDir(), '.claude', 'skills')
@@ -51,7 +51,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeChakraUiSkill: true,
+      includeUiSkill: true,
     })
 
     const skillsDir = path.join(getTmpDir(), '.claude', 'skills')
@@ -63,7 +63,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeChakraUiSkill: false,
+      includeUiSkill: false,
     })
 
     const skillsDir = path.join(getTmpDir(), '.claude', 'skills')
@@ -77,7 +77,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeChakraUiSkill: true,
+      includeUiSkill: true,
     })
 
     const rogueDir = path.join(getTmpDir(), '.claude', 'skills', 'old-skill')
@@ -87,7 +87,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeChakraUiSkill: true,
+      includeUiSkill: true,
     })
 
     expect(fs.existsSync(rogueDir)).toBe(false)
@@ -97,7 +97,7 @@ describe('setupAiDev', () => {
     await setupAiDev({
       projectDir: getTmpDir(),
       projectName: 'test-project',
-      includeChakraUiSkill: true,
+      includeUiSkill: true,
     })
 
     const content = fs.readFileSync(path.join(getTmpDir(), 'CLAUDE.md'), 'utf-8')
@@ -110,7 +110,7 @@ describe('setupAiDev', () => {
       await setupAiDev({
         projectDir: getTmpDir(),
         projectName: 'test-project',
-        includeChakraUiSkill: true,
+        includeUiSkill: true,
         backendFramework,
       })
       return fs.readdirSync(path.join(getTmpDir(), '.claude', 'skills'))
@@ -140,7 +140,7 @@ describe('setupAiDev', () => {
       await setupAiDev({
         projectDir: getTmpDir(),
         projectName: 'test-project',
-        includeChakraUiSkill: true,
+        includeUiSkill: true,
         backendFramework: 'express',
       })
 
@@ -158,7 +158,7 @@ describe('setupAiDev', () => {
       await setupAiDev({
         projectDir: getTmpDir(),
         projectName: 'test-project',
-        includeChakraUiSkill: true,
+        includeUiSkill: true,
         backendFramework: 'express',
       })
 
@@ -197,7 +197,7 @@ describe('setupAiDev', () => {
       await setupAiDev({
         projectDir: getTmpDir(),
         projectName: 'test-project',
-        includeChakraUiSkill: true,
+        includeUiSkill: true,
         backendFramework: 'spring',
       })
 
@@ -215,7 +215,7 @@ describe('setupAiDev', () => {
       await setupAiDev({
         projectDir: getTmpDir(),
         projectName: 'test-project',
-        includeChakraUiSkill: true,
+        includeUiSkill: true,
         backendFramework: 'fastapi',
       })
       const read = (id: string) =>

@@ -8,6 +8,7 @@ vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
   getBackendFramework: vi.fn(() => 'django'),
+  getFrontendFramework: vi.fn(() => 'react'),
   findProjectRoot: vi.fn(),
   loadConfig: vi.fn(() => ({ type: 'fullstack' })),
 }))

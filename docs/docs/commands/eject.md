@@ -23,12 +23,12 @@ blacksmith eject
 The eject command:
 
 1. **Removes `blacksmith.config.json`** from the project root
-2. **Converts the project** to a standard Django + React setup
+2. **Converts the project** to a standard backend + frontend setup (for example Django + React, or FastAPI + Vue)
 
 After ejecting:
 - All generated code remains intact and functional
 - Blacksmith CLI commands will no longer work in this project
-- You manage the Django and React projects independently
+- You manage the backend and frontend projects independently
 - OpenAPI sync must be run manually (using `@hey-api/openapi-ts` directly)
 
 ## When to Eject
@@ -42,7 +42,7 @@ Consider ejecting when:
 
 ## What You Keep
 
-Everything. Ejection doesn't delete any code — it only removes the configuration file that Blacksmith uses to identify the project. Your entire Django + React application continues to work as-is.
+Everything. Ejection doesn't delete any code — it only removes the configuration file that Blacksmith uses to identify the project. Your entire application continues to work as-is.
 
 ## After Ejecting
 

@@ -44,7 +44,7 @@ The processes started depend on your project type:
 Starts three processes concurrently:
 
 1. **Django Development Server** — API backend at `http://localhost:<backend-port>`
-2. **Vite Development Server** — React frontend with HMR at `http://localhost:<frontend-port>`
+2. **Vite Development Server** — React or Vue frontend with HMR at `http://localhost:<frontend-port>`
 3. **OpenAPI File Watcher** — Watches `.py` files and auto-syncs TypeScript types on changes
 
 ### Backend-Only Projects
@@ -57,7 +57,7 @@ Starts one process:
 
 Starts one process:
 
-1. **Vite Development Server** — React frontend with HMR at `http://localhost:<frontend-port>`
+1. **Vite Development Server** — React or Vue frontend with HMR at `http://localhost:<frontend-port>`
 
 ## Port Detection
 

@@ -52,7 +52,7 @@ export async function retrieve(req: Request, res: Response): Promise<void> {
 
 ### Errors Are a Contract
 
-The React client parses Django REST Framework's error shapes, so the backend
+The frontend client parses Django REST Framework's error shapes, so the backend
 must produce them. Always throw \`ApiError\` from \`src/utils/errors.js\`:
 
 \`\`\`ts
@@ -96,7 +96,7 @@ res.json(paginated(req, results, count, page))
 // { count, next, previous, results }
 \`\`\`
 
-The generated React hooks read \`results\` and \`count\` directly, so a bare array
+The generated frontend queries read \`results\` and \`count\` directly, so a bare array
 breaks them.
 
 ### Naming

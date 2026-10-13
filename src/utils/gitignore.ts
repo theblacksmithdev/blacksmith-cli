@@ -7,12 +7,13 @@ import { RUNTIMES } from './runtimes.js'
 import { log } from './logger.js'
 
 /**
- * Which template directory to take a `.gitignore` from. Backend kinds are
- * paths into the template tree, so they match `backendTemplateDir()`.
+ * Which template directory to take a `.gitignore` from. Kinds are paths into
+ * the template tree, so backend ones match `backendTemplateDir()`; every
+ * frontend shares the one in `frontend/common`.
  */
 export type GitignoreKind =
   | 'project'
-  | 'frontend'
+  | 'frontend/common'
   | 'backend/django'
   | 'backend/express'
   | 'backend/fastapi'

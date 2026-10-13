@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { findProjectRoot } from '../utils/paths.js'
+import { findProjectRoot, getFrontendFramework } from '../utils/paths.js'
+import { FRONTEND_TOOLCHAINS } from '../utils/frontend-toolchains.js'
 import { log, promptSelect, promptText, promptYesNo } from '../utils/logger.js'
 
 interface McpPrompt {
@@ -29,6 +30,9 @@ interface McpServerConfig {
 const DONE_OPTION = 'Done — save and exit'
 
 function getPresets(projectRoot: string): McpServerPreset[] {
+  // The UI kit's docs, for whichever frontend the project was generated with
+  const { docs } = FRONTEND_TOOLCHAINS[getFrontendFramework(projectRoot)]
+
   return [
     {
       id: 'filesystem',
@@ -79,18 +83,11 @@ function getPresets(projectRoot: string): McpServerPreset[] {
       ],
     },
     {
-      id: 'chakra-ui-docs',
-      name: 'Chakra UI Docs',
-      description: 'Chakra UI component documentation for AI assistance',
+      id: docs.id,
+      name: docs.name,
+      description: docs.description,
       command: 'npx',
-      args: [
-        '-y',
-        '@anthropic-ai/mcp-docs-server',
-        '--url',
-        'https://www.chakra-ui.com/docs',
-        '--name',
-        'chakra-ui-docs',
-      ],
+      args: ['-y', '@anthropic-ai/mcp-docs-server', '--url', docs.url, '--name', docs.id],
     },
     {
       id: 'sentry',

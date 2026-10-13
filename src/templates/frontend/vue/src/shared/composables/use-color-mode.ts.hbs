@@ -1,0 +1,20 @@
+import { onScopeDispose, readonly, ref } from 'vue'
+import { getColorMode, setColorMode, subscribeColorMode, type ColorMode } from '@/shared/utils/color-mode'
+
+/**
+ * Current color mode (follows the OS until the user picks one) and a toggle.
+ */
+export function useColorMode() {
+  const colorMode = ref<ColorMode>(getColorMode())
+
+  const unsubscribe = subscribeColorMode(() => {
+    colorMode.value = getColorMode()
+  })
+  onScopeDispose(unsubscribe)
+
+  function toggleColorMode() {
+    setColorMode(colorMode.value === 'dark' ? 'light' : 'dark')
+  }
+
+  return { colorMode: readonly(colorMode), setColorMode, toggleColorMode }
+}

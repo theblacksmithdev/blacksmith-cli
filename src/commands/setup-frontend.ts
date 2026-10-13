@@ -83,7 +83,7 @@ export async function setupFrontendDeps() {
 
   // node_modules/ must be ignored before npm install runs, otherwise it lands
   // in git. Projects generated before .gitignore shipped correctly are healed here.
-  if (ensureGitignore(frontendDir, 'frontend')) {
+  if (ensureGitignore(frontendDir, 'frontend/common')) {
     log.step('Added frontend/.gitignore (ignores node_modules/)')
   }
 

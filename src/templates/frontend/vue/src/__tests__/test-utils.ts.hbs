@@ -1,0 +1,92 @@
+import { defineComponent, h, type Component } from 'vue'
+import { createPinia } from 'pinia'
+import { createMemoryHistory, createRouter, type RouteRecordRaw } from 'vue-router'
+import { QueryClient } from '@tanstack/vue-query'
+import { render, type RenderOptions } from '@testing-library/vue'
+import userEvent from '@testing-library/user-event'
+import UApp from '@nuxt/ui/components/App.vue'
+import { installPlugins } from '@/plugins'
+
+// Configure the API client as main.ts does (base URL, auth interceptors)
+import '@/api/client'
+
+/**
+ * Creates a fresh QueryClient configured for tests.
+ * Disables retries and garbage collection to keep tests fast and deterministic.
+ */
+function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: 0,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  })
+}
+
+/** Any path renders nothing, so links resolve without the app's pages. */
+const STUB_ROUTES: RouteRecordRaw[] = [{ path: '/:pathMatch(.*)*', component: { render: () => null } }]
+
+interface CustomRenderOptions {
+  props?: Record<string, unknown>
+  slots?: Record<string, () => unknown>
+  /** Initial route (defaults to "/") */
+  route?: string
+  /** Routes to register instead of the stub, for tests that navigate */
+  routes?: RouteRecordRaw[]
+  /** Provide your own QueryClient (a fresh one is created by default) */
+  queryClient?: QueryClient
+  /** Passed through to @testing-library/vue's render */
+  renderOptions?: Omit<RenderOptions<Component>, 'props' | 'slots' | 'global'>
+}
+
+/**
+ * Custom render that mounts a component with all app plugins, as main.ts
+ * installs them:
+ * - Pinia (a fresh store per test)
+ * - Vue Router (in-memory history)
+ * - Vue Query (with test-friendly defaults)
+ * - Nuxt UI, inside `UApp` so overlays and toasts render
+ *
+ * Also returns a `user` instance from @testing-library/user-event and the router.
+ *
+ * @example
+ *   const { user } = renderWithProviders(MyComponent, { props: { title: 'Hi' } })
+ *   await user.click(screen.getByRole('button'))
+ */
+export function renderWithProviders(
+  component: Component,
+  {
+    props,
+    slots,
+    route = '/',
+    routes = STUB_ROUTES,
+    queryClient = createTestQueryClient(),
+    renderOptions,
+  }: CustomRenderOptions = {},
+) {
+  const router = createRouter({ history: createMemoryHistory(), routes })
+  router.push(route)
+
+  const Wrapper = defineComponent({
+    render: () => h(UApp, null, { default: () => h(component, props, slots) }),
+  })
+
+  const result = render(Wrapper, {
+    ...renderOptions,
+    global: {
+      plugins: [{ install: (app) => installPlugins(app, { pinia: createPinia(), router, queryClient }) }],
+    },
+  })
+
+  return { user: userEvent.setup(), router, ...result }
+}
+
+export { createTestQueryClient }
+
+// Re-export everything from @testing-library/vue for convenience
+export * from '@testing-library/vue'

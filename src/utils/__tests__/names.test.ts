@@ -16,6 +16,10 @@ describe('generateNames', () => {
       kebabs: 'posts',
       UPPER: 'POST',
       UPPERS: 'POSTS',
+      Label: 'Post',
+      Labels: 'Posts',
+      label: 'post',
+      labels: 'posts',
     })
   })
 
@@ -32,6 +36,10 @@ describe('generateNames', () => {
     expect(result.kebabs).toBe('blog-posts')
     expect(result.UPPER).toBe('BLOG_POST')
     expect(result.UPPERS).toBe('BLOG_POSTS')
+    expect(result.Label).toBe('Blog post')
+    expect(result.Labels).toBe('Blog posts')
+    expect(result.label).toBe('blog post')
+    expect(result.labels).toBe('blog posts')
   })
 
   it('should handle snake_case input', () => {

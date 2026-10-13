@@ -5,16 +5,19 @@ import { renderDirectory } from '../utils/template.js'
 import { ensureEnvFile } from '../utils/env-file.js'
 import { ensureGitignore } from '../utils/gitignore.js'
 import type { GitignoreKind } from '../utils/gitignore.js'
-import { backendTemplateDir, ensureCiWorkflow, projectLayout } from '../utils/scaffold.js'
+import { backendTemplateDir, ensureCiWorkflow, projectLayout, renderFrontendTemplates } from '../utils/scaffold.js'
 import { syncFrontendClient } from '../utils/openapi.js'
 import { exec } from '../utils/exec.js'
 import { BACKEND_FRAMEWORKS, BACKEND_TOOLCHAINS } from '../utils/backend-toolchains.js'
+import { FRONTEND_FRAMEWORKS, FRONTEND_TOOLCHAINS, unsupportedNodeVersion } from '../utils/frontend-toolchains.js'
+import { chooseFramework } from '../utils/framework-choice.js'
 import { RUNTIMES, findMissingRuntime, requiredRuntimes } from '../utils/runtimes.js'
 import { runStep } from '../utils/steps.js'
 import { getTemplatesDir } from '../utils/paths.js'
-import type { BackendFramework, ProjectType } from '../utils/paths.js'
+import type { BackendFramework, FrontendFramework, ProjectType } from '../utils/paths.js'
 import { log, spinner, printNextSteps, promptText, promptYesNo, promptSelect, printConfig } from '../utils/logger.js'
 import { setupAiDev } from './ai-setup.js'
+import { wantsUiSkill } from '../utils/cli-options.js'
 
 function parsePort(value: string, label: string): number {
   const port = parseInt(value, 10)
@@ -31,7 +34,9 @@ const PROJECT_TYPES: ProjectType[] = ['fullstack', 'backend', 'frontend']
 interface InitOptions {
   type?: string
   backend?: string
+  frontend?: string
   ai?: boolean
+  uiSkill?: boolean
   chakraUiSkill?: boolean
   backendPort?: string
   frontendPort?: string
@@ -62,28 +67,23 @@ export async function init(name: string | undefined, options: InitOptions) {
   const needsBackend = projectType === 'fullstack' || projectType === 'backend'
   const needsFrontend = projectType === 'fullstack' || projectType === 'frontend'
 
-  // A bad --backend value is an error even on a frontend-only project, where
-  // the flag is otherwise ignored — silently accepting a typo helps nobody.
-  if (options.backend && !BACKEND_FRAMEWORKS.includes(options.backend as BackendFramework)) {
-    log.error(`Invalid backend framework: "${options.backend}". Must be one of: ${BACKEND_FRAMEWORKS.join(', ')}`)
-    process.exit(1)
-  }
-
-  // Backend framework prompt
-  let backendFramework: BackendFramework = 'django'
-  if (needsBackend) {
-    if (options.backend) {
-      backendFramework = options.backend as BackendFramework
-    } else {
-      const selected = await promptSelect('Backend framework', BACKEND_FRAMEWORKS, 'django')
-      // The config must never record a framework the CLI cannot act on, so an
-      // unrecognised answer falls back to the default rather than being stored.
-      backendFramework = BACKEND_FRAMEWORKS.includes(selected as BackendFramework)
-        ? (selected as BackendFramework)
-        : 'django'
-    }
-  }
+  const backendFramework = await chooseFramework<BackendFramework>({
+    flag: options.backend,
+    needed: needsBackend,
+    frameworks: BACKEND_FRAMEWORKS,
+    fallback: 'django',
+    label: 'Backend framework',
+  })
   const toolchain = BACKEND_TOOLCHAINS[backendFramework]
+
+  const frontendFramework = await chooseFramework<FrontendFramework>({
+    flag: options.frontend,
+    needed: needsFrontend,
+    frameworks: FRONTEND_FRAMEWORKS,
+    fallback: 'react',
+    label: 'Frontend framework',
+  })
+  const frontendToolchain = FRONTEND_TOOLCHAINS[frontendFramework]
 
   if (needsBackend && !options.backendPort) {
     options.backendPort = await promptText('Backend port', '8000')
@@ -111,7 +111,7 @@ export async function init(name: string | undefined, options: InitOptions) {
   if (needsBackend) {
     configDisplay['Backend'] = `${toolchain.label} on :${backendPort}`
   }
-  if (needsFrontend) configDisplay['Frontend'] = `React on :${frontendPort}`
+  if (needsFrontend) configDisplay['Frontend'] = `${frontendToolchain.label} on :${frontendPort}`
   if (needsFrontend) configDisplay['Theme'] = themePreset
   configDisplay['AI support'] = options.ai ? 'Yes' : 'No'
   printConfig(configDisplay)
@@ -141,6 +141,11 @@ export async function init(name: string | undefined, options: InitOptions) {
     process.exit(1)
   }
   const prereqs = runtimes.map((runtime) => RUNTIMES[runtime].label).join(', ')
+  const nodeTooOld = needsFrontend ? await unsupportedNodeVersion(frontendToolchain) : null
+  if (nodeTooOld) {
+    checkSpinner.fail(nodeTooOld)
+    process.exit(1)
+  }
   checkSpinner.succeed(`Prerequisites OK (${prereqs})`)
 
   const context = {
@@ -150,7 +155,7 @@ export async function init(name: string | undefined, options: InitOptions) {
     backendPort: backendPort || 8000,
     frontendPort: frontendPort || 5173,
     themePreset,
-    ...projectLayout(projectType, backendFramework),
+    ...projectLayout(projectType, backendFramework, frontendFramework),
   }
 
   // 1. Create project directory and config
@@ -162,7 +167,7 @@ export async function init(name: string | undefined, options: InitOptions) {
     type: projectType,
   }
   if (needsBackend) configObj.backend = { port: backendPort, framework: backendFramework }
-  if (needsFrontend) configObj.frontend = { port: frontendPort }
+  if (needsFrontend) configObj.frontend = { port: frontendPort, framework: frontendFramework }
 
   fs.writeFileSync(
     path.join(projectDir, 'blacksmith.config.json'),
@@ -213,18 +218,14 @@ export async function init(name: string | undefined, options: InitOptions) {
 
   // 6. Generate frontend
   if (frontendDir) {
-    const frontendSpinner = spinner('Generating React frontend...')
+    const frontendSpinner = spinner(`Generating ${frontendToolchain.label} frontend...`)
     try {
-      renderDirectory(
-        path.join(templatesDir, 'frontend'),
-        frontendDir,
-        context
-      )
+      renderFrontendTemplates(frontendDir, frontendFramework, context)
 
       // Safety net: node_modules/ must be ignored before npm install runs
-      ensureGitignore(frontendDir, 'frontend')
+      ensureGitignore(frontendDir, 'frontend/common')
 
-      frontendSpinner.succeed('React frontend generated')
+      frontendSpinner.succeed(`${frontendToolchain.label} frontend generated`)
     } catch (error: any) {
       frontendSpinner.fail('Failed to generate frontend')
       log.error(error.message)
@@ -290,12 +291,13 @@ export async function init(name: string | undefined, options: InitOptions) {
     await setupAiDev({
       projectDir,
       projectName: name,
-      includeChakraUiSkill: options.chakraUiSkill !== false,
+      includeUiSkill: wantsUiSkill(options),
       projectType,
       backendFramework,
+      frontendFramework,
     })
   }
 
   // 11. Print success
-  printNextSteps(name, projectType, backendPort, frontendPort, backendFramework)
+  printNextSteps(name, projectType, backendPort, frontendPort, backendFramework, frontendFramework)
 }
