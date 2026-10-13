@@ -10,6 +10,7 @@ vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
   getBackendFramework: vi.fn(() => 'django'),
+  getFrontendFramework: vi.fn(() => 'react'),
   getTemplatesDir: vi.fn(),
 }))
 vi.mock('../../utils/paths.js', () => pathMocks)
@@ -209,7 +210,9 @@ describe('init', () => {
       themePreset: 'blue',
     })
 
-    const frontendCall = calls.find((c: any[]) => c[0] === '/templates/frontend')
+    const commonCall = calls.find((c: any[]) => c[0] === path.join('/templates', 'frontend', 'common'))
+    expect(commonCall).toBeDefined()
+    const frontendCall = calls.find((c: any[]) => c[0] === path.join('/templates', 'frontend', 'react'))
     expect(frontendCall).toBeDefined()
     expect(frontendCall![2]).toMatchObject({ projectName: 'my-app' })
   })
@@ -226,7 +229,7 @@ describe('init', () => {
     })
 
     const frontendCall = templateMocks.renderDirectory.mock.calls.find(
-      (c: any[]) => c[0] === '/templates/frontend'
+      (c: any[]) => c[0] === path.join('/templates', 'frontend', 'react')
     )
     expect(frontendCall![2]).toMatchObject({ projectDomain: 'my-cool-app' })
   })

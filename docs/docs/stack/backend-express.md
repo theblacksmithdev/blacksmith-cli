@@ -6,7 +6,7 @@ sidebar_position: 3
 
 An alternative to the Django backend, selected with `blacksmith init --backend express`.
 It is TypeScript end to end, and it speaks exactly the same HTTP contract as the
-Django backend — the React frontend is byte-for-byte identical either way. FastAPI and
+Django backend — the frontend (React or Vue) is byte-for-byte identical either way. FastAPI and
 Spring Boot are the other options — see [FastAPI Backend](./backend-fastapi.md),
 [Spring Boot Backend](./backend-spring.md) and
 [Choosing a Backend](../guides/choosing-a-backend.md).
@@ -71,7 +71,7 @@ scripts and jobs without a request.
 ## The API Contract
 
 The Express backend deliberately reproduces Django REST Framework's wire
-format. That is what lets one React codebase work against either backend.
+format. That is what lets one frontend codebase work against any backend.
 
 **Pagination** — list endpoints return DRF's envelope:
 
@@ -95,7 +95,7 @@ from it.
 
 **Operation IDs** follow drf-spectacular's convention — `posts_list`,
 `posts_retrieve`, `posts_partial_update` — which is what makes the generated
-React hooks come out with the same names on both backends.
+frontend queries come out with the same names on every backend.
 
 ## OpenAPI Without a Server
 

@@ -1,6 +1,8 @@
 import type { Skill, SkillContext } from './types.js'
 import { backendProfile } from './backend-profiles.js'
+import { frontendProfile } from './frontend-profiles.js'
 import { BACKEND_FRAMEWORK_CHOICES, BACKEND_FRAMEWORK_CHOICES_QUOTED, BACKEND_TOOLCHAINS } from '../utils/backend-toolchains.js'
+import { FRONTEND_FRAMEWORK_CHOICES } from '../utils/frontend-toolchains.js'
 
 export const blacksmithCliSkill: Skill = {
   id: 'blacksmith-cli',
@@ -9,6 +11,7 @@ export const blacksmithCliSkill: Skill = {
 
   render(ctx: SkillContext): string {
     const backend = backendProfile(ctx)
+    const frontend = frontendProfile(ctx)
     const framework = ctx.backendFramework ?? 'django'
 
     return `## Blacksmith CLI
@@ -66,9 +69,7 @@ Given a PascalCase name (e.g. \`BlogPost\`), it scaffolds based on project type:
 ${backend.resourceSteps}
 
 **Frontend (fullstack and frontend projects):**
-- \`src/api/hooks/blog-posts/\` — query and mutation hooks
-- \`src/pages/blog-posts/\` — list and detail pages
-- Registers route path in \`src/router/paths.ts\` and routes in \`src/router/routes.tsx\`
+${frontend.resourceSteps}
 
 **Fullstack only:** Also runs \`blacksmith sync\` to generate the TypeScript API client.
 
@@ -87,18 +88,19 @@ ${backend.resourceSteps}
 blacksmith init
 
 # Skip prompts with flags
-blacksmith init my-app --type fullstack --backend ${framework} -b 9000 -f 3000 --ai
+blacksmith init my-app --type fullstack --backend ${framework} --frontend ${frontend.framework} -b 9000 -f 3000 --ai
 \`\`\`
 
 | Flag | Description |
 |---|---|
 | \`--type <type>\` | Project type: fullstack, backend, or frontend (default: fullstack) |
 | \`--backend <framework>\` | Backend framework: ${BACKEND_FRAMEWORK_CHOICES} (default: django) |
+| \`--frontend <framework>\` | Frontend framework: ${FRONTEND_FRAMEWORK_CHOICES} (default: react) |
 | \`-b, --backend-port <port>\` | Backend port (default: 8000) |
 | \`-f, --frontend-port <port>\` | Vite port (default: 5173) |
 | \`-t, --theme-color <preset>\` | UI theme preset: default (OpenAI-style monochrome), neutral (monochrome, square corners), blue, green, red, violet. Lives in \`frontend/src/theme/presets.ts\` |
 | \`--ai\` | Generate CLAUDE.md with project skills |
-| \`--no-chakra-ui-skill\` | Exclude Chakra UI skill from CLAUDE.md |
+| \`--no-ui-skill\` | Leave out the UI kit skills (${frontend.uiKit}) |
 `
   },
 }

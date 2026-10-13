@@ -5,8 +5,8 @@ import { fileURLToPath } from 'node:url'
 import { useTmpDir } from './helpers.js'
 import { renderDirectory, renderTemplateFile } from '../utils/template.js'
 import { generateNames } from '../utils/names.js'
-import { projectLayout } from '../utils/scaffold.js'
-import type { BackendFramework } from '../utils/paths.js'
+import { projectLayout, renderFrontendTemplates } from '../utils/scaffold.js'
+import type { BackendFramework, FrontendFramework } from '../utils/paths.js'
 
 const TEMPLATES_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -14,14 +14,14 @@ const TEMPLATES_DIR = path.resolve(
   'templates'
 )
 
-function projectContext(framework: BackendFramework) {
+function projectContext(framework: BackendFramework, frontend: FrontendFramework = 'react') {
   return {
     projectName: 'my-app',
     projectDomain: 'my-app',
     backendPort: 8000,
     frontendPort: 5173,
     themePreset: 'default',
-    ...projectLayout('fullstack', framework),
+    ...projectLayout('fullstack', framework, frontend),
   }
 }
 
@@ -29,6 +29,7 @@ const PROJECT_CONTEXT = projectContext('django')
 const EXPRESS_CONTEXT = projectContext('express')
 const FASTAPI_CONTEXT = projectContext('fastapi')
 const SPRING_CONTEXT = projectContext('spring')
+const VUE_CONTEXT = projectContext('django', 'vue')
 
 const RESOURCE_CONTEXT = { ...generateNames('product'), projectName: 'my-app' }
 const SPRING_RESOURCE_CONTEXT = { ...RESOURCE_CONTEXT, javaPackage: 'products', migrationVersion: 2 }
@@ -53,13 +54,15 @@ describe.each([
   ['backend/express', path.join('backend', 'express'), EXPRESS_CONTEXT],
   ['backend/fastapi', path.join('backend', 'fastapi'), FASTAPI_CONTEXT],
   ['backend/spring', path.join('backend', 'spring'), SPRING_CONTEXT],
-  ['frontend', 'frontend', PROJECT_CONTEXT],
+  ['frontend/common', path.join('frontend', 'common'), PROJECT_CONTEXT],
+  ['frontend/react', path.join('frontend', 'react'), PROJECT_CONTEXT],
+  ['frontend/vue', path.join('frontend', 'vue'), VUE_CONTEXT],
   ['resource/backend/django', path.join('resource', 'backend', 'django'), RESOURCE_CONTEXT],
   ['resource/backend/express', path.join('resource', 'backend', 'express'), RESOURCE_CONTEXT],
   ['resource/backend/fastapi', path.join('resource', 'backend', 'fastapi'), RESOURCE_CONTEXT],
   ['resource/backend/spring', path.join('resource', 'backend', 'spring'), SPRING_RESOURCE_CONTEXT],
-  ['resource/pages', path.join('resource', 'pages'), RESOURCE_CONTEXT],
-  ['resource/api-hooks', path.join('resource', 'api-hooks'), RESOURCE_CONTEXT],
+  ['resource/frontend/react', path.join('resource', 'frontend', 'react'), RESOURCE_CONTEXT],
+  ['resource/frontend/vue', path.join('resource', 'frontend', 'vue'), RESOURCE_CONTEXT],
 ])('%s templates', (_label, relDir, context) => {
   const getTmpDir = useTmpDir()
 
@@ -74,7 +77,12 @@ describe.each([
       // `\{{ base: 1 }}` is Handlebars' escape for a literal JSX object prop,
       // so bare `{{` is legitimate in output. Only an unresolved *expression*
       // (`{{projectName}}`, `{{Name}}`) means a template variable went missing.
-      const unresolved = content.match(/\{\{\s*[#/]?[a-zA-Z_][\w.]*\s*\}\}/g)
+      // In Vue files `{{ title }}` is an interpolation, so there only the
+      // spaceless form the templates use for variables counts.
+      const variable = rel.endsWith('.vue')
+        ? /\{\{[#/]?[a-zA-Z_][\w.]*\}\}/g
+        : /\{\{\s*[#/]?[a-zA-Z_][\w.]*\s*\}\}/g
+      const unresolved = content.match(variable)
       if (unresolved) offenders.push(`${rel}: unrendered ${unresolved[0]}`)
       if (content.includes('BLACKSMITH_OB') || content.includes('BLACKSMITH_CB')) {
         offenders.push(`${rel}: leaked brace sentinel`)
@@ -127,8 +135,8 @@ describe('ports chosen at init', () => {
     return (file: string) => fs.readFileSync(path.join(dest, file), 'utf-8')
   }
 
-  it('reach the Vite dev server and its proxy', () => {
-    const viteConfig = render('frontend', 'django')('vite.config.ts')
+  it.each(['react', 'vue'])('reach the %s Vite dev server and its proxy', (frontend) => {
+    const viteConfig = render(path.join('frontend', frontend), 'django')('vite.config.ts')
 
     expect(viteConfig).toContain('port: 5199,')
     expect(viteConfig).toContain("target: 'http://localhost:8099',")
@@ -156,7 +164,7 @@ describe('frontend API client', () => {
 
   function renderClient(projectType: 'fullstack' | 'frontend') {
     const dest = path.join(getTmpDir(), projectType)
-    renderDirectory(path.join(TEMPLATES_DIR, 'frontend'), dest, {
+    renderFrontendTemplates(dest, 'react', {
       ...PROJECT_CONTEXT,
       ...projectLayout(projectType, 'django'),
     })
@@ -194,7 +202,7 @@ describe('generated API hooks match hey-api naming', () => {
 
   function renderHooks() {
     const dest = path.join(getTmpDir(), 'hooks')
-    renderDirectory(path.join(TEMPLATES_DIR, 'resource', 'api-hooks'), dest, MULTI_WORD)
+    renderDirectory(path.join(TEMPLATES_DIR, 'resource', 'frontend', 'react', 'api'), dest, MULTI_WORD)
     return walkFiles(dest)
       .map((f) => fs.readFileSync(f, 'utf-8'))
       .join('\n')
@@ -313,7 +321,7 @@ describe('generated test files', () => {
 
   it('ships frontend specs so a fresh project has tests to run', () => {
     const dest = path.join(getTmpDir(), 'frontend')
-    renderDirectory(path.join(TEMPLATES_DIR, 'frontend'), dest, PROJECT_CONTEXT)
+    renderFrontendTemplates(dest, 'react', PROJECT_CONTEXT)
 
     const specs = walkFiles(dest).filter((f) => /\.spec\.tsx?$/.test(f))
     expect(specs.length).toBeGreaterThan(0)
@@ -368,7 +376,7 @@ describe('generated test files', () => {
 
   it('renders resource frontend specs with substituted names', () => {
     const dest = path.join(getTmpDir(), 'pages')
-    renderDirectory(path.join(TEMPLATES_DIR, 'resource', 'pages'), dest, RESOURCE_CONTEXT)
+    renderDirectory(path.join(TEMPLATES_DIR, 'resource', 'frontend', 'react', 'pages'), dest, RESOURCE_CONTEXT)
 
     const card = path.join(dest, 'components', '__tests__', 'product-card.spec.tsx')
     expect(fs.existsSync(card)).toBe(true)

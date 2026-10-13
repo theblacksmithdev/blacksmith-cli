@@ -1,5 +1,6 @@
 import type { Skill, SkillContext } from './types.js'
 import { backendProfile } from './backend-profiles.js'
+import { frontendProfile } from './frontend-profiles.js'
 
 export const projectOverviewSkill: Skill = {
   id: 'project-overview',
@@ -8,6 +9,7 @@ export const projectOverviewSkill: Skill = {
 
   render(ctx: SkillContext): string {
     const backend = backendProfile(ctx)
+    const frontend = frontendProfile(ctx)
 
     return `# ${ctx.projectName}
 
@@ -17,20 +19,12 @@ A web application scaffolded by **Blacksmith CLI**. Check \`blacksmith.config.js
 
 The structure depends on the project type configured in \`blacksmith.config.json\`:
 
-**Fullstack** (\`type: "fullstack"\`) — ${backend.name} backend + React frontend in subdirectories:
+**Fullstack** (\`type: "fullstack"\`) — ${backend.name} backend + ${frontend.name} frontend in subdirectories:
 \`\`\`
 ${ctx.projectName}/
 ├── backend/              # ${backend.name} project
 ${backend.tree}
-├── frontend/             # React + Vite project
-│   ├── src/
-│   │   ├── api/          # API client and hooks
-│   │   ├── features/     # Feature modules (auth, etc.)
-│   │   ├── pages/        # Top-level pages
-│   │   ├── router/       # React Router setup and layouts
-│   │   ├── shared/       # Shared components (ui/ = Chakra glue), hooks, utils
-│   │   └── theme/        # Chakra UI v3 design system (tokens, recipes, presets)
-│   └── package.json
+${frontend.tree}
 ├── blacksmith.config.json
 └── CLAUDE.md
 \`\`\`
@@ -42,7 +36,7 @@ ${backend.rootTree}
 └── blacksmith.config.json
 \`\`\`
 
-**Frontend-only** (\`type: "frontend"\`) — React project at root:
+**Frontend-only** (\`type: "frontend"\`) — ${frontend.name} project at root:
 \`\`\`
 ${ctx.projectName}/
 ├── src/
@@ -70,7 +64,7 @@ ${ctx.projectName}/
 **Fullstack:**
 1. ${backend.defineFeature} in the backend
 2. Run \`blacksmith sync\` to generate TypeScript types and API client
-3. Build frontend features using the generated hooks and types
+3. Build frontend features using the generated ${frontend.logicUnits} and types
 
 **Backend-only:**
 1. ${backend.defineFeature}
@@ -78,7 +72,7 @@ ${ctx.projectName}/
 
 **Frontend-only:**
 1. Build pages and components
-2. Create API hooks in \`src/api/hooks/\` for data fetching
+2. Create API ${frontend.logicUnits} in \`${frontend.apiDir}\` for data fetching
 `
   },
 }

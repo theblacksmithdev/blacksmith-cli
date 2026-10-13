@@ -26,6 +26,8 @@ node --version
 # Should output v20.5.0 or higher
 ```
 
+A **Vue** frontend needs Node.js **20.19+ or 22.12+**, because Nuxt UI and the Vite Vue plugin do. `blacksmith init --frontend vue` checks this and stops before creating anything if your version is older. React frontends work from 20.5.0.
+
 ### Python 3 (Backend and Fullstack Projects)
 
 Python is required for projects that include a Django or FastAPI backend (Express backends use Node.js instead, Spring Boot backends use Java). Blacksmith creates a virtual environment for each project. Not needed for frontend-only projects.
@@ -72,9 +74,9 @@ When you run `blacksmith init`, the CLI automatically:
 
 - Creates a **Python virtual environment** (`backend/venv/`)
 - Installs the backend dependencies — **Django**, **Django REST Framework**, **drf-spectacular**, and **SimpleJWT** (or the **Express**/**FastAPI** equivalents when selected; a Spring Boot backend is compiled with `./gradlew classes` instead, which downloads Gradle and the dependencies)
-- Installs **React**, **Vite**, **TanStack Query**, **React Router**, **Chakra UI**, and other frontend dependencies
+- Installs the frontend's dependencies: **React**, **React Router** and **Chakra UI**, or **Vue**, **Vue Router**, **Pinia** and **Nuxt UI**, with **Vite** and **TanStack Query** for both
 - Configures **environment files** (`.env`) for both stacks
 - Runs **initial database migrations** (SQLite by default; Spring Boot applies its Flyway migrations when the app starts)
 - Performs the **first OpenAPI sync** to generate TypeScript types
 
-You don't need to install Django, React, or any project dependencies manually — Blacksmith handles all of that.
+You don't need to install the backend framework, the frontend framework, or any project dependencies manually — Blacksmith handles all of that.

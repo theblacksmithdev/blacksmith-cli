@@ -1,9 +1,11 @@
-import type { BackendFramework } from '../utils/paths.js'
+import type { BackendFramework, FrontendFramework } from '../utils/paths.js'
 
 export interface SkillContext {
   projectName: string
   /** Backend framework the project was generated with. Defaults to Django. */
   backendFramework?: BackendFramework
+  /** Frontend framework the project was generated with. Defaults to React. */
+  frontendFramework?: FrontendFramework
 }
 
 export interface Skill {

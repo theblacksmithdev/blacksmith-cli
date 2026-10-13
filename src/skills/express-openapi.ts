@@ -10,7 +10,7 @@ export const expressOpenApiSkill: Skill = {
 
 > **RULE: Every route MUST be registered with \`registry.registerPath\`.**
 > An unregistered route is invisible to \`blacksmith sync\`, so no types, no
-> client function, and no React Query hook are generated for it.
+> client function, and no TanStack Query helper are generated for it.
 
 ### How It Fits Together
 
@@ -77,8 +77,8 @@ with the full \`/api\` prefix even though the router is mounted at a subpath.
 
 ### Path Params Are Strings
 
-\`z.object({ id: z.string() })\`. The React pages take the id from
-\`useParams\`, which is always a string; typing it as a number produces a client
+\`z.object({ id: z.string() })\`. The frontend pages take the id from
+the URL, which is always a string; typing it as a number produces a client
 the generated pages do not compile against. Parse it in the controller.
 
 ### Avoid z.coerce in Documented Schemas

@@ -1,0 +1,7 @@
+import type { RouteRecordRaw } from 'vue-router'
+import { Path } from '@/router/paths'
+
+export const legalRoutes: RouteRecordRaw[] = [
+  { path: Path.Terms, component: () => import('./TermsPage.vue') },
+  { path: Path.Privacy, component: () => import('./PrivacyPage.vue') },
+]

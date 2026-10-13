@@ -51,7 +51,7 @@ markers. Keep those markers in place.
 
 ### OpenAPI Is the Frontend's Contract
 
-\`blacksmith sync\` exports \`app.openapi()\` and generates the React client from
+\`blacksmith sync\` exports \`app.openapi()\` and generates the frontend client from
 it, so the endpoint declaration *is* the frontend API:
 
 - Set \`operation_id\` on every route to what drf-spectacular would emit for a
@@ -59,14 +59,14 @@ it, so the endpoint declaration *is* the frontend API:
   \`posts_update\`, \`posts_partial_update\`, \`posts_destroy\`. The generated
   hooks are named from these (\`postsListOptions\`, \`postsCreateMutation\`).
 - Set \`response_model\` so the response type is documented.
-- Type path ids as \`str\` and parse them in the service. The React hooks pass
-  route params straight from \`useParams\`; an \`int\` here makes the generated
+- Type path ids as \`str\` and parse them in the service. The frontend passes
+  route params straight from the URL; an \`int\` here makes the generated
   types disagree with them.
 - Keep trailing slashes on every path (\`"/"\`, \`"/{id}/"\`), as Django does.
 
 ### Errors Are a Contract
 
-The React client parses Django REST Framework's error shapes. \`app/errors.py\`
+The frontend client parses Django REST Framework's error shapes. \`app/errors.py\`
 already turns request validation errors into DRF's 400
 (\`{"title": ["This field is required."]}\`) and keeps FastAPI's 422s out of the
 OpenAPI document. For errors you raise yourself:
@@ -105,7 +105,7 @@ next_link, previous_link = page_links(request.url, page, count)
 return schemas.PaginatedPostList(count=count, next=next_link, previous=previous_link, results=results)
 \`\`\`
 
-The generated React hooks read \`results\` and \`count\` directly, so a bare list
+The generated frontend queries read \`results\` and \`count\` directly, so a bare list
 breaks them.
 
 ### Naming

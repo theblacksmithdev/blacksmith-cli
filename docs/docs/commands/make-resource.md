@@ -61,26 +61,41 @@ Created in `apps/<resource_name>/` (at project root for backend-only, in `backen
 | `admin.py` | Django admin site registration |
 | `tests.py` | pytest suite: CRUD, ownership boundaries, and model behaviour (15 tests) |
 
-### API Hooks (fullstack and frontend projects)
+### Frontend Files (fullstack and frontend projects)
 
-Created in `src/api/hooks/<resource-name>/`:
+The frontend half depends on the project's frontend framework. Both give the same result:
+a paginated list page with a **New** dialog, a detail page with **Edit** (in a dialog) and
+**Delete**, query and mutation code with cache invalidation, and tests. Cards and lists are
+typed with the resource's generated type, and the UI text uses readable labels
+("New blog post", "No blog posts yet").
 
-| File | Description |
+#### React
+
+| Path | Description |
 |------|-------------|
-| `index.ts` | Barrel export for all resource hooks |
-| `use-<resources>-query.ts` | List query with pagination, search, and ordering |
-| `use-<resource>-mutations.ts` | Create, update, and delete with cache invalidation |
+| `src/api/hooks/<resource-name>/index.ts` | Barrel export for the resource hooks |
+| `src/api/hooks/<resource-name>/use-<resources>-query.ts` | List query (pagination, search, ordering) and detail query |
+| `src/api/hooks/<resource-name>/use-<resource>-mutations.ts` | Create, update, and delete with cache invalidation |
+| `src/pages/<resource-name>/<resources>-page.tsx` | List page with pagination and the create dialog |
+| `src/pages/<resource-name>/<resource>-detail-page.tsx` | Detail page with edit and delete |
+| `src/pages/<resource-name>/schemas.ts` | The form's Zod schema and its data type |
+| `src/pages/<resource-name>/components/` | Card, list, form, and form dialog |
+| `src/pages/<resource-name>/__tests__/`, `components/__tests__/` | Vitest specs for the list page, list and card |
 
-### Frontend Pages (fullstack and frontend projects)
+#### Vue
 
-Created in `src/pages/<resource-name>/`:
-
-| File | Description |
+| Path | Description |
 |------|-------------|
-| List page | Paginated list of resources |
-| Detail page | Single resource view |
-| Card component | Resource card for list views |
-| `__tests__/*.spec.tsx` | Vitest specs for the list page, list and card components |
+| `src/api/composables/<resource-name>/index.ts` | Barrel export for the resource composables |
+| `src/api/composables/<resource-name>/use-<resources>-query.ts` | List and detail queries; the list takes its params as a getter, so it refetches when the page changes |
+| `src/api/composables/<resource-name>/use-<resource>-mutations.ts` | Create, update, and delete with cache invalidation |
+| `src/api/composables/<resource-name>/__tests__/` | A spec that pages to page 2 and checks the list refetches |
+| `src/pages/<resource-name>/<Resources>Page.vue` | List page with pagination and the create dialog |
+| `src/pages/<resource-name>/<Resource>DetailPage.vue` | Detail page with edit and delete; the id arrives as a prop |
+| `src/pages/<resource-name>/schemas.ts` | The form's Zod schema and its data type |
+| `src/pages/<resource-name>/components/` | `<Resource>Card.vue`, `<Resource>List.vue`, `<Resource>Form.vue` |
+| `src/pages/<resource-name>/composables/` | Page-local composables (empty to start) |
+| `src/pages/<resource-name>/__tests__/`, `components/__tests__/` | Vitest specs for the list page, list and card |
 
 Generated tests pass immediately — run them with
 [`blacksmith test`](./test.md). See the [Testing guide](../guides/testing.md)
@@ -96,7 +111,7 @@ The command also performs these steps (where applicable to the project type):
 | Add API URLs to `config/urls.py` | Yes | Yes | — |
 | Run `makemigrations` + `migrate` | Yes | Yes | — |
 | Sync OpenAPI schema | Yes | — | — |
-| Register frontend routes | Yes | — | Yes |
+| Register frontend routes (`routes.tsx` for React, `routes.ts` for Vue) | Yes | — | Yes |
 | Add path to `Path` enum | Yes | — | Yes |
 
 ## Name Conventions
@@ -106,9 +121,10 @@ Blacksmith automatically handles name casing across all generated files:
 | Input | Usage | Example |
 |-------|-------|---------|
 | `BlogPost` | PascalCase (model, component names) | `class BlogPost` |
-| `blogPost` | camelCase (variables, hooks) | `const blogPost = ...` |
+| `blogPost` | camelCase (variables, hooks, composables) | `const blogPost = ...` |
 | `blog_posts` | snake_case (Django app, URLs) | `apps/blog_posts/` |
 | `blog-posts` | kebab-case (route paths, directories) | `/blog-posts` |
+| `blog post` | Words (UI text) | `New blog post` |
 
 ## Examples
 

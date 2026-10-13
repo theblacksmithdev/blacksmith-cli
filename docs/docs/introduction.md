@@ -5,11 +5,11 @@ slug: /
 
 # Introduction
 
-**Blacksmith CLI** is a development framework that scaffolds production-ready web applications with **Django**, **Express**, **FastAPI**, **Spring Boot**, **React**, or a combination. Choose the project type that fits your needs:
+**Blacksmith CLI** is a development framework that scaffolds production-ready web applications with **Django**, **Express**, **FastAPI** or **Spring Boot** on the backend and **React** or **Vue** on the frontend, or a combination. Choose the project type that fits your needs:
 
-- **Fullstack** — backend + React frontend, wired together through automatic OpenAPI synchronization
+- **Fullstack** — backend + React or Vue frontend, wired together through automatic OpenAPI synchronization
 - **Backend** — standalone REST API
-- **Frontend** — standalone React application with Vite
+- **Frontend** — standalone React or Vue application with Vite
 
 The backend is **Django** (Python, DRF), **Express** (TypeScript, Prisma), **FastAPI**
 (Python, Pydantic), or **Spring Boot** (Java, Spring Data JPA), chosen with `--backend`. All
@@ -27,15 +27,15 @@ Blacksmith eliminates the friction of project setup by providing:
 
 ### Fullstack Projects
 
-Blacksmith uses **OpenAPI** as the bridge between your backend and React frontend. When you define your models and schemas, Blacksmith generates:
+Blacksmith uses **OpenAPI** as the bridge between your backend and frontend. When you define your models and schemas, Blacksmith generates:
 
 1. An **OpenAPI schema** from your backend — DRF serializers via `drf-spectacular`, Zod schemas via `zod-to-openapi`, FastAPI's built-in schema, or Spring controllers via `springdoc-openapi`
 2. **TypeScript types** matching your API exactly
 3. **Zod validation schemas** for runtime validation
 4. **API client functions** for calling your endpoints
-5. **React Query hooks** for data fetching with caching and state management
+5. **TanStack Query helpers** (for React Query or Vue Query) for data fetching with caching and state management
 
-This means changing a field in your backend model automatically flows through to your React components — no manual type definitions needed.
+This means changing a field in your backend model automatically flows through to your components — no manual type definitions needed.
 
 ### Single-End Projects
 

@@ -23,7 +23,7 @@ at the same URLs (`/api/schema/`, `/api/docs/`, `/api/redoc/`).
 :::
 
 
-Synchronize the OpenAPI schema between the backend and the React frontend.
+Synchronize the OpenAPI schema between the backend and the frontend.
 
 :::info Fullstack Only
 This command is only available for fullstack projects. Backend-only and frontend-only projects will receive an error.
@@ -52,7 +52,7 @@ Uses `@hey-api/openapi-ts` to generate four types of files from the OpenAPI sche
 | `types.gen.ts` | TypeScript interfaces matching your Django serializers |
 | `zod.gen.ts` | Zod validation schemas for runtime type checking |
 | `sdk.gen.ts` | API client functions for calling your endpoints |
-| `@tanstack/react-query.gen.ts` | React Query hooks for data fetching |
+| `@tanstack/react-query.gen.ts` (React) or `@tanstack/vue-query.gen.ts` (Vue) | TanStack Query options, mutations and query keys for data fetching |
 
 All generated files are placed in `frontend/src/api/generated/`.
 
@@ -76,12 +76,12 @@ blacksmith backend migrate
 # 4. Sync to update frontend types
 blacksmith sync
 
-# 5. Your React components now have the new field available
+# 5. Your components now have the new field available
 ```
 
 ## Generated Output
 
-After running sync, you can import the generated code in your React components:
+After running sync, you can import the generated code in your components (React shown; in Vue the module is `@tanstack/vue-query.gen`):
 
 ```typescript
 // Import generated types

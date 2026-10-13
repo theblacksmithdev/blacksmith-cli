@@ -1,0 +1,6 @@
+import type { RouteRecordRaw } from 'vue-router'
+import { Path } from '@/router/paths'
+
+export const dashboardRoutes: RouteRecordRaw[] = [
+  { path: Path.Dashboard, component: () => import('./DashboardPage.vue') },
+]

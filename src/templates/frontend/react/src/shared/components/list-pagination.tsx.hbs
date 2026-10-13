@@ -1,0 +1,49 @@
+import { ButtonGroup, IconButton, Pagination } from '@chakra-ui/react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { PAGE_SIZE } from '@/shared/utils/pagination'
+
+interface ListPaginationProps {
+  page: number
+  /** Results across every page, the list endpoint's `count`. */
+  total: number
+  onPageChange: (page: number) => void
+}
+
+/**
+ * Page links under a paginated list; hidden while everything fits on one page.
+ */
+export function ListPagination({ page, total, onPageChange }: ListPaginationProps) {
+  if (total <= PAGE_SIZE) return null
+
+  return (
+    <Pagination.Root
+      count={total}
+      pageSize={PAGE_SIZE}
+      page={page}
+      onPageChange={(details) => onPageChange(details.page)}
+      alignSelf="center"
+    >
+      <ButtonGroup variant="ghost" size="sm">
+        <Pagination.PrevTrigger asChild>
+          <IconButton aria-label="Previous page">
+            <ChevronLeft />
+          </IconButton>
+        </Pagination.PrevTrigger>
+
+        <Pagination.Items
+          render={(item) => (
+            <IconButton variant=\{{ base: 'ghost', _selected: 'outline' }} aria-label={`Page ${item.value}`}>
+              {item.value}
+            </IconButton>
+          )}
+        />
+
+        <Pagination.NextTrigger asChild>
+          <IconButton aria-label="Next page">
+            <ChevronRight />
+          </IconButton>
+        </Pagination.NextTrigger>
+      </ButtonGroup>
+    </Pagination.Root>
+  )
+}

@@ -56,20 +56,20 @@ The pre-built `users` app in `backend/apps/users/` includes:
 
 ## Frontend: Auth Provider
 
-The frontend includes a complete authentication system built with React Context.
+The frontend includes a complete authentication system. React keeps the session in a context provider; Vue keeps it in a Pinia store behind the `useAuth()` composable. Both use the same auth adapter (`src/features/auth/adapter.ts`), which talks to the backend, stores the tokens and restores the session on reload.
 
 ### Components
 
 | Component | Purpose |
 |-----------|---------|
-| `AuthProvider` | Context provider managing auth state |
+| `AuthProvider` (React) / `useAuthStore` + `useAuth` (Vue) | Hold the auth state and actions |
 | `LoginPage` | Login form with validation |
 | `RegisterPage` | Registration form with validation |
 | Password Reset pages | Password reset flow |
 
 ### Auth Guards
 
-React Router routes are protected with authentication guards:
+Private routes are protected with authentication guards. In React they are wrapped in an `AuthGuard` component; in Vue they carry `meta.requiresAuth`, and a `router.beforeEach` guard (`src/router/guards.ts`) waits for the stored session before deciding, so a hard refresh on a private page keeps you signed in. The React version:
 
 ```typescript
 // Protected routes require authentication

@@ -1,9 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { getTemplatesDir } from './paths.js'
-import type { BackendFramework, ProjectType } from './paths.js'
-import { renderToFile } from './template.js'
+import type { BackendFramework, FrontendFramework, ProjectType } from './paths.js'
+import { renderDirectory, renderToFile } from './template.js'
 import { BACKEND_TOOLCHAINS } from './backend-toolchains.js'
+import { FRONTEND_TOOLCHAINS } from './frontend-toolchains.js'
 
 /**
  * Template context describing the shape of a project. Templates that differ
@@ -12,7 +13,8 @@ import { BACKEND_TOOLCHAINS } from './backend-toolchains.js'
  */
 export function projectLayout(
   projectType: ProjectType,
-  backendFramework: BackendFramework = 'django'
+  backendFramework: BackendFramework = 'django',
+  frontendFramework: FrontendFramework = 'react'
 ) {
   const isFullstack = projectType === 'fullstack'
   const needsBackend = isFullstack || projectType === 'backend'
@@ -32,6 +34,10 @@ export function projectLayout(
     backendSummary: BACKEND_TOOLCHAINS[backendFramework].summary,
     // Filename the CI workflow exports the OpenAPI document to
     schemaFile: BACKEND_TOOLCHAINS[backendFramework].schemaFile,
+    frontendFramework,
+    frontendLabel: FRONTEND_TOOLCHAINS[frontendFramework].label,
+    frontendEntry: FRONTEND_TOOLCHAINS[frontendFramework].entry,
+    queryPlugin: FRONTEND_TOOLCHAINS[frontendFramework].queryPlugin,
     // Paths relative to the project root, as CI working directories
     backendPath: isFullstack ? 'backend' : '.',
     frontendPath: isFullstack ? 'frontend' : '.',
@@ -52,6 +58,31 @@ export function backendTemplateDir(framework: BackendFramework): string {
 /** Directory holding a backend framework's `make:resource` templates. */
 export function resourceTemplateDir(framework: BackendFramework): string {
   return path.join('resource', 'backend', framework)
+}
+
+/**
+ * Template directories a frontend framework's project is rendered from, in
+ * order: the files every frontend shares (the API client, the auth adapter,
+ * the route paths, the page content), then the framework's own.
+ */
+export function frontendTemplateDirs(framework: FrontendFramework): string[] {
+  return [path.join('frontend', 'common'), path.join('frontend', framework)]
+}
+
+/** Render a frontend framework's project templates into a directory. */
+export function renderFrontendTemplates(
+  destDir: string,
+  framework: FrontendFramework,
+  context: Record<string, unknown>
+) {
+  for (const dir of frontendTemplateDirs(framework)) {
+    renderDirectory(path.join(getTemplatesDir(), dir), destDir, context)
+  }
+}
+
+/** Directory holding a frontend framework's `make:resource` templates. */
+export function resourceFrontendTemplateDir(framework: FrontendFramework): string {
+  return path.join('resource', 'frontend', framework)
 }
 
 /**

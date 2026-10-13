@@ -2,7 +2,8 @@ import chalk from 'chalk'
 import ora, { type Ora } from 'ora'
 import { createInterface } from 'node:readline'
 import { BACKEND_TOOLCHAINS } from './backend-toolchains.js'
-import type { BackendFramework } from './paths.js'
+import { FRONTEND_TOOLCHAINS } from './frontend-toolchains.js'
+import type { BackendFramework, FrontendFramework } from './paths.js'
 
 export const log = {
   info: (msg: string) => console.log(chalk.blue('ℹ'), msg),
@@ -107,7 +108,8 @@ export function printNextSteps(
   projectType: string = 'fullstack',
   backendPort?: number,
   frontendPort?: number,
-  backendFramework: BackendFramework = 'django'
+  backendFramework: BackendFramework = 'django',
+  frontendFramework: FrontendFramework = 'react'
 ) {
   log.blank()
   log.success('Project created successfully!')
@@ -131,7 +133,7 @@ export function printNextSteps(
   }
 
   if (frontendPort !== undefined) {
-    url('React', `http://localhost:${frontendPort}`)
+    url(FRONTEND_TOOLCHAINS[frontendFramework].label, `http://localhost:${frontendPort}`)
   }
 
   log.blank()

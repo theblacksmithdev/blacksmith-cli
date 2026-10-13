@@ -1,0 +1,47 @@
+<script setup lang="ts">
+import ULink from '@nuxt/ui/components/Link.vue'
+import InfoCard from '@/shared/components/InfoCard.vue'
+import CommandSnippet from '@/shared/components/CommandSnippet.vue'
+{{#if isDjango}}
+import { API_DOCS_URL, API_URL } from '@/shared/utils/api-url'
+{{else}}
+import { API_DOCS_URL } from '@/shared/utils/api-url'
+{{/if}}
+</script>
+
+<template>
+  <div class="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-3">
+    <InfoCard
+      icon="i-lucide-terminal"
+      title="CLI"
+      description="Start the backend and frontend together with one command."
+    >
+      <CommandSnippet command="blacksmith dev" />
+    </InfoCard>
+
+    <InfoCard
+      icon="i-lucide-book-open"
+      title="API"
+      description="Every endpoint is documented and typed from the OpenAPI schema."
+    >
+      <div class="flex gap-4 text-sm">
+        <ULink :to="API_DOCS_URL" target="_blank" class="underline underline-offset-4">
+          Swagger UI
+        </ULink>
+{{#if isDjango}}
+        <ULink :to="`${API_URL}/admin/`" target="_blank" class="underline underline-offset-4">
+          Django Admin
+        </ULink>
+{{/if}}
+      </div>
+    </InfoCard>
+
+    <InfoCard
+      icon="i-lucide-layout"
+      title="Frontend"
+      description="Vue, TanStack Query and Nuxt UI, with typed API composables."
+    >
+      <CommandSnippet command="blacksmith make:resource Post" />
+    </InfoCard>
+  </div>
+</template>

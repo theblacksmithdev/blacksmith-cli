@@ -1,4 +1,5 @@
 import type { Skill, SkillContext } from './types.js'
+import { frontendProfile } from './frontend-profiles.js'
 
 /**
  * Core Rules — Inlined directly into CLAUDE.md (no `name` property).
@@ -10,42 +11,22 @@ export const coreRulesSkill: Skill = {
   id: 'core-rules',
   // No `name` → content is inlined directly into CLAUDE.md, not a separate file
 
-  render(_ctx: SkillContext): string {
+  render(ctx: SkillContext): string {
+    const frontend = frontendProfile(ctx)
+
     return `## Critical Rules
 
 > **These rules are mandatory. Violating them produces broken, inconsistent code.**
 
-### 1. Use \`@chakra-ui/react\` v3 for ALL UI
-- **Layout**: Use \`Stack\`, \`HStack\`, \`VStack\`, \`Flex\`, \`SimpleGrid\`, \`Box\`, \`Container\` with \`gap\` — NEVER styled \`<div>\`s. There is no Tailwind: never write utility \`className\`s
-- **Typography**: Use \`Heading\` and \`Text\` — NEVER raw \`<h1>\`–\`<h6>\`, \`<p>\`, or \`<span>\` with text classes
-- **Separators**: Use \`Separator\` — NEVER \`<hr>\`
-- **Everything else**: \`Button\`, \`Card.Root\`, \`Badge\`, \`Field.Root\` + \`Input\`, \`Table.Root\`, \`Dialog.Root\`, \`Alert.Root\`, \`Skeleton\`, \`Stat.Root\`, etc. — v3 compound components, never v2 APIs (\`CardBody\`, \`FormControl\`, \`Modal\`, \`colorScheme\`, \`isLoading\`)
-- **Colors**: Semantic tokens only (\`fg.muted\`, \`bg.subtle\`, \`border\`) — NEVER hex values or \`gray.500\`
-- **Exceptions**: Semantic HTML landmarks (\`<main>\`, \`<section>\`, \`<nav>\`, \`<header>\`, \`<footer>\`, \`<article>\`, \`<aside>\`) are acceptable for page structure. \`<form>\` is acceptable with React Hook Form. \`<Link>\` from react-router-dom for navigation, wrapped via \`asChild\` (\`<Button asChild>\`) or the shared \`RouterLink\`
-- See the \`chakra-ui-react\` skill for the full component list
+### 1. ${frontend.rules.ui}
 
-### 2. Pages Are Thin Orchestrators
-- Pages import components, call hooks, and compose JSX — they should not contain business logic or large JSX blocks
-- Break every page into child components in a \`components/\` folder. Aim for clarity, not a strict line count
-- See the \`page-structure\` skill for the full pattern with examples
+### 2. ${frontend.rules.pages}
 
-### 3. Components Render, Hooks Think
-- Extract ALL logic into hooks in a \`hooks/\` folder — API calls, mutations, form setup, filtering, pagination, debouncing, computed state
-- Components should contain only JSX composition, prop passing, and simple event handler wiring
-- The only \`useState\` acceptable inline in a component is a simple UI toggle (e.g. modal open/close)
-- If a component has more than one \`useState\`, one \`useEffect\`, or any \`useApiQuery\`/\`useApiMutation\` — extract to a hook
+### 3. ${frontend.rules.logic}
 
-### 4. Use the \`Path\` Enum — Never Hardcode Paths
-- All route paths are in \`src/router/paths.ts\` as a \`Path\` enum
-- Use \`Path.Login\`, \`Path.Dashboard\`, etc. in \`navigate()\`, \`<Link to={}>\`, and route definitions
-- When adding a new page, add its path to the enum before \`// blacksmith:path\`
-- Use \`buildPath(Path.ResetPassword, { token })\` for dynamic segments
+### 4. ${frontend.rules.paths}
 
-### 5. API Hooks vs UI Hooks — Two Different Places
-- **API hooks** (data fetching) → \`src/api/hooks/<resource>/\` — queries, mutations, cache invalidation. Import as: \`import { usePosts } from '@/api/hooks/posts'\`
-- **UI hooks** (page logic) → \`pages/<page>/hooks/\` or \`features/<feature>/hooks/\` — form state, pagination, filtering, debouncing
-- Never put API data fetching in page-level hooks. Never put UI-only logic in \`src/api/hooks/\`
-- See the \`react-query\` skill for API hook conventions
+### 5. ${frontend.rules.api}
 
 ### 6. Use Generated API Client Code
 - Always check \`src/api/generated/\` first before writing any API calls — use the generated types, query options, mutations, and query keys
@@ -61,16 +42,7 @@ export const coreRulesSkill: Skill = {
 - **No duplicated logic** — if the same logic appears in two places, extract it into a shared utility immediately
 - See the \`frontend-modularization\` and \`backend-modularization\` skills for full conventions
 
-### 8. Follow the Page/Feature Folder Structure
-\`\`\`
-pages/<page>/
-├── <page>.tsx         # Thin orchestrator (default export)
-├── routes.tsx         # RouteObject[] using Path enum
-├── index.ts           # Re-exports public API
-├── components/        # Child components
-└── hooks/             # Page-local hooks (UI logic only, not API hooks)
-\`\`\`
-- See the \`page-structure\` skill for full conventions
+### 8. ${frontend.rules.folders}
 `
   },
 }

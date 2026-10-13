@@ -1,0 +1,8 @@
+import type { RouteRecordRaw } from 'vue-router'
+import { Path } from '@/router/paths'
+
+export const {{names}}Routes: RouteRecordRaw[] = [
+  { path: Path.{{Names}}, component: () => import('./{{Names}}Page.vue') },
+  // `props: true` passes the `:id` param to the page as a prop
+  { path: `${Path.{{Names}}}/:id`, component: () => import('./{{Name}}DetailPage.vue'), props: true },
+]

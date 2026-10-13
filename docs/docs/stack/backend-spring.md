@@ -7,7 +7,7 @@ sidebar_position: 5
 The fourth backend, selected with `blacksmith init --backend spring`. It brings the
 JVM: Java 17, Spring Boot, JPA for the database, Flyway for migrations and Spring
 Security for JWT auth. It speaks exactly the same HTTP contract as the Django,
-Express and FastAPI backends, so the React frontend is identical whichever you pick.
+Express and FastAPI backends, so the frontend is identical whichever you pick.
 See [Choosing a Backend](../guides/choosing-a-backend.md) for how the four compare.
 
 ## Stack
@@ -74,7 +74,7 @@ the `spring` and `spring-jpa` skills, which describe these conventions.
 ## The API Contract
 
 The Spring backend reproduces Django REST Framework's wire format, which is what
-lets one React codebase work against any backend.
+lets one frontend codebase work against any backend.
 
 **Errors**: `ApiExceptionHandler` answers every failure in DRF's shape, never with
 Spring's RFC 7807 problem document:
@@ -103,7 +103,7 @@ in UTC with a `Z`. **URLs** keep their trailing slash: `/api/auth/me/`.
 
 **Operation IDs** follow drf-spectacular's convention (`auth_me_retrieve`,
 `auth_me_partial_update`), set with `@Operation(operationId = ...)` on each
-endpoint. That is what gives the generated React hooks the same names on every
+endpoint. That is what gives the generated frontend queries the same names on every
 backend. Error responses are left out of the document, so the generated hooks'
 error types match the other backends. Every field of a response schema is marked
 required (`config/RequiredResponseFields`), as drf-spectacular does, so response

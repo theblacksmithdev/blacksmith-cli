@@ -1,0 +1,6 @@
+import type { RouteRecordRaw } from 'vue-router'
+import { Path } from '@/router/paths'
+
+export const supportRoutes: RouteRecordRaw[] = [
+  { path: Path.Support, component: () => import('./SupportPage.vue') },
+]

@@ -1,6 +1,7 @@
-import { Command } from 'commander'
+import { Command, Option } from 'commander'
 import { banner } from './utils/logger.js'
 import { BACKEND_FRAMEWORK_CHOICES } from './utils/backend-toolchains.js'
+import { FRONTEND_FRAMEWORK_CHOICES } from './utils/frontend-toolchains.js'
 import { init } from './commands/init.js'
 import { dev } from './commands/dev.js'
 import { sync } from './commands/sync.js'
@@ -20,7 +21,7 @@ const program = new Command()
 
 program
   .name('blacksmith')
-  .description('Fullstack Django, Express, or FastAPI + React framework')
+  .description('Fullstack Django, Express, FastAPI, or Spring Boot + React framework')
   .version('0.1.0')
   .hook('preAction', () => {
     banner()
@@ -31,8 +32,10 @@ program
   .argument('[name]', 'Project name')
   .option('--type <type>', 'Project type: fullstack, backend, or frontend (default: fullstack)')
   .option('--backend <framework>', `Backend framework: ${BACKEND_FRAMEWORK_CHOICES} (default: django)`)
+  .option('--frontend <framework>', `Frontend framework: ${FRONTEND_FRAMEWORK_CHOICES} (default: react)`)
   .option('--ai', 'Set up AI development skills and documentation (CLAUDE.md)')
-  .option('--no-chakra-ui-skill', 'Disable Chakra UI skill when using --ai')
+  .option('--no-ui-skill', 'Leave out the UI kit skills when using --ai')
+  .addOption(new Option('--no-chakra-ui-skill').hideHelp())
   .option('-b, --backend-port <port>', 'Backend port (default: 8000)')
   .option('-f, --frontend-port <port>', 'Vite frontend port (default: 5173)')
   .option('-t, --theme-color <color>', 'Theme preset (default, neutral, blue, green, violet, red)')
@@ -62,13 +65,14 @@ program
 
 program
   .command('eject')
-  .description('Remove Blacksmith, keep a clean Django + React project')
+  .description('Remove Blacksmith, keep a clean backend + frontend project')
   .action(eject)
 
 program
   .command('setup:ai')
   .description('Generate CLAUDE.md with AI development skills for the project')
-  .option('--no-chakra-ui-skill', 'Exclude Chakra UI skill')
+  .option('--no-ui-skill', 'Leave out the UI kit skills')
+  .addOption(new Option('--no-chakra-ui-skill').hideHelp())
   .action(setupSkills)
 
 program

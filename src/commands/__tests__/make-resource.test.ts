@@ -8,6 +8,7 @@ vi.mock('../../utils/logger.js', () => createLoggerMock())
 
 const pathMocks = vi.hoisted(() => ({
   getBackendFramework: vi.fn(() => 'django'),
+  getFrontendFramework: vi.fn(() => 'react'),
   findProjectRoot: vi.fn(),
   getBackendDir: vi.fn(),
   getFrontendDir: vi.fn(),
@@ -74,7 +75,7 @@ describe('makeResource', () => {
     )
 
     expect(templateMocks.renderDirectory).toHaveBeenCalledWith(
-      '/templates/resource/api-hooks',
+      '/templates/resource/frontend/react/api',
       path.join(getTmpDir(), 'frontend', 'src', 'api', 'hooks', 'blog-posts'),
       expect.objectContaining({
         Name: 'BlogPost',
@@ -84,7 +85,7 @@ describe('makeResource', () => {
     )
 
     expect(templateMocks.renderDirectory).toHaveBeenCalledWith(
-      '/templates/resource/pages',
+      '/templates/resource/frontend/react/pages',
       path.join(getTmpDir(), 'frontend', 'src', 'pages', 'blog-posts'),
       expect.objectContaining({
         Name: 'BlogPost',

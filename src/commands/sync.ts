@@ -1,4 +1,5 @@
-import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, getProjectType } from '../utils/paths.js'
+import { findProjectRoot, getBackendDir, getBackendFramework, getFrontendDir, getFrontendFramework, getProjectType } from '../utils/paths.js'
+import { queryModuleFile } from '../utils/frontend-toolchains.js'
 import { syncFrontendClient } from '../utils/openapi.js'
 import { log, spinner } from '../utils/logger.js'
 
@@ -32,7 +33,7 @@ export async function sync() {
     log.step('  types.gen.ts            → TypeScript interfaces')
     log.step('  zod.gen.ts              → Zod validation schemas')
     log.step('  sdk.gen.ts              → API client functions')
-    log.step('  @tanstack/react-query.gen.ts → TanStack Query hooks')
+    log.step(`  ${queryModuleFile(getFrontendFramework(root))} → TanStack Query hooks`)
     log.blank()
   } catch (error: any) {
     s.fail('Failed to sync OpenAPI schema')

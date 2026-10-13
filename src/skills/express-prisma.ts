@@ -32,7 +32,7 @@ model Post {
 
 These names are serialized straight to JSON, and the frontend's TypeScript
 types are generated from that JSON. camelCase here would change the API
-contract and break the generated React components.
+contract and break the generated frontend code.
 
 \`@@map\` keeps the table name plural and snake_case.
 

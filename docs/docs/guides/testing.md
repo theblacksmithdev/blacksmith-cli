@@ -34,7 +34,7 @@ jacocoTestReport`), prints the total line coverage and writes the HTML report to
 
 
 Blacksmith projects ship with a working test suite on both sides: **pytest** for the
-Django backend and **Vitest** with React Testing Library for the React frontend. A
+Django backend and **Vitest** with Testing Library for the frontend (React or Vue). A
 freshly generated project has passing tests from the first commit, and
 `make:resource` scaffolds tests for every resource you add.
 
@@ -167,6 +167,9 @@ blacksmith test --backend --coverage
 ---
 
 # Frontend (Vitest)
+
+Both frontends test with Vitest, jsdom and Testing Library. The sections below use the
+React frontend; [Vue Frontend Tests](#vue-frontend-tests) covers what changes for Vue.
 
 ## Test Stack
 
@@ -371,7 +374,7 @@ describe('CustomerForm', () => {
 No JSX needed — test input/output directly.
 
 ```tsx
-// shared/hooks/__tests__/api-error.spec.ts
+// shared/utils/__tests__/api-error.spec.ts
 import { parseApiError } from '../api-error'
 
 describe('parseApiError', () => {
@@ -467,6 +470,66 @@ beforeEach(() => {
 5. **Prefer `getByRole` and `getByText`** — use `getByTestId` only as a last resort
 6. **Keep tests focused** — a component test doesn't need to test its child components in detail
 7. **Update tests with code** — when you modify a component, update its tests. When you delete a component, delete its tests
+
+## Vue Frontend Tests
+
+A Vue project uses the same runner, environment and testing approach, with
+[`@testing-library/vue`](https://testing-library.com/docs/vue-testing-library/intro/) in place
+of React Testing Library.
+
+| | React | Vue |
+|---|---|---|
+| Test files | `*.spec.tsx` / `*.spec.ts` | `*.spec.ts` |
+| Test utilities | `src/__tests__/test-utils.tsx` | `src/__tests__/test-utils.ts` |
+| Example names | `customer-card.spec.tsx` | `CustomerCard.spec.ts` |
+
+`renderWithProviders(Component, options)` installs the same plugins as `main.ts` (a fresh
+Pinia store, an in-memory router, Vue Query with retries off, Nuxt UI) and mounts the
+component inside `UApp`, so dialogs and menus render. It also imports `@/api/client`, so the
+generated client has its base URL. It returns `user` and `router`:
+
+```ts
+import { screen, renderWithProviders } from '@/__tests__/test-utils'
+import CustomerCard from '../CustomerCard.vue'
+
+it('links to the detail page', () => {
+  renderWithProviders(CustomerCard, { props: { customer } })
+
+  expect(screen.getByRole('link')).toHaveAttribute('href', '/customers/42')
+})
+
+it('navigates home', async () => {
+  const { user, router } = renderWithProviders(NotFoundPage, { route: '/missing' })
+  await router.isReady()
+
+  await user.click(screen.getByRole('button', { name: /back to home/i }))
+
+  await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/'))
+})
+```
+
+Options: `props`, `slots`, `route` (the starting URL), `routes` (real routes instead of the
+catch-all stub), and `queryClient`.
+
+**Mocking composables.** Mock the module and return refs, since that is what the page reads:
+
+```ts
+vi.mock('@/api/composables/customers')
+
+vi.mocked(useCustomers).mockReturnValue({
+  data: ref({ customers: items, total: items.length }),
+  isLoading: ref(false),
+  errorMessage: computed(() => null),
+} as unknown as ReturnType<typeof useCustomers>)
+```
+
+**Testing a query composable.** Stub `fetch` and mount a small component that calls it. The
+generated `make:resource` spec does this to check that the list refetches when the page passed
+as a getter changes.
+
+**Guards and the auth store.** The auth adapter keeps the session in module state, so these
+tests call `vi.resetModules()` and import the guard again, with a fresh Pinia store. See
+`src/router/__tests__/guards.spec.ts`.
 
 ---
 

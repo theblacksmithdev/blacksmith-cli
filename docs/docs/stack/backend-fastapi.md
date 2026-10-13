@@ -7,8 +7,8 @@ sidebar_position: 4
 The third backend, selected with `blacksmith init --backend fastapi`. It is Python,
 like Django, but small and function-first: an `app/` package you own, Pydantic for
 validation and the schema, SQLAlchemy for the database, and Alembic for migrations. It
-speaks exactly the same HTTP contract as the Django and Express backends, so the React
-frontend is identical whichever you pick. See
+speaks exactly the same HTTP contract as the Django and Express backends, so the
+frontend (React or Vue) is identical whichever you pick. See
 [Choosing a Backend](../guides/choosing-a-backend.md) for how the backends compare, and
 [Spring Boot Backend](./backend-spring.md) for the Java option.
 
@@ -67,7 +67,7 @@ callable from scripts and tests without a request.
 ## The API Contract
 
 The FastAPI backend reproduces Django REST Framework's wire format, which is what
-lets one React codebase work against any of the three backends.
+lets one frontend codebase work against any of the backends.
 
 **Pagination**: list endpoints return DRF's envelope:
 
@@ -89,7 +89,7 @@ serialized in UTC with a `Z`. **URLs** keep their trailing slash: `/api/posts/`,
 
 **Operation IDs** follow drf-spectacular's convention (`posts_list`,
 `posts_retrieve`, `posts_partial_update`), set with `operation_id=` on each route.
-That is what gives the generated React hooks the same names on every backend.
+That is what gives the generated frontend queries the same names on every backend.
 
 ## OpenAPI Without a Server
 

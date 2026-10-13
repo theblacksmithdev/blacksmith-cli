@@ -4,8 +4,9 @@ sidebar_position: 1
 
 # blacksmith init
 
-Scaffold a new backend, React, or fullstack project. The backend is Django, Express, FastAPI, or Spring Boot —
-see [Choosing a Backend](../guides/choosing-a-backend.md).
+Scaffold a new backend, frontend, or fullstack project. The backend is Django, Express, FastAPI, or Spring Boot —
+see [Choosing a Backend](../guides/choosing-a-backend.md). The frontend is React or Vue — see
+[Choosing a Frontend](../guides/choosing-a-frontend.md).
 
 ## Usage
 
@@ -25,18 +26,20 @@ blacksmith init <project-name> [options]
 |--------|---------|-------------|
 | `--type <type>` | `fullstack` | Project type: `fullstack`, `backend`, or `frontend` |
 | `--backend <framework>` | `django` | Backend framework: `django`, `express`, `fastapi`, or `spring` |
+| `--frontend <framework>` | `react` | Frontend framework: `react` or `vue` |
 | `--backend-port <port>` | `8000` | Port for the backend development server |
 | `--frontend-port <port>` | `5173` | Port for the Vite development server |
 | `--theme-color <color>` | `default` | UI theme color preset |
 | `--ai` | `false` | Generate CLAUDE.md and AI development skill files |
+| `--no-ui-skill` | — | With `--ai`, leave out the UI kit skills (Chakra UI or Nuxt UI). `--no-chakra-ui-skill` still works |
 
 ### Project Types
 
 | Type | Description |
 |------|-------------|
-| `fullstack` | Backend + React frontend in `backend/` and `frontend/` subdirectories |
+| `fullstack` | Backend + frontend in `backend/` and `frontend/` subdirectories |
 | `backend` | API project at the project root (no frontend) |
-| `frontend` | React + Vite project at the project root (no backend) |
+| `frontend` | React or Vue + Vite project at the project root (no backend) |
 
 ### Backend Frameworks
 
@@ -50,16 +53,29 @@ blacksmith init <project-name> [options]
 All four expose the same HTTP API, so the generated frontend is identical. Omit the
 flag and `init` prompts for it. The flag is ignored for `--type frontend`.
 
+### Frontend Frameworks
+
+| Framework | Description |
+|-----------|-------------|
+| `react` | React 19 + React Router + TanStack React Query + React Hook Form + Chakra UI v3 |
+| `vue` | Vue 3.5 + Vue Router + Pinia + TanStack Vue Query + Nuxt UI v4 on Tailwind CSS v4 |
+
+Both build the same pages against the same generated API client, with any backend. Omit the
+flag and `init` prompts for it. The flag is ignored for `--type backend`. The choice is
+recorded as `frontend.framework` in `blacksmith.config.json`.
+
 ### Theme Color Options
 
 | Color | Description |
 |-------|-------------|
-| `default` | Orange/amber tones |
-| `blue` | Blue palette |
-| `green` | Green palette |
-| `violet` | Purple/violet palette |
-| `red` | Red palette |
-| `neutral` | Gray/neutral palette |
+| `default` | Monochrome (black and white actions), rounded |
+| `neutral` | Monochrome, square corners |
+| `blue` | Blue accent |
+| `green` | Green accent |
+| `red` | Red accent |
+| `violet` | Violet accent |
+
+See [Theme Colors](/docs/configuration/theme-colors).
 
 ## What It Does
 
@@ -80,7 +96,9 @@ The `init` command performs the following steps based on the selected project ty
 6. **Runs initial database setup** — Django migrations, Prisma migrate for Express, Alembic migrations for FastAPI. Spring Boot has no step here: Flyway applies the migrations when the application starts
 
 ### Frontend steps (fullstack and frontend)
-7. **Scaffolds React project** — Vite, TypeScript, React Router, TanStack React Query, React Hook Form + Zod, Chakra UI, auth pages
+7. **Scaffolds the frontend** —
+   - *React*: Vite, TypeScript, React Router, TanStack React Query, React Hook Form + Zod, Chakra UI, auth pages
+   - *Vue*: Vite, TypeScript (`vue-tsc`), Vue Router, Pinia, TanStack Vue Query, Nuxt UI + Tailwind, Zod, ESLint, auth pages
 8. **Installs frontend npm packages**
 
 ### Fullstack only
@@ -103,6 +121,9 @@ blacksmith init my-app --type fullstack --backend spring
 
 # Frontend-only React app
 blacksmith init my-ui --type frontend -f 3000 --theme-color violet
+
+# Fullstack with a FastAPI backend and a Vue frontend
+blacksmith init my-app --backend fastapi --frontend vue
 ```
 
 ## Generated Structure

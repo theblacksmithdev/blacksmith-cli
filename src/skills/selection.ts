@@ -1,4 +1,4 @@
-import type { BackendFramework, ProjectType } from '../utils/paths.js'
+import type { BackendFramework, FrontendFramework, ProjectType } from '../utils/paths.js'
 import type { Skill } from './types.js'
 import { coreRulesSkill } from './core-rules.js'
 import { projectOverviewSkill } from './project-overview.js'
@@ -27,6 +27,15 @@ import { frontendModularizationSkill } from './frontend-modularization.js'
 import { frontendTestingSkill } from './frontend-testing.js'
 import { cleanCodeSkill } from './clean-code.js'
 import { aiGuidelinesSkill } from './ai-guidelines.js'
+import { vueSkill } from './vue.js'
+import { vueQuerySkill } from './vue-query.js'
+import { vuePageStructureSkill } from './vue-page-structure.js'
+import { vueModularizationSkill } from './vue-modularization.js'
+import { vueTestingSkill } from './vue-testing.js'
+import { nuxtUiSkill } from './nuxt-ui.js'
+import { nuxtUiFormsSkill } from './nuxt-ui-forms.js'
+import { vueAuthSkill } from './vue-auth.js'
+import { blacksmithComposablesSkill } from './blacksmith-composables.js'
 
 /**
  * Backend conventions per framework. They have entirely separate
@@ -39,28 +48,45 @@ const BACKEND_SKILLS: Record<BackendFramework, Skill[]> = {
   spring: [springSkill, springJpaSkill],
 }
 
-const CHAKRA_UI_SKILLS: Skill[] = [
-  chakraUiReactSkill,
-  chakraUiFormsSkill,
-  chakraUiAuthSkill,
-  blacksmithHooksSkill,
-  uiDesignSkill,
-]
+interface FrontendSkills {
+  /** The framework, data fetching and code layout. */
+  core: Skill[]
+  /** The UI kit; `--no-ui-skill` leaves these out. */
+  ui: Skill[]
+  testing: Skill[]
+}
+
+/** Frontend conventions per framework, for the same reason as the backend's. */
+const FRONTEND_SKILLS: Record<FrontendFramework, FrontendSkills> = {
+  react: {
+    core: [reactSkill, reactQuerySkill, pageStructureSkill, frontendModularizationSkill],
+    ui: [chakraUiReactSkill, chakraUiFormsSkill, chakraUiAuthSkill, blacksmithHooksSkill, uiDesignSkill],
+    testing: [frontendTestingSkill],
+  },
+  vue: {
+    core: [vueSkill, vueQuerySkill, vuePageStructureSkill, vueModularizationSkill],
+    ui: [nuxtUiSkill, nuxtUiFormsSkill, vueAuthSkill, blacksmithComposablesSkill, uiDesignSkill],
+    testing: [vueTestingSkill],
+  },
+}
 
 export interface SkillSelection {
   projectType: ProjectType
   backendFramework: BackendFramework
-  includeChakraUiSkill: boolean
+  frontendFramework: FrontendFramework
+  includeUiSkill: boolean
 }
 
 /** Every skill a project gets, in the order they are written. */
 export function selectSkills({
   projectType,
   backendFramework,
-  includeChakraUiSkill,
+  frontendFramework,
+  includeUiSkill,
 }: SkillSelection): Skill[] {
   const needsBackend = projectType === 'fullstack' || projectType === 'backend'
   const needsFrontend = projectType === 'fullstack' || projectType === 'frontend'
+  const frontendSkills = FRONTEND_SKILLS[frontendFramework]
 
   return [
     coreRulesSkill,
@@ -68,12 +94,9 @@ export function selectSkills({
     ...(needsBackend ? BACKEND_SKILLS[backendFramework] : []),
     ...(needsFrontend
       ? [
-          reactSkill,
-          reactQuerySkill,
-          pageStructureSkill,
-          frontendModularizationSkill,
-          ...(includeChakraUiSkill ? CHAKRA_UI_SKILLS : []),
-          frontendTestingSkill,
+          ...frontendSkills.core,
+          ...(includeUiSkill ? frontendSkills.ui : []),
+          ...frontendSkills.testing,
         ]
       : []),
     blacksmithCliSkill,

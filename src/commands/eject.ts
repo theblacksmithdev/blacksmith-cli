@@ -1,8 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { findProjectRoot, getBackendFramework, loadConfig } from '../utils/paths.js'
+import { findProjectRoot, getBackendFramework, getFrontendFramework, loadConfig } from '../utils/paths.js'
 import { log } from '../utils/logger.js'
 import { BACKEND_TOOLCHAINS } from '../utils/backend-toolchains.js'
+import { FRONTEND_TOOLCHAINS } from '../utils/frontend-toolchains.js'
 
 export async function eject() {
   let root: string
@@ -17,6 +18,7 @@ export async function eject() {
   const projectType = config.type || 'fullstack'
   const toolchain = BACKEND_TOOLCHAINS[getBackendFramework(root)]
   const backendName = toolchain.label
+  const frontendName = FRONTEND_TOOLCHAINS[getFrontendFramework(root)].label
   const configPath = path.join(root, 'blacksmith.config.json')
 
   if (fs.existsSync(configPath)) {
@@ -27,11 +29,11 @@ export async function eject() {
   log.blank()
 
   if (projectType === 'fullstack') {
-    log.step(`Your project is now a standard ${backendName} + React project.`)
+    log.step(`Your project is now a standard ${backendName} + ${frontendName} project.`)
   } else if (projectType === 'backend') {
     log.step(`Your project is now a standard ${backendName} project.`)
   } else {
-    log.step('Your project is now a standard React project.')
+    log.step(`Your project is now a standard ${frontendName} project.`)
   }
 
   log.step('All generated code remains in place and is fully owned by you.')

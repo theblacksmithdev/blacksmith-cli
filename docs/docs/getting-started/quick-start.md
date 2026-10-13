@@ -22,6 +22,7 @@ blacksmith init my-app --type fullstack -b 8000 -f 5173 --theme-color blue --ai
 |--------|---------|-------------|
 | `--type` | `fullstack` | Project type: `fullstack`, `backend`, or `frontend` |
 | `--backend` | `django` | Backend framework: `django`, `express`, `fastapi`, or `spring` |
+| `--frontend` | `react` | Frontend framework: `react` or `vue` |
 | `--backend-port` | `8000` | Backend development server port |
 | `--frontend-port` | `5173` | Vite development server port |
 | `--theme-color` | `default` | UI theme preset (`default`, `blue`, `green`, `violet`, `red`, `neutral`) |
@@ -67,8 +68,8 @@ What gets generated depends on your project type:
 
 | File | Purpose |
 |------|---------|
-| `src/api/hooks/products/` | Query and mutation hooks |
-| `src/pages/products/` | List and detail pages |
+| `src/api/hooks/products/` (React) or `src/api/composables/products/` (Vue) | Query and mutation hooks or composables |
+| `src/pages/products/` | List page with pagination and a create dialog, detail page with edit and delete |
 
 For fullstack projects, it also syncs the OpenAPI schema to generate TypeScript types.
 

@@ -13,6 +13,15 @@ import {
 } from '../template.js'
 
 describe('renderTemplate', () => {
+  it('renders a variable inside an escaped Vue interpolation', () => {
+    const result = renderTemplate('<h1>\\{{ {{name}}.title }}</h1>', { name: 'post' })
+    expect(result).toBe('<h1>{{ post.title }}</h1>')
+  })
+
+  it('still escapes a JSX brace before a variable', () => {
+    expect(renderTemplate('{ {{name}}.title }', { name: 'post' })).toBe('{ post.title }')
+  })
+
   it('should render simple variables', () => {
     const result = renderTemplate('Hello {{name}}!', { name: 'World' })
     expect(result).toBe('Hello World!')

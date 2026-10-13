@@ -5,7 +5,7 @@ sidebar_position: 2
 # Choosing a Backend
 
 Blacksmith generates one of four backends: **Django**, **Express**, **FastAPI**, or
-**Spring Boot**. All four expose the same HTTP API, so the React frontend is identical whichever you pick and
+**Spring Boot**. All four expose the same HTTP API, so the frontend is identical whichever you pick and
 you are choosing a team and an ecosystem, not an API design.
 
 ```bash
@@ -15,7 +15,8 @@ blacksmith init my-app --backend fastapi
 blacksmith init my-app --backend spring
 ```
 
-Omit the flag and `init` asks.
+Omit the flag and `init` asks. The frontend is a separate choice — see
+[Choosing a Frontend](./choosing-a-frontend.md).
 
 ## At a Glance
 
@@ -43,7 +44,7 @@ Omit the flag and `init` asks.
 
 - Your team writes TypeScript and you would rather not run two languages
 - You want **one type system end to end** — Prisma and Zod types flow into the
-  same generated client the React app consumes
+  same generated client the frontend consumes
 - You want a smaller runtime and faster cold starts, or you are deploying to an
   edge/serverless Node platform
 - You prefer explicit layers (schemas → service → controller → routes) over
@@ -75,7 +76,7 @@ Because the Express, FastAPI and Spring Boot backends reproduce DRF's wire forma
 - Pagination — `{ count, next, previous, results }`
 - Error bodies — `detail`, `non_field_errors`, and per-field errors
 - snake_case JSON field names
-- OpenAPI operation IDs, so the generated React hooks have the same names
+- OpenAPI operation IDs, so the generated frontend queries have the same names
 - The whole `frontend/` tree, the auth flow, and every generated page
 
 `blacksmith dev`, `sync`, `test` and `make:resource` behave the same on all
