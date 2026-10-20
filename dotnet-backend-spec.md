@@ -12,6 +12,11 @@ conventions against these answers. All seven are taken as recommended. Each
 answer carries a one-line reason, and the one answer whose reversal would
 change this sprint's size is named where it sits.
 
+This revision withdraws decision 7's claim that SQLite matches Spring's
+H2-in-PostgreSQL-mode decision in substance, and gives decision 5 a pinned
+Swashbuckle version with its net10.0 compatibility checks, so neither lands
+on a template ticket undiscovered.
+
 ## What .NET is here
 
 The fifth backend, after Django, Express, FastAPI and Spring Boot: ASP.NET
@@ -92,7 +97,7 @@ replaying migrations, copying the FastAPI Phase 2 precedent.
 Reason: first-party and colocated with the data layer, so resources, tests
 and production apply the same migration pipeline.
 
-### 5. API document generator. Taken: Swashbuckle.AspNetCore
+### 5. API document generator. Taken: Swashbuckle.AspNetCore, pinned and checked
 
 Swashbuckle over NSwag or Microsoft.AspNetCore.OpenApi. It serves the parity
 documentation paths — Swagger UI at `/api/docs/` and ReDoc at `/api/redoc/` —
@@ -101,8 +106,30 @@ and generates the OpenAPI 3.0 document from the code the API runs, pinned to
 settled on: a task boots the application context without a web server and
 writes the document, so `blacksmith sync` needs no server listening.
 
+The package version is part of the decision, because that is where this
+choice has gone wrong before. The 6.x line is out: it carries Microsoft.OpenApi
+1.x, which conflicts with the 2.x that the SDK's first-party
+`Microsoft.AspNetCore.OpenApi` pulls in — the assembly conflict the .NET 9
+cycle surfaced. The template ticket pins the newest stable release at or
+above 7.0, the line maintained past that conflict, and checks two things
+before any template ships, each as a CI step rather than a note:
+
+- the pinned package targets `net10.0`, not an older TFM riding on
+  roll-forward, and
+- its `Microsoft.OpenApi` dependency is 2.x, matching the SDK's, so the two
+  generators can sit in the same project.
+
+If no release passes both checks, the decision has a fallback rather than a
+gap: the first-party `Microsoft.AspNetCore.OpenApi` writes the document — it
+targets whatever the SDK targets by definition — and Swagger UI and ReDoc
+are served from static assets at the parity paths. That loses the
+one-library middleware but keeps the contract, and no third-party release
+cadence gates the sprint either way.
+
 Reason: it is the one generator that reads the code, serves both parity UIs
-and pins 3.0 without a second tool.
+and emits OpenAPI 3.0 without a second tool — provided the pin holds, which
+is why the pin and its checks are part of the decision instead of a
+discovery for the template ticket.
 
 The template tickets inherit the springdoc traps: error responses declared by
 exception handlers must stay out of the document, and every endpoint sets its
@@ -119,17 +146,33 @@ Reason: xUnit is the ecosystem default — `dotnet new` and Microsoft's own
 templates — so the generated suite matches what a .NET developer already
 knows.
 
-### 7. Development and test database. Taken: SQLite in development and tests, PostgreSQL in production
+### 7. Development and test database. Taken: SQLite in development, PostgreSQL in production, tests on both
 
-This matches the Spring decision (H2 in PostgreSQL mode) in substance: an
-embedded file database keeps the .NET SDK the only prerequisite — no Docker —
-while production runs on Postgres. Where Spring needed H2 because Hibernate's
-SQLite support is a community dialect, EF Core's SQLite provider is
-first-party, so SQLite is the direct match. Migrations are written once and
-run in development, in tests and in production.
+This takes Spring's reasoning (decision 6) but not its answer, and the
+distinction is the point. H2 in PostgreSQL mode existed to give a
+developer's machine Postgres behaviour; SQLite gives none of it. Its LIKE is
+case-insensitive for ASCII where Postgres's is case-sensitive, a `jsonb` or
+`uuid` column has no SQLite equivalent, and EF Core emits provider-specific
+SQL for each provider — so a test can pass against SQLite and fail against
+Postgres, and "migrations written once, run anywhere" stops being true the
+first time one of those columns appears. The earlier claim that this matches
+the Spring decision in substance is withdrawn.
 
-Reason: the same reasoning as Spring's decision 6 — the SDK stays the only
-prerequisite, and one migration pipeline serves all three places.
+What SQLite buys is the property this decision actually trades on: the SDK
+stays the only prerequisite for `blacksmith dev` — no Docker — and the local
+test run is fast. Postgres behaviour is then the test suite's job, not the
+development database's. The generated suite runs against SQLite by default
+and against PostgreSQL when the connection string is overridden by
+environment variable, the way the Spring phase re-ran its suite on
+PostgreSQL 17; the generated CI does that Postgres run as its own step with
+a PostgreSQL service container, so a test that passes on SQLite and fails on
+Postgres cannot ship. Migrations are written once from the EF Core model and
+validated by replaying them against both providers — that is what keeps
+"one migration pipeline" an honest claim.
+
+Reason: the SDK stays the only prerequisite for the dev loop, and the test
+suite — not the development database — carries the guarantee that production
+behaviour works on Postgres.
 
 ## The dev loop promise
 
